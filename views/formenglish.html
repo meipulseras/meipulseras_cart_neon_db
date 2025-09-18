@@ -1,0 +1,168 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/form.css?v=2.2">
+    <link rel="icon" href="/images/webp/mei_logo_web.webp" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <title>Pricing</title>
+</head>
+
+<body>
+    <div class="nav" id="nav">
+        <ul class="navbar" id="navbar">
+            <li class="links"><a class="lang link" key="HOME" href="/english">Home</a></li>
+            <li class="links"><a class="lang link" key="COTIZ" href="/pricing">Pricing</a></li>
+            <li class="links2"><a class="translate link" id="english" href="/pricing">English</a></li>
+            <li class="links2"><a class="pipe link">|</a></li>
+            <li class="links2"><a class="translate link" id="español" href="/cotizacion">Español</a></li>
+        </ul>
+        <a href="javascript:void(0);" class="icon" onclick="navbar()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+    <div class="relleno2"></div>
+    <div class="formu">
+        <form action="/cotizacion" method="post">
+            <div class="inputforms">
+                <div class="lblinput">
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F1" for="name">FULL NAME:</label>
+                        <input class="forminput" type="text" id="name" name="name" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F2" for="rut">ID:</label>
+                        <input class="forminput" type="text" id="rut" name="rut" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F3" for="direccion">ADDRESS:</label>
+                        <input class="forminput" type="text" id="address" name="address" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F4" for="direccion">ZIP CODE:</label>
+                        <input class="forminput" type="text" id="commune" name="commune" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F5" for="tel">PHONE NUMBER:</label>
+                        <input class="forminput" type="tel" id="phone" name="phone" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F6" for="mail">EMAIL:</label>
+                        <input class="forminput" type="email" id="mail" name="mail" required>
+                    </div>
+
+                </div>
+            </div>
+            <br />
+            <br />
+            <br />
+            <label class="lang lblform" key="F7">QUOTE YOUR PRODUCT:</label>
+
+            <div class="relleno2"></div>
+            <div class="fotosproductos">
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image101.webp" alt="Pulseras1">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto1" name="product" value="01. Pulsera macramé roja.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image102.webp" alt="Pulseras2">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="02. Feria septiembre 2023.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image103.webp" alt="Pulseras3">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="03. Pulseras para compartir.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image104.webp" alt="Pulseras4">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="04. Amuleto Protector.">
+                    </div>
+                </div>
+            </div>
+            <div class="fotosproductos">
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image105.webp" alt="Pulseras5">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="05. Pulsera amazonita 6mm.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image106.webp" alt="Pulseras6">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="06. Pulseras cuarzo cristal.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image107.webp" alt="Pulseras7">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="07. Pulsera Amatista 8mm.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image108.webp" alt="Pulseras8">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="08. Pulseras cuarzo cristal.">
+                    </div>
+                </div>
+            </div>
+            <div class="fotosproductos">
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image109.webp" alt="Pulseras9">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="09. Pulseras macramé.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image110.webp" alt="Pulseras10">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="10. Pulsera ágatas 3mm.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image111.webp" alt="Pulseras11">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="11. Pulseras para compartir.">
+                    </div>
+                </div>
+                <div class="products">
+                    <img class="fotoform" src="/images/webp/image112.webp" alt="Pulseras12">
+                    <div class="checkboxes">
+                        <input type="checkbox" id="foto2" name="product" value="12. Pulseras macramé morado.">
+                    </div>
+                </div>
+            </div>
+
+            <br>
+            <br>
+            <div class="reference">
+                <p class="lang lblform" key="F8">*Reference images.</p>
+            </div>
+            <div class="relleno2"></div>
+
+            <textarea class="commentbox lang" id="comment" name="comment" key="F9">Leave us your comment.</textarea><br /><br />
+            <input class="cotizar pe lang" type="submit" value="Pricing" id="aceptar">
+        </form>
+    </div>
+    <!-- <div class="wsp">
+        <a href="https://wa.me/56952170243" target="_blank">
+            <img class="wsplogo" src="/images/webp/wsp.webp" alt="wsp_logo">
+        </a>
+    </div> -->
+<!--     <script src="/js/language.js" type="text/javascript"></script>
+ -->    <script src="/js/navbar.js" type="text/javascript"></script>
+</body>
+
+</html>

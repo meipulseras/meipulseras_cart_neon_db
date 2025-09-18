@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /cotizacion
+Allow: /english
+Allow: /pricing
+Disallow: /enviado
+Disallow: /noenviado
+
+Sitemap: https://www.meipulseras.cl/sitemap_meipulseras.txt

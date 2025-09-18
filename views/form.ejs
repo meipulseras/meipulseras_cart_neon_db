@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" href="css/form.css?v=2.2"> -->
+    <link rel="stylesheet" href="/css/style.css?v=2.2">
+    <link rel="icon" href="/images/webp/mei_logo_web.webp" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <title>Contacto</title>
+</head>
+
+<body>
+    <div class="nav" id="nav">
+        <ul class="navbar" id="navbar">
+            <li class="links"><a class="logosredes" href="/"> 
+                <img class="wsplogo" src="/images/webp/home.webp" alt="home"></a></li>
+            <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
+                <img class="wsplogo" src="/images/webp/logout.webp" alt="logout"></a></li>
+            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
+            <li class="links2" id="cart"><a class="logosredes" href="/cart"> 
+                <img class="wsplogo" src="/images/webp/cart.webp" alt="cart"></a></li>
+            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
+            <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/personal"><%= username %></a></li>
+            <li class="links2" id="login"><a class="logosredes" href="/auth/login"> 
+                <img class="wsplogo" src="/images/webp/login.webp" alt="con_logo"></a></li>
+        </ul>
+    </div>
+    <div class="relleno"></div>
+    <div class="formu">
+        <form action="/contact" method="post">
+            <div class="inputforms">
+                <div class="lblinput">
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F1" for="name">NOMBRE COMPLETO:</label>
+                        <input class="forminput" type="text" id="name" name="name" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F5" for="tel">TELÉFONO:</label>
+                        <input class="forminput" type="tel" id="phone" name="phone" required><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lang lblform" key="F6" for="mail">CORREO:</label>
+                        <input class="forminput" type="email" id="mail" name="mail" required>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <br />
+            <br />
+            
+            <textarea class="commentbox" placeholder="Deja tu comentario y/o consulta." id="comment" name="comment" key="F9"></textarea><br /><br />
+            <input class="cotiza pe" type="submit" value="Contactar" id="aceptar">
+        </form>
+    </div>
+    
+ <script src="/js/navbar.js" type="text/javascript"></script>
+ <script src="/js/hide.js" type="text/javascript"></script>
+</body>
+
+</html>
