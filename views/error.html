@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/swal.css?v=1.1">
+        <link rel="icon" href="/images/mei_logo_web.png" type="image/x-icon"/>
+        <title>OK</title>
+    </head>
+    <body>    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            Swal.fire({
+                title: 'Contacto no enviado',
+                text: 'Su comentario no se pudo enviar. Intente nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar',
+                showConfirmButton: true,
+            }).then(function() {
+                window.location = "/contact";
+            });
+        </script>
+    </body>
+
+</html>
+

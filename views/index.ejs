@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css?v=2.2">
+    <link rel="icon" href="/images/webp/mei_logo_web.webp" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <title>Mei Pulseras</title>
+</head>
+<body>
+    <div class="nav" id="nav">
+        <ul class="navbar" id="navbar">
+            <li class="links"><a class="logosredes" href="/"> 
+                <img class="wsplogo" src="/images/webp/home.webp" alt="home"></a></li>
+            <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
+                <img class="wsplogo" src="/images/webp/logout.webp" alt="logout"></a></li>
+            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
+            <li class="links2" id="cart"><a class="logosredes" href="/cart"> 
+                <img class="wsplogo" src="/images/webp/cart.webp" alt="cart">
+                <p id="counter" class="counter"><%= count %></p>
+            </a></li>
+            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
+            <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/personal"><%= username %></a></li>
+            
+            <li class="links2" id="login"><a class="logosredes" href="/auth/login"> 
+                <img class="wsplogo" src="/images/webp/login.webp" alt="con_logo"></a></li>
+        </ul>
+    </div>
+   <div></div>
+    <div class="logo">
+        <img class="logomei" src="/images/webp/logo.webp" alt="logo">
+    </div>
+    <br>
+    <div class="welcome">
+        <p class="lang" key="BIEN">¡Hola!</p>
+    </div>
+    <div class="intro texto">
+        <h4 class="lang" key="INTRO">Mi nombre es Marcela, Diseñadora Gráfica y fanática de las manualidades. Me gustaría presentarte Mei Pulseras, mi emprendimiento, que nace el año 2022 con el fin de crear pulseras coloridas y atemporales, para combinar con tu outfit del día a día. Todas nuestras pulseras son hechas a mano con materiales cuidadosamente seleccionados como: piedras naturales, cristales, vidrio, acero y plata. Cada pieza es única y está hecha con mucho cariño. Si te gusta mi trabajo, no dudes en contactarme.</h4>  
+    </div>
+    <div class="relleno"></div>
+    
+    <div class="divcenter">
+        <div class="grid-container">
+            <div class="grid-item"><img class="foto" src="<%= imag_1 %>" alt="Pulseras1" title="01. Pulsera macramé roja.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/1"><%= prod_1 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_1 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_2 %>" alt="Pulseras2" title="02. Feria septiembre 2023.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/2"><%= prod_2 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_2 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_3 %>" alt="Pulseras3" title="03. Pulseras para compartir.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/3"><%= prod_3 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_3 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_4 %>" alt="Pulseras4" title="04. Amuleto Protector.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/4"><%= prod_4 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_4 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_5 %>" alt="Pulseras5" title="05. Pulsera amazonita 6mm.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/5"><%= prod_5 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_5 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_6 %>" alt="Pulseras6" title="06. Pulseras cuarzo cristal.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/6"><%= prod_6 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_6 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_7 %>" alt="Pulseras7" title="07. Pulsera Amatista 8mm.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/7"><%= prod_7 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_7 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_8 %>" alt="Pulseras8" title="08. Pulseras cuarzo cristal.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/8"><%= prod_8 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_8 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_9 %>" alt="Pulseras9" title="09. Pulseras macramé.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/9"><%= prod_9 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_9 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_10 %>" alt="Pulseras10" title="10. Pulsera ágatas 3mm.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/10"><%= prod_10 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_10 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_11 %>" alt="Pulseras11" title="11. Pulseras para compartir.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/11"><%= prod_11 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_11 %></span></div>
+            </div>
+            <div class="grid-item"><img class="foto" src="<%= imag_12 %>" alt="Pulseras12" title="12. Pulseras macramé morado.">
+                <div class="productname"><h4><a class="lblprod" href="/producto/12"><%= prod_12 %></a></h4></div>
+                <div class="productprice"><span class="lblprec">$<%= prec_12 %></span></div>
+            </div>
+          </div>
+    </div>
+    <div class="relleno"></div>
+    <div class="texto">
+        <div class="centro">
+        <div class="follow">
+            <p class="lang sigue" id="seguir" key="SIGUE">SÍGUENOS</p>
+        </div>
+        <div class="instalogo">
+            <a class="logosredes" href="https://www.instagram.com/meipulseras"> 
+                <img class="wsplogo" src="/images/webp/instagram.webp" alt="ins_logo">
+            </a>
+            <a class="logosredes" href="/contact"> 
+                <img class="wsplogo" src="/images/webp/contact.webp" alt="con_logo">
+            </a>
+        </div> 
+    </div>
+    </div>
+    <div class="relleno"></div>
+    <footer class="foot">
+        <p>Mei Pulseras 2025 &#8729; Santo Domingo, Chile.</p>
+    </footer>
+    <div class="modal" id="modalfotos">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+    <script src="/js/modal.js" type="text/javascript"></script>
+    <script src="/js/hide.js" type="text/javascript"></script>
+</body>
+</html>

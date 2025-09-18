@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" href="/css/form.css?v=2.2"> -->
+    <link rel="stylesheet" href="/css/style.css?v=2.2">
+    <link rel="icon" href="/images/webp/mei_logo_web.webp" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <title>Carro</title>
+</head>
+
+<body>
+    <div class="nav" id="nav">
+        <ul class="navbar" id="navbar">
+            <li class="links"><a class="logosredes" href="/"> 
+                <img class="wsplogo" src="/images/webp/home.webp" alt="home"></a></li>
+            <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
+                <img class="wsplogo" src="/images/webp/logout.webp" alt="logout"></a></li>
+            <li class="links2 link3"><a class="pipe link">|</a></li>
+            <li class="links2 link3"><a class="translate link" key="USERNAME" href="/personal">Personal</a></li>
+        </ul>
+    </div>
+    <div class="relleno2"></div>
+    <div class="welcome">
+        <p>Estos son tus productos, <%= username %> </p>
+    </div>
+    <div class="container">
+        <h1 class="h1">Productos seleccionados</h1>
+        <div id="table-container">
+            <p id="array" style="display: none;"><%= array %></p>
+        </div>
+        <br>
+        <div class="total">
+            <label for="" class="lblenv lblprice"><b>Subtotal:</b> $<%= subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></label>
+           
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+        <h1 class="h1">Datos envío</h1>
+        <label for="" class="lblenv"><b>Nombre:</b> <%= clientname %></label><br>
+        <label for="" class="lblenv"><b>Dirección:</b> <%= clientaddress %></label><br>
+        <label for="" class="lblenv"><b>Comuna:</b> <%= clientcomune %></label><br>
+        <label for="" class="lblenv"><b>Región:</b> <%= clientregion %></label><br>
+        <label for="" class="lblenv"><b>Teléfono:</b> <%= clientphone %></label><br>
+        <label for="" class="lblenv"><b>Email:</b> <%= clientmail %></label><br>
+        <label for="" class="lblenv lblprice"><b>Precio Envío:</b> $<%= clientshipmentprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></label>
+    </div>
+    <br>
+    <br>
+    <div class="container total">
+        <h1>Total: $<%= total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></h1>
+    </div>
+    <br>
+    <br>
+    <form action="/pagar" method="post">
+        <div class="pagar">
+            <input class="cotiza pe lang" type="submit" value="PAGAR"></input>
+        </div>
+    </form>
+    <br>
+    <br>
+    <br>
+    <br>
+<script src="/js/table.js" type="text/javascript"></script>
+<script src="/js/cartcount.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>    
+<!-- <script src="/js/deleteproduct.js" type="text/javascript"></script> -->
+</body>
+</html>
