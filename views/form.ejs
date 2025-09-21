@@ -23,7 +23,7 @@
                 <img class="wsplogo" src="/images/webp/cart.webp" alt="cart"></a></li>
             <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
             <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/personal"><%= username %></a></li>
-            <li class="links2" id="login"><a class="logosredes" href="/auth/login"> 
+            <li class="links2" id="login"><a class="logosredes" href="/login"> 
                 <img class="wsplogo" src="/images/webp/login.webp" alt="con_logo"></a></li>
         </ul>
     </div>
@@ -34,17 +34,17 @@
                 <div class="lblinput">
                     <div class="inputlbl">
                         <label class="lang lblform" key="F1" for="name">NOMBRE COMPLETO:</label>
-                        <input class="forminput" type="text" id="name" name="name" required><br />
+                        <input class="forminput" value="<%= fullname %>" type="text" id="name" name="name" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F5" for="tel">TELÉFONO:</label>
-                        <input class="forminput" type="tel" id="phone" name="phone" required><br />
+                        <input class="forminput" value="<%= phone %>" type="tel" id="phone" name="phone" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F6" for="mail">CORREO:</label>
-                        <input class="forminput" type="email" id="mail" name="mail" required>
+                        <input class="forminput" value="<%= mail %>" type="email" id="mail" name="mail" required>
                     </div>
                 </div>
             </div>

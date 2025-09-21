@@ -1,33 +1,41 @@
 import { Resend } from 'resend';
 import express from 'express';
 import session from 'express-session';
+import jwt from 'jsonwebtoken';
 import path from 'path';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
 import cartDuration from './middleware/cartSession.js';
-import {utcToZonedTime} from 'date-fns-tz';
+import { comparePassword, hashPassword } from './hash/hashing.js';
+import { toZonedTime } from 'date-fns-tz';
 import ProductQuantity from './models/ProductQuantity.js';
 import Cart from './models/Cart.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { config } from "dotenv";
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
 import verifyJWT from "./middleware/verifyJWT.js";
-import authRouter from "./authorization.js";
+// import authRouter from "./authorization.js";
 import userInfo from "./setUserInfo.js";
-import { MongoClient } from "mongodb";
-const uri = process.env.MONGODB_DB_URI;
-
+// import { MongoClient } from "mongodb";
+//const uri = process.env.MONGODB_DB_URI;
+const resend = new Resend(process.env.RESEND);
+// import getProducts from './middleware/queries/products.js';
+// import getProductsPQ from './middleware/queries/productsPriceQuantity.js';
+import getProductDetail from './middleware/queries/productsDetails.js'
+import getFromTable from './middleware/queries/select.js';
+import intoTable from './middleware/queries/insert.js';
+import updateTable from './middleware/queries/update.js';
 
 const app = express();
 config();
 
-mongoose.connect(process.env.MONGODB_URL).then( () => {
-    console.log("Conectado a la DB de Mongo");
-});
+// mongoose.connect(process.env.MONGODB_URL).then( () => {
+//     console.log("Conectado a la DB de Mongo");
+// });
 
 app.use(session({
     name: 'token',
@@ -41,90 +49,74 @@ app.use(session({
     }
 }));
 
-//express.urlencoded y express.json para que pesque datos de form.html
+// //express.urlencoded y express.json para que pesque datos de form.html
 app.use(express.urlencoded({extended: true}));
 
 app.use(express.json());
-app.use('/auth', authRouter);
+// app.use('/auth', authRouter);
 app.set('views', path.join(__dirname + '/views/'));
 app.set('view engine', 'ejs');
-app.use('/user', userInfo);
+// app.use('/user', userInfo);
 
-const resend = new Resend(process.env.RESEND);
-
-//Para que pesque imagenes y estilos
+// //Para que pesque imagenes y estilos
 app.use(express.static(__dirname + '/public'));
 
-let client = new MongoClient(uri);
-let clientPromise = client.connect();
+// let client = new MongoClient(uri);
+// let clientPromise = client.connect();
 
+//Indice de aplicacion web, INDEX
 app.get('/', async (req, res) => {
 
     try {
         const token = req.session.token;
         
-        const db = (await clientPromise).db("test");
-
-        const prod1 = await db.collection("products").findOne({ productid: "PrMP1"});
-        const prod2 = await db.collection("products").findOne({ productid: "PrMP2"});
-        const prod3 = await db.collection("products").findOne({ productid: "PrMP3"});
-        const prod4 = await db.collection("products").findOne({ productid: "PrMP4"});
-        const prod5 = await db.collection("products").findOne({ productid: "PrMP5"});
-        const prod6 = await db.collection("products").findOne({ productid: "PrMP6"});
-        const prod7 = await db.collection("products").findOne({ productid: "PrMP7"});
-        const prod8 = await db.collection("products").findOne({ productid: "PrMP8"});
-        const prod9 = await db.collection("products").findOne({ productid: "PrMP9"});
-        const prod10 = await db.collection("products").findOne({ productid: "PrMP10"});
-        const prod11 = await db.collection("products").findOne({ productid: "PrMP11"});
-        const prod12 = await db.collection("products").findOne({ productid: "PrMP12"});
-
         const username = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
 
-        if(username != 'index') {
-            cartDuration(username);
-        }
+        // if(username != 'index') {
+        //     cartDuration(username);
+        // }
 
-        const items = await cartNumeration(username);
+        // const items = await cartNumeration(username);
 
         var data = {
             username: username,
-            count: items,
-            prod_1: prod1.productname,
-            prod_2: prod2.productname,
-            prod_3: prod3.productname,
-            prod_4: prod4.productname,
-            prod_5: prod5.productname,
-            prod_6: prod6.productname,
-            prod_7: prod7.productname,
-            prod_8: prod8.productname,
-            prod_9: prod9.productname,
-            prod_10: prod10.productname,
-            prod_11: prod11.productname,
-            prod_12: prod12.productname,
-            prec_1: prod1.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_2: prod2.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_3: prod3.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_4: prod4.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_5: prod5.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_6: prod6.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_7: prod7.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_8: prod8.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_9: prod9.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_10: prod10.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_11: prod11.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            prec_12: prod12.productprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            imag_1: prod1.productimage,
-            imag_2: prod2.productimage,
-            imag_3: prod3.productimage,
-            imag_4: prod4.productimage,
-            imag_5: prod5.productimage,
-            imag_6: prod6.productimage,
-            imag_7: prod7.productimage,
-            imag_8: prod8.productimage,
-            imag_9: prod9.productimage,
-            imag_10: prod10.productimage,
-            imag_11: prod11.productimage,
-            imag_12: prod12.productimage,
+            // count: items,
+            prod_1: 'Pulsera macramé roja',
+            prod_2: 'Feria septiembre 2023',
+            prod_3: 'Pulseras para compartir',
+            prod_4: 'Amuleto Protector',
+            prod_5: 'Pulsera amazonita 6mm',
+            prod_6: 'Pulseras cuarzo cristal',
+            prod_7: 'Pulsera Amatista 8mm',
+            prod_8: 'Pulseras cuarzo cristal',
+            prod_9: 'Pulseras macramé',
+            prod_10: 'Pulsera ágatas 3mm',
+            prod_11: 'Pulseras para compartir',
+            prod_12: 'Pulseras macramé morado',
+            prec_1: '5.000',
+            prec_2: '5.000',
+            prec_3: '5.000',
+            prec_4: '5.000',
+            prec_5: '5.000',
+            prec_6: '5.000',
+            prec_7: '5.000',
+            prec_8: '5.000',
+            prec_9: '5.000',
+            prec_10: '5.000',
+            prec_11: '5.000',
+            prec_12: '5.000',
+            imag_1: '/images/webp/image101.webp',
+            imag_2: '/images/webp/image102.webp',
+            imag_3: '/images/webp/image103.webp',
+            imag_4: '/images/webp/image104.webp',
+            imag_5: '/images/webp/image105.webp',
+            imag_6: '/images/webp/image106.webp',
+            imag_7: '/images/webp/image107.webp',
+            imag_8: '/images/webp/image108.webp',
+            imag_9: '/images/webp/image109.webp',
+            imag_10: '/images/webp/image110.webp',
+            imag_11: '/images/webp/image111.webp',
+            imag_12: '/images/webp/image112.webp',
         };
 
         res.render('index', data);
@@ -133,351 +125,233 @@ app.get('/', async (req, res) => {
         console.log(error);
         res.status(500).redirect('/');
     }
-
-    
 });
 
-app.get('/cart', async (req, res) => {
+//Carga pagina LOGIN
+app.get('/login', (req, res) => {
+    const data = {no: 'no'};
+    res.render('login', data);
+    // res.sendFile(path.join(__dirname + '/views/login.html'));
+});
+
+//Ruta login - Acceso de usuario
+app.post("/login", async (request, response) => {
+    const credential = request.body.user;
+    const password = request.body.pass;
+
+    // cartDuration(username);
 
     try {
-        const token = req.session.token;
+        const credentialType = credential.includes('@') ? 'mail' : 'username';
 
-        const user = verifyJWT(token);
+        const user = await getFromTable('username, password, mail', 'user_info', credentialType, credential);
 
-        cartDuration(user);
-        const items = await cartNumeration(user);
-
-        if(user == ''){
-            return res.status(401).redirect('/');
+        if(!comparePassword(password, user[0].password)){
+            const data = {no: 'yes'};
+            return response.render('login', data);
         }
-    
-        const db = (await clientPromise).db("test");
 
-        const prodtosell = await db.collection("carts").aggregate([
+        //Generar Token JWT
+        const token = jwt.sign(
+            { id: user[0].mail, username: user[0].username },
+            process.env.JWT_SECRET,
             {
-                $lookup: {
-                    from: 'productquantities',
-                    localField: "products",
-                    foreignField: "_id",
-                    as: "shopping"
-                }
-            },
-            {
-                $match: { username: user, active: true, sold: false }
-            },
-            {
-                $project: {
-                    _id: '$shopping._id',
-                    productid: '$shopping.productid',
-                    productname: '$shopping.productname',
-                    productprice: '$shopping.productprice',
-                    productquantity: '$shopping.productquantity',
-                    producttotalamount: { $sum: '$shopping.producttotalamount'}
-                }
-            },
-        ]).toArray();
-
-        var dataArray = []
-
-        const clientData = await db.collection("userinfos").findOne({ username: user});
-
-        const clientName = clientData.fullname;
-        const clientAddress = clientData.address;
-        const clientComune = clientData.comune;
-        const clientRegion = clientData.region;
-        const clientPhone = clientData.phone;
-        const clientMail = clientData.mail;
-
-        const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
-
-        if(prodtosell.length > 0){
-            const pid = prodtosell[0]._id;
-            const productid = prodtosell[0].productid;
-            const pname = prodtosell[0].productname;
-            const pprice = prodtosell[0].productprice;
-            const pquantity = prodtosell[0].productquantity;
-            const ptotal = prodtosell[0].producttotalamount;
-
-            for(let i = 0; i < prodtosell[0].productid.length; i++){
-                dataArray.push({ "nombre": pname[i], "precio": pprice[i], "cantidad": pquantity[i], "id": pid[i] });
+                expiresIn: '6h'
             }
+        );
 
-            const data = {
-                username: user,
-                clientname: clientName,
-                clientaddress: clientAddress,
-                clientcomune: clientComune,
-                clientregion: clientRegion,
-                clientphone: clientPhone,
-                clientmail: clientMail,
-                clientshipmentprice: regionPrice.priceregion,
-                array: JSON.stringify(dataArray),
-                count: items,
-                subtotal: ptotal,
-                total: (ptotal + regionPrice.priceregion)
-            };
-            
-            if(data.username == ''){
-                return res.status(401).redirect('/');
-            } else {
-                res.render('cart', data);
-            }
-        } else {
-            res.redirect('/');
-        }
+        request.session.token = token;
+
+        response.redirect('/personal');
 
     } catch (error) {
         console.log(error)
+        response.status(500).redirect('/login');    
+    }
+});
+
+//Ruta Signup - Info de Usuario(s)
+app.get("/user/info", async (req, res) => {
+
+    const token = req.session.token;
+    
+    try {
+        const data = verifyJWT(token);
+
+        // const items = await cartNumeration(data);
+
+        // cartDuration(data);
+
+        if(data == ''){
+            return res.status(401).redirect("/auth/logout");
+        }
+
+        const credential = data.username;
+
+        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail', 'user_info', 'username', credential);
+
+        const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
+
+        const dataUser = {
+            fullname: datos[0].fullname,
+            birthdate: datos[0].birthdate.toLocaleDateString('es-CL', dateOptions).replace(/\//g, '-'),
+            address: datos[0].address,
+            comune: datos[0].comune,
+            region: datos[0].region,
+            country: datos[0].country,
+            phone: datos[0].phone,
+            mail: datos[0].mail,
+            // count: items
+        }
+        
+        res.render('userinfo', dataUser);
+
+    } catch (error) {
+        console.log(error);
         res.status(500).redirect('/');
     }
 
 });
 
-app.post('/cart', async (req, res) => {
+//Actualizar datos usuario LOGGED
+app.post("/user/info", async (req, res) => {
 
     const token = req.session.token;
-    const idtochange = req.body.cart;
-    const prodqty = parseInt(req.body.prodquantity);
-    const user = verifyJWT(token);
-   
+
+    const fullnameRB = req.body.fullname;
+    const birthdateRB = req.body.birthdate;
+    const addressRB = req.body.address;
+    const comuneRB = req.body.comune;
+    const regionRB = req.body.region;
+    const countryRB = req.body.country;
+    const phoneRB = req.body.phone;
+
     try {
+        const data = verifyJWT(token);
 
-        if(prodqty == 0){
+        if(data == ''){
+            return res.status(401).redirect("/auth/logout");
+        }
+           
+        const set = `fullname = '${fullnameRB}', 
+                birthdate = '${birthdateRB}',
+                address = '${addressRB}', 
+                comune = '${comuneRB}', 
+                region = '${regionRB}',
+                country = '${countryRB}', 
+                phone = '${phoneRB}'`;
 
-            await Cart.updateMany({username: user, active: true, sold: false}, 
-                {
-                    $pull: {
-                        products: idtochange
-                    }
-            });
+        await updateTable('user_info', set, 'username', data);
 
-            const price = await ProductQuantity.deleteOne({ _id: idtochange});
+        res.redirect('/user/info');
 
-            const cartToDeleteProducts = await Cart.findOne({username: user, active: true, sold: false});
+    } catch (error) {
+        res.status(500).redirect('/');
+    }
 
-            if(cartToDeleteProducts.products.length == 0){
-                await Cart.updateOne({username: user, active: true, sold: false}, 
-                    { 
-                        $set: { active: false }
-                    });
-            }
+});
 
-            return res.redirect('/cart');
-            
+//Nuevo password
+app.post("/user/newpass", async (req, res) => {
+
+    const oldpass = req.body.oldpass;
+    const newpass = req.body.newpass;
+    const token = req.session.token;
+
+    try {
+        const data = verifyJWT(token);
+
+        if(data == ''){
+            return res.status(401).redirect("/auth/logout");
         }
 
-        const price = await ProductQuantity.findOne({ _id: idtochange}, {_id: 0, productprice: 1});
+        const user = await getFromTable('password', 'user_info', 'username', data);
 
-        const subtotal = (price.productprice * prodqty);
+        var password = '';
 
-        const cartProduct = await ProductQuantity.updateOne({ _id: idtochange}, 
-            { 
-                $set: { productquantity: prodqty,
-                    producttotalamount: subtotal
-                }
-            });
+        if(comparePassword(oldpass, user[0].password)){
+            password = hashPassword(newpass);
+        }
 
-        res.redirect('/cart');
+        const set = `password = '${password}'`;
+
+        await updateTable('user_info', set, 'username', data);
+
+        return res.status(201).redirect("/auth/logout");
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).redirect('/');
+    }
+});
+
+//Acceso recuperación password
+app.get('/forgot', (req, res) => {
+
+    const data = {no: 'no'};
+    res.render('forgot', data);
+});
+
+//Recuperación password
+app.post("/auth/forgot", async (req, res) => {
+    try {
+        const username = req.body.user;
+
+        const email = req.body.mail;
+
+        const user = await getFromTable('mail', 'user_info', 'username', username);
+
+        var random = '';
+
+        if(user[0].mail == email){
+            random = Randomstring.generate(7);
+        } else {
+            const data = {no: 'yes'};
+            return res.render('forgot', data);
+        }
+
+        const password = hashPassword(random);
+
+        const set = `password = '${password}'`;
+
+        await updateTable('user_info', set, 'username', username);
+
+        resend.emails.send({
+            from: 'contacto@meipulseras.cl',
+            to: email,
+            subject: 'Recuperación de contraseña',
+            html: '<br>'+
+                '<br>'+      
+                '<div style="text-align: center;">'+
+                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
+                '</div>'+
+                '<br>'+
+                '<br>'+
+                '<div style="text-align: center;">'+
+                '<p style="font-family: Quicksand;">Su contraseña provisoria es: ' + random + '</p>'+
+                    '<p style="font-family: Quicksand;">Por favor, inicie sesión y cambie la contraseña provisoria por una nueva.</p>'+
+                '</div>'+
+                '<br>'+
+                '<br>'
+        });
+        
+        return res.status(201).redirect('/');
         
     } catch (error) {
-        console.log(error)
         res.status(500).redirect('/');
     }
 });
 
-function orderParams(params) {
-    return Object.keys(params)
-    .map(key => key)
-    .sort((a,b) => {
-        if(a > b) return 1;
-        else if (a < b) return -1;
-        return 0;
+//LOG OUT usuario LOGGED
+app.get('/auth/logout', (req, res) => {
+    res.status(200).clearCookie('token', "", {
+        path: "/"
     });
-}
-
-app.post('/pagar', async (req, res) => {
-
-    const token = req.session.token;
-
-    const user = verifyJWT(token);
-
-    const db = (await clientPromise).db("test");
-
-    const clientData = await db.collection("userinfos").findOne({ username: user});
-
-    const clientRegion = clientData.region;
-       
-    const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
-
-    await Cart.updateOne({username: user, active: true, waitingpayment: false, sold: false}, 
-        { 
-            $set: { waitingpayment: true }
-        });
-
-    const carToPay = await db.collection("carts").aggregate([
-        {
-            $lookup: {
-                from: 'productquantities',
-                localField: "products",
-                foreignField: "_id",
-                as: "shopping"
-            }
-        },
-        {
-            $match: { username: user, active: true, waitingpayment: true, sold: false }
-        },
-        {
-            $project: {
-                _id: '$shopping._id',
-                productid: '$shopping.productid',
-                productname: '$shopping.productname',
-                productprice: '$shopping.productprice',
-                productquantity: '$shopping.productquantity',
-                producttotalamount: { $sum: '$shopping.producttotalamount'}
-            }
-        },
-    ]).toArray();
-
-    const totalToPay = (carToPay[0].producttotalamount + regionPrice.priceregion);
-
-    await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
-        { 
-            $set: { total: totalToPay }
-        });
-
-    const secretKey = process.env.SECRET_KEY;
-    const urlFlow = "https://sandbox.flow.cl/api";
-    const createPayment = urlFlow + "/payment/create";
-
-    const amount = totalToPay;
-    const apiKey =  process.env.API_KEY;
-    const commerceOrder = Randomstring.generate(7);
-    const currency = "CLP";
-    const email = "wynegsrhuntar@gmail.com";
-    const paymentMethod = "9";
-    const subject = "Prueba Mei Pulseras";
-    const urlConfirmation = "http://localhost:3000/confirmedpayment";
-    const urlReturn = "http://localhost:3000/result";
     
-    const params = {
-
-        "amount": amount,
-        "apiKey": apiKey,
-        "commerceOrder": commerceOrder,
-        "currency": currency,
-        "email": email,
-        "paymentMethod": paymentMethod,
-        "subject": subject,
-        "urlConfirmation": urlConfirmation,
-        "urlReturn": urlReturn
-    }
-
-    const keys = orderParams(params);
-
-    let data = [];
-
-    keys.map(key => {
-        data.push(key + "=" + params[key])
+    req.session.destroy(function (err) {
+        res.redirect('/');
     });
-
-    data = data.join("&");
-
-    const signed = CryptoJS.HmacSHA256(data, secretKey);
-
-    console.log(data)
-
-    let response = await axios.post(createPayment, `${data}&s=${signed}`)
-                .then(response => {
-                    return {
-                        output: response.data,
-                        info: {
-                            http_code: response.status
-                        }
-                    }
-                });
-
-    
-    const redirectTo = response.output.url + "?token=" + response.output.token;
-
-    console.log(redirectTo);
-    
-    res.redirect(redirectTo);
-
-});
-
-app.post('/result', async (req, res) => {
-
-    const apiKey = process.env.API_KEY;
-
-    const params = {
-        token: req.body.token,
-        apiKey: apiKey
-    }
-
-    const secretKey = process.env.SECRET_KEY;
-
-    const urlFlow = "https://sandbox.flow.cl/api";
-    const getPayment = urlFlow + "/payment/getStatus";
-
-    const keys = orderParams(params);
-
-    let data = [];
-
-    keys.map(key => {
-        data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-    });
-
-    data = data.join("&");
-
-    let s = [];
-
-    keys.map(key => {
-        s.push(key + "=" + params[key])
-    });
-
-    s = s.join("&");
-
-    const signed = CryptoJS.HmacSHA256(s, secretKey);
-
-    const urlGet = getPayment + "?" + data + "&s=" + signed;
-
-    let response = await axios.get(urlGet)
-                .then(response => {
-                    return {
-                        output: response.data,
-                        info: {
-                            http_code: response.status
-                        }
-                    }
-                });
-
-    if(response.info.http_code = 200){
-        res.status(200).redirect('/confirmedpayment');
-    }
-
-});
-
-app.get('/confirmedpayment', async (req, res) => {
-    const token = req.session.token;
-    const user = verifyJWT(token);
-
-    const soldCart = await Cart.findOne({username: user, active: true, waitingpayment: true, sold: false});
-
-    let productosVendidos = await Promise.all(soldCart.products.map(product => ProductQuantity.findOne({_id: product}, {_id: 0, productname: 1, productquantity: 1})));
-
-    console.log(productosVendidos);
-
-    const data = {
-        total: soldCart.total,
-        productos: productosVendidos
-    }
-
-    await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
-        { 
-            $set: { active: false, waitingpayment: false, sold: true }
-        });
-
-    res.render('confirmed', data);
 });
 
 
@@ -486,15 +360,14 @@ app.get('/personal', async (req, res) => {
     try {
         const token = req.session.token;
         const user = verifyJWT(token);
-        const items = await cartNumeration(user);
+        // const items = await cartNumeration(user);
 
         const data = {
             username: user,
-            count: items
+            // count: items
         };
 
-
-        cartDuration(data.username);
+        // cartDuration(data.username);
 
         if(data.username == ''){
             return res.status(401).redirect('/');
@@ -507,14 +380,419 @@ app.get('/personal', async (req, res) => {
     }
 });
 
-// app.get('/english', (req, res) => {
-//     res.sendFile(path.join(__dirname + '/views/english.html'));
+//Ruta Signup - Formulario registro usuario
+app.get('/signup', async (req, res) => {
+
+    try {
+        const region = await getFromTable('region_name', 'regions', null, null);
+
+        res.render('register', {region: JSON.stringify(region)});
+    } catch (error) {
+        res.status(500).redirect('/');
+    }
+});
+
+//Ruta Signup - Registro de Usuario(s)
+app.post("/signup", async (req, res) => {
+    try {
+        const username = req.body.user;
+        const password = hashPassword(req.body.pass);
+        const mail = req.body.mail;
+
+        const fullname = req.body.fullname;
+        const birthdate = req.body.birthdate;
+        const address = req.body.address;
+        const comune = req.body.comune;
+        const region = req.body.region;
+        const country = req.body.country;
+        const phone = req.body.phone;
+
+        const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password';
+
+        const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}'`;
+
+        await intoTable("user_info", columns, values);
+
+        resend.emails.send({
+            from: 'contacto@meipulseras.cl',
+            to: mail,
+            subject: 'Registro exitoso ' + username,
+            html: '<br>'+
+                '<br>'+      
+                '<div style="text-align: center;">'+
+                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
+                '</div>'+
+                '<br>'+
+                '<br>'+
+                '<div style="text-align: center;">'+
+                '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
+                    '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
+                '</div>'+
+                '<br>'+
+                '<br>'
+        });
+        
+        return res.status(201).redirect('/');
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).redirect('/');
+    }
+});
+
+
+// app.get('/cart', async (req, res) => {
+
+//     try {
+//         const token = req.session.token;
+
+//         const user = verifyJWT(token);
+
+//         cartDuration(user);
+//         const items = await cartNumeration(user);
+
+//         if(user == ''){
+//             return res.status(401).redirect('/');
+//         }
+    
+//         const db = (await clientPromise).db("test");
+
+//         const prodtosell = await db.collection("carts").aggregate([
+//             {
+//                 $lookup: {
+//                     from: 'productquantities',
+//                     localField: "products",
+//                     foreignField: "_id",
+//                     as: "shopping"
+//                 }
+//             },
+//             {
+//                 $match: { username: user, active: true, sold: false }
+//             },
+//             {
+//                 $project: {
+//                     _id: '$shopping._id',
+//                     productid: '$shopping.productid',
+//                     productname: '$shopping.productname',
+//                     productprice: '$shopping.productprice',
+//                     productquantity: '$shopping.productquantity',
+//                     producttotalamount: { $sum: '$shopping.producttotalamount'}
+//                 }
+//             },
+//         ]).toArray();
+
+//         var dataArray = []
+
+//         const clientData = await db.collection("userinfos").findOne({ username: user});
+
+//         const clientName = clientData.fullname;
+//         const clientAddress = clientData.address;
+//         const clientComune = clientData.comune;
+//         const clientRegion = clientData.region;
+//         const clientPhone = clientData.phone;
+//         const clientMail = clientData.mail;
+
+//         const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
+
+//         if(prodtosell.length > 0){
+//             const pid = prodtosell[0]._id;
+//             const productid = prodtosell[0].productid;
+//             const pname = prodtosell[0].productname;
+//             const pprice = prodtosell[0].productprice;
+//             const pquantity = prodtosell[0].productquantity;
+//             const ptotal = prodtosell[0].producttotalamount;
+
+//             for(let i = 0; i < prodtosell[0].productid.length; i++){
+//                 dataArray.push({ "nombre": pname[i], "precio": pprice[i], "cantidad": pquantity[i], "id": pid[i] });
+//             }
+
+//             const data = {
+//                 username: user,
+//                 clientname: clientName,
+//                 clientaddress: clientAddress,
+//                 clientcomune: clientComune,
+//                 clientregion: clientRegion,
+//                 clientphone: clientPhone,
+//                 clientmail: clientMail,
+//                 clientshipmentprice: regionPrice.priceregion,
+//                 array: JSON.stringify(dataArray),
+//                 count: items,
+//                 subtotal: ptotal,
+//                 total: (ptotal + regionPrice.priceregion)
+//             };
+            
+//             if(data.username == ''){
+//                 return res.status(401).redirect('/');
+//             } else {
+//                 res.render('cart', data);
+//             }
+//         } else {
+//             res.redirect('/');
+//         }
+
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).redirect('/');
+//     }
+
 // });
 
-// app.get('/pricing', (req, res) => {
-//     res.sendFile(path.join(__dirname + '/views/formenglish.html'));
+// app.post('/cart', async (req, res) => {
+
+//     const token = req.session.token;
+//     const idtochange = req.body.cart;
+//     const prodqty = parseInt(req.body.prodquantity);
+//     const user = verifyJWT(token);
+   
+//     try {
+
+//         if(prodqty == 0){
+
+//             await Cart.updateMany({username: user, active: true, sold: false}, 
+//                 {
+//                     $pull: {
+//                         products: idtochange
+//                     }
+//             });
+
+//             const price = await ProductQuantity.deleteOne({ _id: idtochange});
+
+//             const cartToDeleteProducts = await Cart.findOne({username: user, active: true, sold: false});
+
+//             if(cartToDeleteProducts.products.length == 0){
+//                 await Cart.updateOne({username: user, active: true, sold: false}, 
+//                     { 
+//                         $set: { active: false }
+//                     });
+//             }
+
+//             return res.redirect('/cart');
+            
+//         }
+
+//         const price = await ProductQuantity.findOne({ _id: idtochange}, {_id: 0, productprice: 1});
+
+//         const subtotal = (price.productprice * prodqty);
+
+//         const cartProduct = await ProductQuantity.updateOne({ _id: idtochange}, 
+//             { 
+//                 $set: { productquantity: prodqty,
+//                     producttotalamount: subtotal
+//                 }
+//             });
+
+//         res.redirect('/cart');
+        
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).redirect('/');
+//     }
 // });
 
+// function orderParams(params) {
+//     return Object.keys(params)
+//     .map(key => key)
+//     .sort((a,b) => {
+//         if(a > b) return 1;
+//         else if (a < b) return -1;
+//         return 0;
+//     });
+// }
+
+// app.post('/pagar', async (req, res) => {
+
+//     const token = req.session.token;
+
+//     const user = verifyJWT(token);
+
+//     const db = (await clientPromise).db("test");
+
+//     const clientData = await db.collection("userinfos").findOne({ username: user});
+
+//     const clientRegion = clientData.region;
+       
+//     const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
+
+//     await Cart.updateOne({username: user, active: true, waitingpayment: false, sold: false}, 
+//         { 
+//             $set: { waitingpayment: true }
+//         });
+
+//     const carToPay = await db.collection("carts").aggregate([
+//         {
+//             $lookup: {
+//                 from: 'productquantities',
+//                 localField: "products",
+//                 foreignField: "_id",
+//                 as: "shopping"
+//             }
+//         },
+//         {
+//             $match: { username: user, active: true, waitingpayment: true, sold: false }
+//         },
+//         {
+//             $project: {
+//                 _id: '$shopping._id',
+//                 productid: '$shopping.productid',
+//                 productname: '$shopping.productname',
+//                 productprice: '$shopping.productprice',
+//                 productquantity: '$shopping.productquantity',
+//                 producttotalamount: { $sum: '$shopping.producttotalamount'}
+//             }
+//         },
+//     ]).toArray();
+
+//     const totalToPay = (carToPay[0].producttotalamount + regionPrice.priceregion);
+
+//     await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
+//         { 
+//             $set: { total: totalToPay }
+//         });
+
+//     const secretKey = process.env.SECRET_KEY;
+//     const urlFlow = "https://sandbox.flow.cl/api";
+//     const createPayment = urlFlow + "/payment/create";
+
+//     const amount = totalToPay;
+//     const apiKey =  process.env.API_KEY;
+//     const commerceOrder = Randomstring.generate(7);
+//     const currency = "CLP";
+//     const email = "wynegsrhuntar@gmail.com";
+//     const paymentMethod = "9";
+//     const subject = "Prueba Mei Pulseras";
+//     const urlConfirmation = "http://localhost:3000/confirmedpayment";
+//     const urlReturn = "http://localhost:3000/result";
+    
+//     const params = {
+
+//         "amount": amount,
+//         "apiKey": apiKey,
+//         "commerceOrder": commerceOrder,
+//         "currency": currency,
+//         "email": email,
+//         "paymentMethod": paymentMethod,
+//         "subject": subject,
+//         "urlConfirmation": urlConfirmation,
+//         "urlReturn": urlReturn
+//     }
+
+//     const keys = orderParams(params);
+
+//     let data = [];
+
+//     keys.map(key => {
+//         data.push(key + "=" + params[key])
+//     });
+
+//     data = data.join("&");
+
+//     const signed = CryptoJS.HmacSHA256(data, secretKey);
+
+//     console.log(data)
+
+//     let response = await axios.post(createPayment, `${data}&s=${signed}`)
+//                 .then(response => {
+//                     return {
+//                         output: response.data,
+//                         info: {
+//                             http_code: response.status
+//                         }
+//                     }
+//                 });
+
+    
+//     const redirectTo = response.output.url + "?token=" + response.output.token;
+
+//     console.log(redirectTo);
+    
+//     res.redirect(redirectTo);
+
+// });
+
+// app.post('/result', async (req, res) => {
+
+//     const apiKey = process.env.API_KEY;
+
+//     const params = {
+//         token: req.body.token,
+//         apiKey: apiKey
+//     }
+
+//     const secretKey = process.env.SECRET_KEY;
+
+//     const urlFlow = "https://sandbox.flow.cl/api";
+//     const getPayment = urlFlow + "/payment/getStatus";
+
+//     const keys = orderParams(params);
+
+//     let data = [];
+
+//     keys.map(key => {
+//         data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+//     });
+
+//     data = data.join("&");
+
+//     let s = [];
+
+//     keys.map(key => {
+//         s.push(key + "=" + params[key])
+//     });
+
+//     s = s.join("&");
+
+//     const signed = CryptoJS.HmacSHA256(s, secretKey);
+
+//     const urlGet = getPayment + "?" + data + "&s=" + signed;
+
+//     let response = await axios.get(urlGet)
+//                 .then(response => {
+//                     return {
+//                         output: response.data,
+//                         info: {
+//                             http_code: response.status
+//                         }
+//                     }
+//                 });
+
+//     if(response.info.http_code = 200){
+//         res.status(200).redirect('/confirmedpayment');
+//     }
+
+// });
+
+// app.get('/confirmedpayment', async (req, res) => {
+//     const token = req.session.token;
+//     const user = verifyJWT(token);
+
+//     const soldCart = await Cart.findOne({username: user, active: true, waitingpayment: true, sold: false});
+
+//     let productosVendidos = await Promise.all(soldCart.products.map(product => ProductQuantity.findOne({_id: product}, {_id: 0, productname: 1, productquantity: 1})));
+
+//     console.log(productosVendidos);
+
+//     const data = {
+//         total: soldCart.total,
+//         productos: productosVendidos
+//     }
+
+//     await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
+//         { 
+//             $set: { active: false, waitingpayment: false, sold: true }
+//         });
+
+//     res.render('confirmed', data);
+// });
+
+// // app.get('/english', (req, res) => {
+// //     res.sendFile(path.join(__dirname + '/views/english.html'));
+// // });
+
+// // app.get('/pricing', (req, res) => {
+// //     res.sendFile(path.join(__dirname + '/views/formenglish.html'));
+// // });
+
+//Ruta PRODUCTO - Requiere LOGGED
 app.get('/producto/:productnumber', async (req, res) => {
 
     const numproduct = req.params['productnumber'];
@@ -525,28 +803,28 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         const data = verifyJWT(token);
 
-        cartDuration(data);
+        // cartDuration(data);
 
-        const items = await cartNumeration(data);
+        // const items = await cartNumeration(data);
         
         if(data == ''){
             return res.status(401).redirect("/auth/login");
         }
 
-        const db = (await clientPromise).db("test");
+        const prodtosell = await getProductDetail(numproduct);
 
-        const prodtosell = await db.collection("products").find({productid: 'PrMP' + numproduct}).toArray();
+        console.log(prodtosell);
 
-        const image = prodtosell[0].productimage;
-        const id = prodtosell[0].productid;
-        const name = prodtosell[0].productname;
-        const description = prodtosell[0].productdescription;
-        const price = prodtosell[0].productprice;
-        const stock = prodtosell[0].productstock;
+        const image = prodtosell.product_image;
+        const id = prodtosell.product_id;
+        const name = prodtosell.product_name;
+        const description = prodtosell.product_description;
+        const price = prodtosell.product_price;
+        const stock = prodtosell.product_quantity;
 
         var prod = {
             username: data,
-            count: items,
+            // count: items,
             prodid: id,
             prodimage: image,
             prodname: name,
@@ -565,71 +843,66 @@ app.get('/producto/:productnumber', async (req, res) => {
 
 });
 
-app.post('/producto/', async (req, res) => {
+// app.post('/producto/', async (req, res) => {
 
-    const token = req.session.token;
-    const prodquantity = req.body.prodquantity;
-    const prodnumber = req.body.prodnumber;
+//     const token = req.session.token;
+//     const prodquantity = req.body.prodquantity;
+//     const prodnumber = req.body.prodnumber;
     
-    const date = new Date();
+//     const date = new Date();
 
-    try {
+//     try {
 
-        const username = verifyJWT(token);
+//         const username = verifyJWT(token);
 
-        if(username == ''){
-            return res.status(401).redirect("/auth/login");
-        }
+//         if(username == ''){
+//             return res.status(401).redirect("/auth/login");
+//         }
 
-        const db = (await clientPromise).db("test");
+//         const db = (await clientPromise).db("test");
 
-        const prodtosell = await db.collection("products").find({productid: 'PrMP' + prodnumber}).toArray();
+//         const prodtosell = await db.collection("products").find({productid: 'PrMP' + prodnumber}).toArray();
 
-        const prodid = prodtosell[0].productid;
-        const prodname = prodtosell[0].productname;
-        const prodprice = prodtosell[0].productprice;
-        const prodamount = (prodprice * prodquantity);
-        const prodstock = prodtosell[0].productstock;
+//         const prodid = prodtosell[0].productid;
+//         const prodname = prodtosell[0].productname;
+//         const prodprice = prodtosell[0].productprice;
+//         const prodamount = (prodprice * prodquantity);
+//         const prodstock = prodtosell[0].productstock;
  
-        const shoppingProd = new ProductQuantity({productid: prodid, productname: prodname, productprice: prodprice, productquantity: prodquantity, producttotalamount: prodamount});
-        shoppingProd.save();
+//         const shoppingProd = new ProductQuantity({productid: prodid, productname: prodname, productprice: prodprice, productquantity: prodquantity, producttotalamount: prodamount});
+//         shoppingProd.save();
 
-        const newCart = await Cart.findOne({username: username, active: true, waitingpayment: false, sold: false});
+//         const newCart = await Cart.findOne({username: username, active: true, waitingpayment: false, sold: false});
 
-        if(newCart == null){
-            const cart = new Cart({token: token, username: username, sellsdate: date, products: shoppingProd, total: 0});
-            cart.save();
-        } else {
+//         if(newCart == null){
+//             const cart = new Cart({token: token, username: username, sellsdate: date, products: shoppingProd, total: 0});
+//             cart.save();
+//         } else {
 
-            // Con esto puedo crear un nuevo ObjectId
-            newCart.products.push(shoppingProd._id);
-            newCart.save();
+//             // Con esto puedo crear un nuevo ObjectId
+//             newCart.products.push(shoppingProd._id);
+//             newCart.save();
 
-        }
+//         }
 
-    const newProductStock = prodstock - prodquantity;
+//     const newProductStock = prodstock - prodquantity;
 
-    await db.collection("products").updateOne({productid: 'PrMP' + prodnumber},
-        { 
-            $set: { productstock: newProductStock }
-        }
-    );
+//     await db.collection("products").updateOne({productid: 'PrMP' + prodnumber},
+//         { 
+//             $set: { productstock: newProductStock }
+//         }
+//     );
 
-    res.redirect('/producto/' + prodnumber);
+//     res.redirect('/producto/' + prodnumber);
 
-    }catch(error){
-        console.log(error)
-        res.status(500).redirect('/');
-    }
-});
+//     }catch(error){
+//         console.log(error)
+//         res.status(500).redirect('/');
+//     }
+// });
 
-app.get('/forgot', (req, res) => {
-
-    res.sendFile(path.join(__dirname + '/views/forgot.html'));
-
-});
-
-app.get('/contact', (req, res) => {
+//Contacto
+app.get('/contact', async (req, res) => {
 
     try {
         const token = req.session.token;
@@ -637,15 +910,29 @@ app.get('/contact', (req, res) => {
             username: verifyJWT(token)
         };
 
-        cartDuration(data.username);
+        // cartDuration(data.username);
+
+        let dataUser;
 
         if(data.username == ''){
-            data = {
+            dataUser = {
+                fullname: '',
+                phone: '',
+                mail: '',
                 username: 'index'
-            };
+            }
+        } else {
+            const datosContacto = await getFromTable('fullname, phone, mail', 'user_info', 'username', data.username);
+            console.log(datosContacto);
+            dataUser = {
+                fullname: datosContacto[0].fullname,
+                phone: datosContacto[0].phone,
+                mail: datosContacto[0].mail,
+                username: data.username
+            }
         }
 
-        res.render('form', data);
+        res.render('form', dataUser);
         
     } catch (error) {
         console.log(error);
@@ -653,6 +940,7 @@ app.get('/contact', (req, res) => {
     }
 });
 
+//Enviar formulario contacto
 app.post("/contact", (req, res) => {
 
     const userName = req.body.name;
@@ -662,45 +950,37 @@ app.post("/contact", (req, res) => {
 
     const fecha = new Date().toLocaleDateString('es-CL', { timezone: 'America/Adak' });
 
-    /* const hora = new Date().toLocaleTimeString('en-US', { timezone: 'America/Adak' }); */
+    const hora = toZonedTime(new Date(), 'America/Santiago').toLocaleTimeString();
 
-    const hora = utcToZonedTime(new Date(), 'America/Santiago').toLocaleTimeString();
+    try {
+        resend.emails.send({
+            from: 'contacto@meipulseras.cl',
+            to: 'meipulseras@gmail.com',
+            subject: 'Contacto ' + fecha + ' ' + hora,
+            html: '<ol>'+
+            '<li><b>Nombre completo:</b> '+userName+'</li>'+
+            '<li><b>Teléfono:</b> '+phone+'</li>'+
+            '<li><b>Email:</b> '+userMail+'</li>'+
+            '</ol>'+
+            '<p><b>Comentario contacto:</b> '+comment+'</p>'
+        });
 
-    /* console.log(fecha +' '+hora); */
+        res.redirect('/enviado');
 
-        try {
-            resend.emails.send({
-                from: 'contacto@meipulseras.cl',
-                to: 'meipulseras@gmail.com',
-                subject: 'Contacto ' + fecha + ' ' + hora,
-                html: '<ol>'+
-                '<li><b>Nombre completo:</b> '+userName+'</li>'+
-                '<li><b>Teléfono:</b> '+phone+'</li>'+
-                '<li><b>Email:</b> '+userMail+'</li>'+
-                '</ol>'+
-                '<p><b>'+userName+' te contacta por:</b></p>'+
-                '<p><b>Comentario:</b> '+comment+'</p>'
-            });
-    
-            res.redirect('/enviado');
-
-        } catch (e) {
-            console.log(e);
-            res.redirect('/noenviado');
-        } 
-    
+    } catch (e) {
+        console.log(e);
+        res.redirect('/noenviado');
+    } 
 });
 
+//Contacto Enviado
 app.get('/enviado', (req, res) => {
-
     res.sendFile(path.join(__dirname + '/views/ok.html'));
-
 });
 
+//Contacto No Enviado
 app.get('/noenviado', (req, res) => {
-
     res.sendFile(path.join(__dirname + '/views/error.html'));
-
 });
 
 const port = process.env.PORT || 3000;
