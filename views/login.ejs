@@ -19,7 +19,7 @@
     </div>
     <div class="relleno"></div>
     <div class="formu">
-        <form action="/auth/login" method="post">
+        <form action="/login" method="post">
             <div class="inputforms">
                 <div class="lblinput">
                     <div class="inputlbl">
@@ -43,7 +43,7 @@
         <h4 class="lblform h4" key="REGISTER">¿No estás registrado?</h4>
         <br>
         <div>
-            <a class="cotiza pe" key="REGISTER" href="/auth/signup">REGISTRAR</a>
+            <a class="cotiza pe" key="REGISTER" href="/signup">REGISTRAR</a>
         </div>
     </div>
     <p id="data" style="display: none;"><%= no %></p>
@@ -54,7 +54,6 @@
         var alerta = document.getElementById('data').innerText;
         
         if(alerta === 'yes'){
-            // alert('Usuario y/o contraseña incorrecta.');
             Swal.fire({
                 title: 'Error',
                 text: 'Usuario y/o contraseña incorrecta.',
@@ -62,7 +61,7 @@
                 confirmButtonText: 'Aceptar',
                 showConfirmButton: true,
             }).then(function() {
-                window.location = "/auth/login";
+                window.location = "/login";
             });
             alerta = 'no';
         }

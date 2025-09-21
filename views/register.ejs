@@ -3,7 +3,6 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- <link rel="stylesheet" href="/css/form.css?v=2.2"> -->
     <link rel="stylesheet" href="/css/style.css?v=2.2">
     <link rel="icon" href="/images/webp/mei_logo_web.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -18,13 +17,10 @@
                 <li class="links"><a class="logosredes" href="/"> 
                     <img class="wsplogo" src="/images/webp/home.webp" alt="con_logo"></a></li>
         </ul>
-        <!-- <a href="javascript:void(0);" class="icon" onclick="navbar()">
-            <i class="fa fa-bars"></i>
-        </a> -->
     </div>
     <div class="relleno2"></div>
     <div class="formu">
-        <form action="/auth/signup" method="post">
+        <form action="/signup" method="post">
             <div class="inputforms">
                 <div class="lblinput">
                     <div class="inputlbl">
@@ -54,7 +50,7 @@
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F2" for="region">REGIÓN:</label>
-                        <input type="text" hidden="true" id="region" value="<%= region %>">
+                        <!-- <input type="text" hidden="true" id="region" value="<%//= region %>"> -->
                         <br />
                         <select class="select" name="region" id="regionSelect"></select>
                     </div>
