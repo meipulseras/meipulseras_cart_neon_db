@@ -7,35 +7,32 @@ import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
-import cartDuration from './middleware/cartSession.js';
+// import cartDuration from './middleware/cartSession.js';
 import { comparePassword, hashPassword } from './hash/hashing.js';
 import { toZonedTime } from 'date-fns-tz';
-import ProductQuantity from './models/ProductQuantity.js';
-import Cart from './models/Cart.js';
+// import ProductQuantity from './models/ProductQuantity.js';
+// import Cart from './models/Cart.js';
+import userInfo from "./setUserInfo.js";
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { config } from "dotenv";
 // import mongoose from "mongoose";
 import verifyJWT from "./middleware/verifyJWT.js";
-// import authRouter from "./authorization.js";
-import userInfo from "./setUserInfo.js";
 // import { MongoClient } from "mongodb";
 //const uri = process.env.MONGODB_DB_URI;
-const resend = new Resend(process.env.RESEND);
+const resend = new Resend(process.env.RESEND_KEY);
 // import getProducts from './middleware/queries/products.js';
 // import getProductsPQ from './middleware/queries/productsPriceQuantity.js';
 import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
+import { LocalStorage } from 'node-localstorage';
+let localStorage = new LocalStorage('./localstorage');
 
 const app = express();
 config();
-
-// mongoose.connect(process.env.MONGODB_URL).then( () => {
-//     console.log("Conectado a la DB de Mongo");
-// });
 
 app.use(session({
     name: 'token',
@@ -53,16 +50,11 @@ app.use(session({
 app.use(express.urlencoded({extended: true}));
 
 app.use(express.json());
-// app.use('/auth', authRouter);
 app.set('views', path.join(__dirname + '/views/'));
 app.set('view engine', 'ejs');
-// app.use('/user', userInfo);
 
 // //Para que pesque imagenes y estilos
 app.use(express.static(__dirname + '/public'));
-
-// let client = new MongoClient(uri);
-// let clientPromise = client.connect();
 
 //Indice de aplicacion web, INDEX
 app.get('/', async (req, res) => {
@@ -72,15 +64,13 @@ app.get('/', async (req, res) => {
         
         const username = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
 
-        // if(username != 'index') {
-        //     cartDuration(username);
-        // }
+        var length = localStorage.getItem(username);
 
-        // const items = await cartNumeration(username);
+        const items = cartNumeration(length, username);    
 
         var data = {
             username: username,
-            // count: items,
+            count: items,
             prod_1: 'Pulsera macramé roja',
             prod_2: 'Feria septiembre 2023',
             prod_3: 'Pulseras para compartir',
@@ -131,15 +121,12 @@ app.get('/', async (req, res) => {
 app.get('/login', (req, res) => {
     const data = {no: 'no'};
     res.render('login', data);
-    // res.sendFile(path.join(__dirname + '/views/login.html'));
 });
 
 //Ruta login - Acceso de usuario
 app.post("/login", async (request, response) => {
     const credential = request.body.user;
     const password = request.body.pass;
-
-    // cartDuration(username);
 
     try {
         const credentialType = credential.includes('@') ? 'mail' : 'username';
@@ -178,17 +165,17 @@ app.get("/user/info", async (req, res) => {
     try {
         const data = verifyJWT(token);
 
-        // const items = await cartNumeration(data);
+        console.log(data);
 
-        // cartDuration(data);
+        var length = localStorage.getItem(data);
+
+        const items = cartNumeration(length, data);
 
         if(data == ''){
             return res.status(401).redirect("/auth/logout");
         }
 
-        const credential = data.username;
-
-        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail', 'user_info', 'username', credential);
+        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail', 'user_info', 'username', data);
 
         const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
 
@@ -201,7 +188,7 @@ app.get("/user/info", async (req, res) => {
             country: datos[0].country,
             phone: datos[0].phone,
             mail: datos[0].mail,
-            // count: items
+            count: items
         }
         
         res.render('userinfo', dataUser);
@@ -354,20 +341,21 @@ app.get('/auth/logout', (req, res) => {
     });
 });
 
-
+//Informacion personal de usuario LOGGED
 app.get('/personal', async (req, res) => {
 
     try {
         const token = req.session.token;
         const user = verifyJWT(token);
-        // const items = await cartNumeration(user);
+        
+        var length = localStorage.getItem(user);
+
+        const items = cartNumeration(length, user);
 
         const data = {
             username: user,
-            // count: items
+            count: items
         };
-
-        // cartDuration(data.username);
 
         if(data.username == ''){
             return res.status(401).redirect('/');
@@ -440,102 +428,72 @@ app.post("/signup", async (req, res) => {
     }
 });
 
+//Ruta carrito - Mostrar items en carrito
+app.get('/cart', async (req, res) => {
 
-// app.get('/cart', async (req, res) => {
+    try {
+        const token = req.session.token;
 
-//     try {
-//         const token = req.session.token;
+        const user = verifyJWT(token);
 
-//         const user = verifyJWT(token);
+        var length = localStorage.getItem(user);
 
-//         cartDuration(user);
-//         const items = await cartNumeration(user);
+        const items = cartNumeration(length, user);
 
-//         if(user == ''){
-//             return res.status(401).redirect('/');
-//         }
-    
-//         const db = (await clientPromise).db("test");
+        if(user == ''){
+            return res.status(401).redirect('/');
+        }
 
-//         const prodtosell = await db.collection("carts").aggregate([
-//             {
-//                 $lookup: {
-//                     from: 'productquantities',
-//                     localField: "products",
-//                     foreignField: "_id",
-//                     as: "shopping"
-//                 }
-//             },
-//             {
-//                 $match: { username: user, active: true, sold: false }
-//             },
-//             {
-//                 $project: {
-//                     _id: '$shopping._id',
-//                     productid: '$shopping.productid',
-//                     productname: '$shopping.productname',
-//                     productprice: '$shopping.productprice',
-//                     productquantity: '$shopping.productquantity',
-//                     producttotalamount: { $sum: '$shopping.producttotalamount'}
-//                 }
-//             },
-//         ]).toArray();
+        const clientData = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
 
-//         var dataArray = []
+        const clientName = clientData[0].fullname;
+        const clientAddress = clientData[0].address;
+        const clientComune = clientData[0].comune;
+        const clientRegion = clientData[0].region;
+        const clientPhone = clientData[0].phone;
+        const clientMail = clientData[0].mail;
 
-//         const clientData = await db.collection("userinfos").findOne({ username: user});
+        const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion);
 
-//         const clientName = clientData.fullname;
-//         const clientAddress = clientData.address;
-//         const clientComune = clientData.comune;
-//         const clientRegion = clientData.region;
-//         const clientPhone = clientData.phone;
-//         const clientMail = clientData.mail;
+        var jsonCart = JSON.parse(length);
 
-//         const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
+        var subtotal = 0;
 
-//         if(prodtosell.length > 0){
-//             const pid = prodtosell[0]._id;
-//             const productid = prodtosell[0].productid;
-//             const pname = prodtosell[0].productname;
-//             const pprice = prodtosell[0].productprice;
-//             const pquantity = prodtosell[0].productquantity;
-//             const ptotal = prodtosell[0].producttotalamount;
+        for(let i = 0; i < jsonCart.length; i++){
 
-//             for(let i = 0; i < prodtosell[0].productid.length; i++){
-//                 dataArray.push({ "nombre": pname[i], "precio": pprice[i], "cantidad": pquantity[i], "id": pid[i] });
-//             }
+            var object = jsonCart[i];
+        
+            subtotal = subtotal + (object.precio * object.cantidad);    
+        
+        }
 
-//             const data = {
-//                 username: user,
-//                 clientname: clientName,
-//                 clientaddress: clientAddress,
-//                 clientcomune: clientComune,
-//                 clientregion: clientRegion,
-//                 clientphone: clientPhone,
-//                 clientmail: clientMail,
-//                 clientshipmentprice: regionPrice.priceregion,
-//                 array: JSON.stringify(dataArray),
-//                 count: items,
-//                 subtotal: ptotal,
-//                 total: (ptotal + regionPrice.priceregion)
-//             };
+        const data = {
+            username: user,
+            clientname: clientName,
+            clientaddress: clientAddress,
+            clientcomune: clientComune,
+            clientregion: clientRegion,
+            clientphone: clientPhone,
+            clientmail: clientMail,
+            clientshipmentprice: regionPrice[0].blue_price,
+            array: length,
+            count: items,
+            subtotal: subtotal,
+            total: (subtotal + parseInt(regionPrice[0].blue_price))
+        };
             
-//             if(data.username == ''){
-//                 return res.status(401).redirect('/');
-//             } else {
-//                 res.render('cart', data);
-//             }
-//         } else {
-//             res.redirect('/');
-//         }
+        if(data.username == ''){
+            return res.status(401).redirect('/');
+        } else {
+            res.render('cart', data);
+        }
 
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).redirect('/');
-//     }
+    } catch (error) {
+        console.log(error)
+        res.status(500).redirect('/');
+    }
 
-// });
+});
 
 // app.post('/cart', async (req, res) => {
 
@@ -805,15 +763,15 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         // cartDuration(data);
 
-        // const items = await cartNumeration(data);
-        
+        var length = localStorage.getItem(data);
+
+        const items = cartNumeration(length, data);  
+
         if(data == ''){
             return res.status(401).redirect("/auth/login");
         }
 
         const prodtosell = await getProductDetail(numproduct);
-
-        console.log(prodtosell);
 
         const image = prodtosell.product_image;
         const id = prodtosell.product_id;
@@ -824,7 +782,7 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         var prod = {
             username: data,
-            // count: items,
+            count: items,
             prodid: id,
             prodimage: image,
             prodname: name,
@@ -843,63 +801,68 @@ app.get('/producto/:productnumber', async (req, res) => {
 
 });
 
-// app.post('/producto/', async (req, res) => {
+let array = [];
 
-//     const token = req.session.token;
-//     const prodquantity = req.body.prodquantity;
-//     const prodnumber = req.body.prodnumber;
+app.post('/producto/', async (req, res) => {
+
+    const token = req.session.token;
+    let prodquantity = req.body.prodquantity;
+    const prodnumber = req.body.prodnumber;
+
+    const username = verifyJWT(token);
+
+    var length = localStorage.getItem(username);
+
+    const items = cartNumeration(length, username);
+
+    if(username == ''){
+        return res.status(401).redirect("/auth/login");
+    }
     
-//     const date = new Date();
+    try {
+        var cart = JSON.parse(localStorage.getItem(username)) || [];
 
-//     try {
+        for(let x = 0; x <= cart.length; x++){
 
-//         const username = verifyJWT(token);
+            var object = cart[x];
+            
+            for(var producto in object){
+                console.log();
+                if(object[producto] === prodnumber){
+                    prodquantity = (parseInt(prodquantity) + parseInt(cart[x].cantidad));
+                    const index = cart.indexOf(object);
+                    if(index > -1){
+                        cart.splice(index, 1);
+                    }
+                    break;
+                }
+            }
+        }
 
-//         if(username == ''){
-//             return res.status(401).redirect("/auth/login");
-//         }
+        var cartItems = await getProductDetail(prodnumber);
 
-//         const db = (await clientPromise).db("test");
+        let datosVenta = {
+            nombre: cartItems.product_name,
+            precio: parseInt(cartItems.product_price),
+            cantidad: prodquantity,
+            id: cartItems.product_id
+        };
+        
+        cart.push(datosVenta);
+        localStorage.setItem(username, JSON.stringify(cart));
 
-//         const prodtosell = await db.collection("products").find({productid: 'PrMP' + prodnumber}).toArray();
+        const data = {
+            count: items,
+            username: username
+        }
 
-//         const prodid = prodtosell[0].productid;
-//         const prodname = prodtosell[0].productname;
-//         const prodprice = prodtosell[0].productprice;
-//         const prodamount = (prodprice * prodquantity);
-//         const prodstock = prodtosell[0].productstock;
- 
-//         const shoppingProd = new ProductQuantity({productid: prodid, productname: prodname, productprice: prodprice, productquantity: prodquantity, producttotalamount: prodamount});
-//         shoppingProd.save();
+    res.redirect('/producto/' + prodnumber);
 
-//         const newCart = await Cart.findOne({username: username, active: true, waitingpayment: false, sold: false});
-
-//         if(newCart == null){
-//             const cart = new Cart({token: token, username: username, sellsdate: date, products: shoppingProd, total: 0});
-//             cart.save();
-//         } else {
-
-//             // Con esto puedo crear un nuevo ObjectId
-//             newCart.products.push(shoppingProd._id);
-//             newCart.save();
-
-//         }
-
-//     const newProductStock = prodstock - prodquantity;
-
-//     await db.collection("products").updateOne({productid: 'PrMP' + prodnumber},
-//         { 
-//             $set: { productstock: newProductStock }
-//         }
-//     );
-
-//     res.redirect('/producto/' + prodnumber);
-
-//     }catch(error){
-//         console.log(error)
-//         res.status(500).redirect('/');
-//     }
-// });
+    }catch(error){
+        console.log(error)
+        res.status(500).redirect('/');
+    }
+});
 
 //Contacto
 app.get('/contact', async (req, res) => {
@@ -910,8 +873,10 @@ app.get('/contact', async (req, res) => {
             username: verifyJWT(token)
         };
 
-        // cartDuration(data.username);
+        var length = localStorage.getItem(data.username);
 
+        const items = cartNumeration(length, data.username);
+        
         let dataUser;
 
         if(data.username == ''){
@@ -919,16 +884,18 @@ app.get('/contact', async (req, res) => {
                 fullname: '',
                 phone: '',
                 mail: '',
-                username: 'index'
+                username: 'index',
+                count: items
             }
         } else {
             const datosContacto = await getFromTable('fullname, phone, mail', 'user_info', 'username', data.username);
-            console.log(datosContacto);
+
             dataUser = {
                 fullname: datosContacto[0].fullname,
                 phone: datosContacto[0].phone,
                 mail: datosContacto[0].mail,
-                username: data.username
+                username: data.username,
+                count: items
             }
         }
 

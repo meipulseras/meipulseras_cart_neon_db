@@ -1,10 +1,8 @@
-import Cart from '../models/Cart.js';
+function cartNumeration(cartLength, user){
 
-async function cartNumeration(user){
-    const newProduct = await Cart.findOne({username: user, active: true, sold: false}, { _id: 0, products: 1});
-
-    if(newProduct !== null) {
-        return newProduct.products.length;
+    if(cartLength !== null && user !== 'index') {
+        var jsonCart = JSON.parse(cartLength);
+        return jsonCart.length;
     } else {
         return 0
     }
