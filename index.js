@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import userInfo from "./setUserInfo.js";
 import express from 'express';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
@@ -12,27 +13,22 @@ import { comparePassword, hashPassword } from './hash/hashing.js';
 import { toZonedTime } from 'date-fns-tz';
 // import ProductQuantity from './models/ProductQuantity.js';
 // import Cart from './models/Cart.js';
-import userInfo from "./setUserInfo.js";
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { config } from "dotenv";
-// import mongoose from "mongoose";
 import verifyJWT from "./middleware/verifyJWT.js";
-// import { MongoClient } from "mongodb";
-//const uri = process.env.MONGODB_DB_URI;
-const resend = new Resend(process.env.RESEND_KEY);
-// import getProducts from './middleware/queries/products.js';
-// import getProductsPQ from './middleware/queries/productsPriceQuantity.js';
+import { LocalStorage } from 'node-localstorage';
 import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-import { LocalStorage } from 'node-localstorage';
+
 let localStorage = new LocalStorage('./localstorage');
 
 const app = express();
-config();
+
+const resend = new Resend(process.env.RESEND_KEY);
+
 
 app.use(session({
     name: 'token',
@@ -484,6 +480,8 @@ app.get('/cart', async (req, res) => {
             
         if(data.username == ''){
             return res.status(401).redirect('/');
+        } else if(length.length == 2 && length == "[]") {
+            res.redirect('/');
         } else {
             res.render('cart', data);
         }
@@ -495,57 +493,48 @@ app.get('/cart', async (req, res) => {
 
 });
 
-// app.post('/cart', async (req, res) => {
+app.post('/cart', async (req, res) => {
 
-//     const token = req.session.token;
-//     const idtochange = req.body.cart;
-//     const prodqty = parseInt(req.body.prodquantity);
-//     const user = verifyJWT(token);
+    const token = req.session.token;
+    const idtochange = req.body.cart;
+    const prodqty = parseInt(req.body.prodquantity);
+    const user = verifyJWT(token);
    
-//     try {
+    try {
 
-//         if(prodqty == 0){
+        var cart = localStorage.getItem(user);
 
-//             await Cart.updateMany({username: user, active: true, sold: false}, 
-//                 {
-//                     $pull: {
-//                         products: idtochange
-//                     }
-//             });
+        var jsonCart = JSON.parse(cart);
 
-//             const price = await ProductQuantity.deleteOne({ _id: idtochange});
+        for(let i = 0; i < jsonCart.length; i++){
 
-//             const cartToDeleteProducts = await Cart.findOne({username: user, active: true, sold: false});
-
-//             if(cartToDeleteProducts.products.length == 0){
-//                 await Cart.updateOne({username: user, active: true, sold: false}, 
-//                     { 
-//                         $set: { active: false }
-//                     });
-//             }
-
-//             return res.redirect('/cart');
-            
-//         }
-
-//         const price = await ProductQuantity.findOne({ _id: idtochange}, {_id: 0, productprice: 1});
-
-//         const subtotal = (price.productprice * prodqty);
-
-//         const cartProduct = await ProductQuantity.updateOne({ _id: idtochange}, 
-//             { 
-//                 $set: { productquantity: prodqty,
-//                     producttotalamount: subtotal
-//                 }
-//             });
-
-//         res.redirect('/cart');
+            var item = jsonCart[i];
+            var newItem;
         
-//     } catch (error) {
-//         console.log(error)
-//         res.status(500).redirect('/');
-//     }
-// });
+            if(item.id == idtochange) {
+                if(prodqty > 0) {
+                    item.cantidad = prodqty;
+                    newItem = item;
+                    const index = jsonCart.indexOf(item);                
+                    jsonCart.splice(index, 1);
+                    jsonCart.push(newItem);
+                    localStorage.setItem(user, JSON.stringify(jsonCart));
+                    break;
+                } else {
+                    const index = jsonCart.indexOf(item);                
+                    jsonCart.splice(index, 1);
+                    localStorage.setItem(user, JSON.stringify(jsonCart));
+                }
+            }
+        }
+
+        res.redirect('/cart');
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).redirect('/');
+    }
+});
 
 // function orderParams(params) {
 //     return Object.keys(params)
@@ -800,8 +789,6 @@ app.get('/producto/:productnumber', async (req, res) => {
     }    
 
 });
-
-let array = [];
 
 app.post('/producto/', async (req, res) => {
 

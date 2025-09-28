@@ -33,6 +33,7 @@ const incrementButtons = document.querySelectorAll('button[data-action="incremen
 
 decrementButtons.forEach(btn => {
     btn.addEventListener("click", decrement);
+    
 });
 
 incrementButtons.forEach(btn => {
