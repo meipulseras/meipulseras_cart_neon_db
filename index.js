@@ -458,10 +458,15 @@ app.get('/cart', async (req, res) => {
         for(let i = 0; i < jsonCart.length; i++){
 
             var object = jsonCart[i];
+
+            var stock = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', object.id); 
         
-            subtotal = subtotal + (object.precio * object.cantidad);    
+            subtotal = subtotal + (object.precio * object.cantidad);
+            object.stock = stock[0].product_quantity;   
         
         }
+
+        var array = JSON.stringify(jsonCart)
 
         const data = {
             username: user,
@@ -472,11 +477,23 @@ app.get('/cart', async (req, res) => {
             clientphone: clientPhone,
             clientmail: clientMail,
             clientshipmentprice: regionPrice[0].blue_price,
-            array: length,
+            array: array,
             count: items,
             subtotal: subtotal,
             total: (subtotal + parseInt(regionPrice[0].blue_price))
         };
+
+        const renewStock = setInterval(async function(){
+            for(let i = 0; i < jsonCart.length; i++){
+
+                var object = jsonCart[i];
+
+                var stock = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', object.id);
+        
+                object.stock = stock[0].product_quantity;   
+        
+            }
+        }, 1000 * 60 * 15);
             
         if(data.username == ''){
             return res.status(401).redirect('/');
@@ -498,7 +515,10 @@ app.post('/cart', async (req, res) => {
     const token = req.session.token;
     const idtochange = req.body.cart;
     const prodqty = parseInt(req.body.prodquantity);
+    const selectedOption = req.body.selectedOption;
     const user = verifyJWT(token);
+
+    console.log(selectedOption);
    
     try {
 
@@ -509,15 +529,10 @@ app.post('/cart', async (req, res) => {
         for(let i = 0; i < jsonCart.length; i++){
 
             var item = jsonCart[i];
-            var newItem;
         
             if(item.id == idtochange) {
                 if(prodqty > 0) {
                     item.cantidad = prodqty;
-                    newItem = item;
-                    const index = jsonCart.indexOf(item);                
-                    jsonCart.splice(index, 1);
-                    jsonCart.push(newItem);
                     localStorage.setItem(user, JSON.stringify(jsonCart));
                     break;
                 } else {
@@ -536,228 +551,166 @@ app.post('/cart', async (req, res) => {
     }
 });
 
-// function orderParams(params) {
-//     return Object.keys(params)
-//     .map(key => key)
-//     .sort((a,b) => {
-//         if(a > b) return 1;
-//         else if (a < b) return -1;
-//         return 0;
-//     });
-// }
+function orderParams(params) {
+    return Object.keys(params)
+    .map(key => key)
+    .sort((a,b) => {
+        if(a > b) return 1;
+        else if (a < b) return -1;
+        return 0;
+    });
+}
 
-// app.post('/pagar', async (req, res) => {
+//Pagar con Flow
+app.post('/pagar', async (req, res) => {
 
-//     const token = req.session.token;
+    const token = req.session.token;
+    const totalToPay = req.body.total;
+    const user = verifyJWT(token);
 
-//     const user = verifyJWT(token);
 
-//     const db = (await clientPromise).db("test");
+    const secretKey = process.env.SECRET_KEY;
+    const urlFlow = process.env.URI_FLOW;
+    const createPayment = urlFlow + "/payment/create";
 
-//     const clientData = await db.collection("userinfos").findOne({ username: user});
-
-//     const clientRegion = clientData.region;
-       
-//     const regionPrice = await db.collection("blues").findOne({ region: clientRegion});
-
-//     await Cart.updateOne({username: user, active: true, waitingpayment: false, sold: false}, 
-//         { 
-//             $set: { waitingpayment: true }
-//         });
-
-//     const carToPay = await db.collection("carts").aggregate([
-//         {
-//             $lookup: {
-//                 from: 'productquantities',
-//                 localField: "products",
-//                 foreignField: "_id",
-//                 as: "shopping"
-//             }
-//         },
-//         {
-//             $match: { username: user, active: true, waitingpayment: true, sold: false }
-//         },
-//         {
-//             $project: {
-//                 _id: '$shopping._id',
-//                 productid: '$shopping.productid',
-//                 productname: '$shopping.productname',
-//                 productprice: '$shopping.productprice',
-//                 productquantity: '$shopping.productquantity',
-//                 producttotalamount: { $sum: '$shopping.producttotalamount'}
-//             }
-//         },
-//     ]).toArray();
-
-//     const totalToPay = (carToPay[0].producttotalamount + regionPrice.priceregion);
-
-//     await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
-//         { 
-//             $set: { total: totalToPay }
-//         });
-
-//     const secretKey = process.env.SECRET_KEY;
-//     const urlFlow = "https://sandbox.flow.cl/api";
-//     const createPayment = urlFlow + "/payment/create";
-
-//     const amount = totalToPay;
-//     const apiKey =  process.env.API_KEY;
-//     const commerceOrder = Randomstring.generate(7);
-//     const currency = "CLP";
-//     const email = "wynegsrhuntar@gmail.com";
-//     const paymentMethod = "9";
-//     const subject = "Prueba Mei Pulseras";
-//     const urlConfirmation = "http://localhost:3000/confirmedpayment";
-//     const urlReturn = "http://localhost:3000/result";
+    const amount = totalToPay;
+    const apiKey =  process.env.API_KEY;
+    const commerceOrder = Randomstring.generate(7);
+    const currency = "CLP";
+    const email = "wynegsrhuntar@gmail.com";
+    const paymentMethod = "9";
+    const subject = "Prueba Mei Pulseras";
+    const urlConfirmation = "http://localhost:3000/confirmedpayment";
+    const urlReturn = "http://localhost:3000/result";
     
-//     const params = {
+    const params = {
 
-//         "amount": amount,
-//         "apiKey": apiKey,
-//         "commerceOrder": commerceOrder,
-//         "currency": currency,
-//         "email": email,
-//         "paymentMethod": paymentMethod,
-//         "subject": subject,
-//         "urlConfirmation": urlConfirmation,
-//         "urlReturn": urlReturn
-//     }
+        "amount": amount,
+        "apiKey": apiKey,
+        "commerceOrder": commerceOrder,
+        "currency": currency,
+        "email": email,
+        "paymentMethod": paymentMethod,
+        "subject": subject,
+        "urlConfirmation": urlConfirmation,
+        "urlReturn": urlReturn
+    }
 
-//     const keys = orderParams(params);
+    const keys = orderParams(params);
 
-//     let data = [];
+    let data = [];
 
-//     keys.map(key => {
-//         data.push(key + "=" + params[key])
-//     });
+    keys.map(key => {
+        data.push(key + "=" + params[key])
+    });
 
-//     data = data.join("&");
+    data = data.join("&");
 
-//     const signed = CryptoJS.HmacSHA256(data, secretKey);
+    const signed = CryptoJS.HmacSHA256(data, secretKey);
 
-//     console.log(data)
+    console.log(data)
 
-//     let response = await axios.post(createPayment, `${data}&s=${signed}`)
-//                 .then(response => {
-//                     return {
-//                         output: response.data,
-//                         info: {
-//                             http_code: response.status
-//                         }
-//                     }
-//                 });
+    let response = await axios.post(createPayment, `${data}&s=${signed}`)
+                .then(response => {
+                    return {
+                        output: response.data,
+                        info: {
+                            http_code: response.status
+                        }
+                    }
+                });
 
     
-//     const redirectTo = response.output.url + "?token=" + response.output.token;
+    const redirectTo = response.output.url + "?token=" + response.output.token;
 
-//     console.log(redirectTo);
+    console.log(redirectTo);
     
-//     res.redirect(redirectTo);
+    res.redirect(redirectTo);
 
-// });
+});
 
-// app.post('/result', async (req, res) => {
+app.post('/result', async (req, res) => {
 
-//     const apiKey = process.env.API_KEY;
+    const apiKey = process.env.API_KEY;
 
-//     const params = {
-//         token: req.body.token,
-//         apiKey: apiKey
-//     }
+    const params = {
+        token: req.body.token,
+        apiKey: apiKey
+    }
 
-//     const secretKey = process.env.SECRET_KEY;
+    const secretKey = process.env.SECRET_KEY;
 
-//     const urlFlow = "https://sandbox.flow.cl/api";
-//     const getPayment = urlFlow + "/payment/getStatus";
+    const urlFlow = process.env.URI_FLOW;
+    const getPayment = urlFlow + "/payment/getStatus";
 
-//     const keys = orderParams(params);
+    const keys = orderParams(params);
 
-//     let data = [];
+    let data = [];
 
-//     keys.map(key => {
-//         data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-//     });
+    keys.map(key => {
+        data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+    });
 
-//     data = data.join("&");
+    data = data.join("&");
 
-//     let s = [];
+    let s = [];
 
-//     keys.map(key => {
-//         s.push(key + "=" + params[key])
-//     });
+    keys.map(key => {
+        s.push(key + "=" + params[key])
+    });
 
-//     s = s.join("&");
+    s = s.join("&");
 
-//     const signed = CryptoJS.HmacSHA256(s, secretKey);
+    const signed = CryptoJS.HmacSHA256(s, secretKey);
 
-//     const urlGet = getPayment + "?" + data + "&s=" + signed;
+    const urlGet = getPayment + "?" + data + "&s=" + signed;
 
-//     let response = await axios.get(urlGet)
-//                 .then(response => {
-//                     return {
-//                         output: response.data,
-//                         info: {
-//                             http_code: response.status
-//                         }
-//                     }
-//                 });
+    let response = await axios.get(urlGet)
+                .then(response => {
+                    return {
+                        output: response.data,
+                        info: {
+                            http_code: response.status
+                        }
+                    }
+                });
 
-//     if(response.info.http_code = 200){
-//         res.status(200).redirect('/confirmedpayment');
-//     }
+    if(response.info.http_code = 200){
+        res.status(200).redirect('/confirmedpayment');
+    }
 
-// });
+});
 
-// app.get('/confirmedpayment', async (req, res) => {
-//     const token = req.session.token;
-//     const user = verifyJWT(token);
+app.get('/confirmedpayment', async (req, res) => {
+    const token = req.session.token;
+    const user = verifyJWT(token);
 
-//     const soldCart = await Cart.findOne({username: user, active: true, waitingpayment: true, sold: false});
+    const array = localStorage.getItem(user);
 
-//     let productosVendidos = await Promise.all(soldCart.products.map(product => ProductQuantity.findOne({_id: product}, {_id: 0, productname: 1, productquantity: 1})));
+    const data = {
+        array: array
+    }
 
-//     console.log(productosVendidos);
 
-//     const data = {
-//         total: soldCart.total,
-//         productos: productosVendidos
-//     }
-
-//     await Cart.updateOne({username: user, active: true, waitingpayment: true, sold: false}, 
-//         { 
-//             $set: { active: false, waitingpayment: false, sold: true }
-//         });
-
-//     res.render('confirmed', data);
-// });
-
-// // app.get('/english', (req, res) => {
-// //     res.sendFile(path.join(__dirname + '/views/english.html'));
-// // });
-
-// // app.get('/pricing', (req, res) => {
-// //     res.sendFile(path.join(__dirname + '/views/formenglish.html'));
-// // });
+    res.render('confirmed', data);
+});
 
 //Ruta PRODUCTO - Requiere LOGGED
 app.get('/producto/:productnumber', async (req, res) => {
 
     const numproduct = req.params['productnumber'];
-
     const token = req.session.token;
 
     try {
 
         const data = verifyJWT(token);
 
-        // cartDuration(data);
-
         var length = localStorage.getItem(data);
 
         const items = cartNumeration(length, data);  
 
         if(data == ''){
-            return res.status(401).redirect("/auth/login");
+            return res.status(401).redirect("/login");
         }
 
         const prodtosell = await getProductDetail(numproduct);
@@ -793,7 +746,7 @@ app.get('/producto/:productnumber', async (req, res) => {
 app.post('/producto/', async (req, res) => {
 
     const token = req.session.token;
-    let prodquantity = req.body.prodquantity;
+    let prodquantity = parseInt(req.body.prodquantity);
     const prodnumber = req.body.prodnumber;
 
     const username = verifyJWT(token);
@@ -814,8 +767,7 @@ app.post('/producto/', async (req, res) => {
             var object = cart[x];
             
             for(var producto in object){
-                console.log();
-                if(object[producto] === prodnumber){
+                if(object.id === ('PrMP' + prodnumber)){
                     prodquantity = (parseInt(prodquantity) + parseInt(cart[x].cantidad));
                     const index = cart.indexOf(object);
                     if(index > -1){
@@ -829,9 +781,11 @@ app.post('/producto/', async (req, res) => {
         var cartItems = await getProductDetail(prodnumber);
 
         let datosVenta = {
+            imagen: cartItems.product_image,
             nombre: cartItems.product_name,
             precio: parseInt(cartItems.product_price),
             cantidad: prodquantity,
+            stock: parseInt(cartItems.product_quantity),
             id: cartItems.product_id
         };
         

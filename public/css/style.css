@@ -3,6 +3,11 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.fotopagado {
+    width: 45px; 
+    height: 45px;
+}
+
 .swal2-popup {
     font-family: Quicksand;
     font-size: 0.9rem;
@@ -55,7 +60,7 @@ table {
 
 th, td {
     padding: 12px;
-    text-align: left;
+    text-align: center;
     font-family: Quicksand; 
     letter-spacing: .1rem; 
     color: #7b7d7b;

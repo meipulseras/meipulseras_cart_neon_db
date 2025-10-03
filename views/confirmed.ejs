@@ -25,16 +25,13 @@
             <li class="links2 link3"><a class="translate link" key="USERNAME" href="/user/info">Tu info</a></li>
         </ul>
     </div>
-    <div class="relleno2"></div>
-    <div class="welcome">
-        <p>Producto(s):</p>
-        <% productos.forEach(producto => { %>
-            <p><%= producto.productname %> x <%= producto.productquantity %></p>
-        <% }) %>
-        
-        <p>Total pagado: <%= total %></p>
+    <div class="relleno"></div>
+    <div class="container">
+        <div id="table-container">
+            <p id="array" style="display: none;"><%= array %></p>
+        </div>
     </div>
     <script src="/js/hide.js" type="text/javascript"></script>
+    <script src="/js/tablePaid.js" type="text/javascript"></script>
 </body>
-
 </html>
