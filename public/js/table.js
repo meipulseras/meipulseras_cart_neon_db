@@ -25,7 +25,7 @@ function generateTable(data) {
     keys.forEach(key => {
         const th = document.createElement("th");
 
-        if(key == 'nombre' || key == 'precio' || key == 'cantidad') {
+        if(key == 'nombre' || key == 'precio' || key == 'cantidad' || key == 'stock') {
             th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
         }
 
@@ -88,6 +88,8 @@ function generateTable(data) {
                 // td.append(buttonminus);
                 // td.append(input);
                 // td.append(buttonplus);
+            } else if (key == 'stock') {
+                td.textContent = item[key] || ""; 
             }
             
             row.appendChild(td);
