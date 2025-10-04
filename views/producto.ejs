@@ -74,7 +74,7 @@
 
         console.log(disabled.value)
 
-        if(disabled.value - 1 == 0){
+        if(disabled.value == 0 || disabled.value - 1 == 0){
             document.getElementById("aceptarcarrito").disabled = true;
         } else {
             document.getElementById("aceptarcarrito").disabled = false;

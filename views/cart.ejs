@@ -50,11 +50,9 @@
         <h1 class="h1">Precio envío</h1>
         <input type="radio" name="envio" id="blue" value="blue">
         <label for="blue" class="lblenv"><b>Blue Express: </b> $<%= clientshipmentprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></label><br>
+        <br>
         <input type="radio" name="envio" id="zokko" value="zokko">
         <label for="zokko" class="lblenv"><b>Retiro en Zokko: </b>$0</label>
-    </div>
-    <div class="container">
-        
     </div>
     <br>
     <br>
@@ -67,6 +65,7 @@
         <div class="pagar">
             <input class="cotiza pe lang" type="submit" value="PAGAR"></input>
             <input name="total" value="<%= total %>" style="display: none;">
+            <input name="subtotal" value="<%= subtotal %>" style="display: none;">
         </div>
     </form>
     <br>

@@ -25,8 +25,12 @@ function generateTable(data) {
     keys.forEach(key => {
         const th = document.createElement("th");
 
-        if(key == 'nombre' || key == 'precio' || key == 'cantidad' || key == 'stock') {
+        if(key == 'nombre' || key == 'precio' || key == 'cantidad') {
             th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+        }
+
+        if(key == 'stock') {
+            th.textContent = key.charAt(0).toUpperCase() + key.slice(1) + ' Tienda';
         }
 
         headerRow.appendChild(th);
@@ -51,7 +55,6 @@ function generateTable(data) {
                 buttonminus.setAttribute("data-action", "decrement");
                 buttonminus.setAttribute("class", "minplus");
                 buttonminus.setAttribute("value", item['id']);
-                // buttonminus.setAttribute("onclick", "deleteProduct()");
 
                 var spanminus = document.createElement("span");
                 spanminus.innerText = "-";
@@ -59,10 +62,11 @@ function generateTable(data) {
 
                 var input = document.createElement("input");
                 input.setAttribute("class", "inputminplus");
-                input.setAttribute("type", "text");
+                input.setAttribute("type", "number");
                 input.setAttribute("name", "prodquantity");
                 input.setAttribute("value", item[key]);
                 input.setAttribute("id", item['id']);
+                input.setAttribute("max", item['stock']);
 
                 var buttonplus = document.createElement("button");
                 buttonplus.setAttribute("id", "plus");
@@ -85,9 +89,6 @@ function generateTable(data) {
 
                 td.setAttribute("class", "btnqty");
                 td.append(form);
-                // td.append(buttonminus);
-                // td.append(input);
-                // td.append(buttonplus);
             } else if (key == 'stock') {
                 td.textContent = item[key] || ""; 
             }

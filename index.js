@@ -8,11 +8,8 @@ import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
-// import cartDuration from './middleware/cartSession.js';
 import { comparePassword, hashPassword } from './hash/hashing.js';
 import { toZonedTime } from 'date-fns-tz';
-// import ProductQuantity from './models/ProductQuantity.js';
-// import Cart from './models/Cart.js';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -565,9 +562,10 @@ function orderParams(params) {
 app.post('/pagar', async (req, res) => {
 
     const token = req.session.token;
+    const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
-
+    const cart = localStorage.getItem(user);
 
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
@@ -577,7 +575,7 @@ app.post('/pagar', async (req, res) => {
     const apiKey =  process.env.API_KEY;
     const commerceOrder = Randomstring.generate(7);
     const currency = "CLP";
-    const email = "wynegsrhuntar@gmail.com";
+    const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
     const paymentMethod = "9";
     const subject = "Prueba Mei Pulseras";
     const urlConfirmation = "http://localhost:3000/confirmedpayment";
@@ -589,7 +587,7 @@ app.post('/pagar', async (req, res) => {
         "apiKey": apiKey,
         "commerceOrder": commerceOrder,
         "currency": currency,
-        "email": email,
+        "email": emailpayer[0].mail,
         "paymentMethod": paymentMethod,
         "subject": subject,
         "urlConfirmation": urlConfirmation,
@@ -608,8 +606,6 @@ app.post('/pagar', async (req, res) => {
 
     const signed = CryptoJS.HmacSHA256(data, secretKey);
 
-    console.log(data)
-
     let response = await axios.post(createPayment, `${data}&s=${signed}`)
                 .then(response => {
                     return {
@@ -620,10 +616,26 @@ app.post('/pagar', async (req, res) => {
                     }
                 });
 
-    
-    const redirectTo = response.output.url + "?token=" + response.output.token;
+    const saleDate = new Date();
+    const formattedDate = saleDate.toISOString().split('T')[0];
+    const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
+    const values = `'${0}', '${cart}', ${subtotalToPay}, ${0}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
 
-    console.log(redirectTo);
+    const insertedCart = await getFromTable('username, cart, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+
+    if(insertedCart === '[]'){
+        await intoTable('sales', columns, values);
+    }
+
+    const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
+
+    if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart){
+        const set = `cart = '${cart}'`;
+
+        await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+    }
+
+    const redirectTo = response.output.url + "?token=" + response.output.token;
     
     res.redirect(redirectTo);
 
