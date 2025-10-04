@@ -19,7 +19,11 @@ function increment(e) {
     let value = Number(target.value);
     value++;
 
-    target.value = value;
+    if(value > target.max){
+        target.value = target.max;
+    } else {
+        target.value = value;
+    }
 }
 
 const decrementButtons = document.querySelectorAll('button[data-action="decrement"]');
