@@ -2,11 +2,14 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
     radio.addEventListener('change', function(){
         const selectedValue = this.value;
         sendDataToNodeJS(selectedValue);
-    })
+        setTimeout(function() {
+        window.location.reload();
+    }, 300); 
+    });
 });
 
 function sendDataToNodeJS(value) {
-    fetch('/cart', {
+    fetch('/envio', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
