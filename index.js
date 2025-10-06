@@ -476,7 +476,6 @@ app.get('/cart', async (req, res) => {
             count: items,
             subtotal: subtotal,
             total: (subtotal + parseInt(jsonCart[0].envio))
-            // total: (subtotal + parseInt(regionPrice[0].blue_price))
         };
 
         const renewStock = setInterval(async function(){
@@ -747,17 +746,15 @@ app.post('/result', async (req, res) => {
     
     const token = req.session.token;
     const user = verifyJWT(token);
-    const cart = localStorage.getItem(user);
 
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
 
     const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-    console.log(insertedCart)
-
     if(response.info.http_code = 200){
-        const set = `paid = ${true} `;
+        const set = `paid = ${true},
+                    sale_order = '${response.output.commerceOrder}'`;
         const comp1 = `cart = '${insertedCart[0].cart}' 
                         AND subtotal = '${insertedCart[0].subtotal}' 
                         AND shipping = '${insertedCart[0].shipping}' 
@@ -781,8 +778,33 @@ app.get('/confirmedpayment', async (req, res) => {
         array: array
     }
 
+    const saleDate = new Date();
+    const formattedDate = saleDate.toISOString().split('T')[0];
 
-    res.render('confirmed', data);
+    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
+
+    if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
+        localStorage.removeItem(user);
+
+        var jsonCart = JSON.parse(insertedCart[0].cart);
+
+        for(let x = 0; x < jsonCart.length; x++){
+
+            var item = jsonCart[x];
+
+            var stockDB = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', item.id);
+
+            var newStock = parseInt(stockDB[0].product_quantity) - parseInt(item.cantidad);
+
+            const set = `product_quantity = ${newStock}`;
+            await updateTable('price_quantity_products', set, 'product_id', item.id);
+            
+        }
+
+        res.render('confirmed', data);
+    }
+
+    
 });
 
 //Ruta PRODUCTO - Requiere LOGGED
