@@ -4,7 +4,7 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
         sendDataToNodeJS(selectedValue);
         setTimeout(function() {
         window.location.reload();
-    }, 300); 
+    }, 500); 
     });
 });
 

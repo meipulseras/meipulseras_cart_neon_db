@@ -670,33 +670,32 @@ app.post('/pagar', async (req, res) => {
                     }
                 });
 
+    const envio = JSON.parse(cart);
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
     const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-    const values = `'${0}', '${cart}', ${subtotalToPay}, ${shipping}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+    const values = `'${0}', '${cart}', ${subtotalToPay}, ${envio[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
 
-    const insertedCart = await getFromTable('username, cart, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+    const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
     if(insertedCart.toString().trim() === ''){
         await intoTable('sales', columns, values);
     } else {
         const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
-        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart){
+        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart && insertedCart[0].total !== totalToPay){
             const set = `cart = '${cart}',
                         subtotal = '${subtotalToPay}', 
-                        shipping = '${1}', 
+                        shipping = '${envio[0].envio}', 
                         total = '${totalToPay}'`;
 
             await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
         }
     }
 
+    const redirectTo = response.output.url + "?token=" + response.output.token;
     
-
-    // const redirectTo = response.output.url + "?token=" + response.output.token;
-    
-    // res.redirect(redirectTo);
+    res.redirect(redirectTo);
 
 });
 
@@ -745,8 +744,28 @@ app.post('/result', async (req, res) => {
                         }
                     }
                 });
+    
+    const token = req.session.token;
+    const user = verifyJWT(token);
+    const cart = localStorage.getItem(user);
+
+    const saleDate = new Date();
+    const formattedDate = saleDate.toISOString().split('T')[0];
+
+    const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+
+    console.log(insertedCart)
 
     if(response.info.http_code = 200){
+        const set = `paid = ${true} `;
+        const comp1 = `cart = '${insertedCart[0].cart}' 
+                        AND subtotal = '${insertedCart[0].subtotal}' 
+                        AND shipping = '${insertedCart[0].shipping}' 
+                        AND total = '${insertedCart[0].total}' 
+                        AND paid = ${false} 
+                        AND sale_date = '${formattedDate}' 
+                        AND username`;
+        await updateTable('sales', set, comp1, user);
         res.status(200).redirect('/confirmedpayment');
     }
 
