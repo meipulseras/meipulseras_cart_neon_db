@@ -426,7 +426,6 @@ app.get('/cart', async (req, res) => {
 
     try {
         const token = req.session.token;
-
         const user = verifyJWT(token);
 
         var length = localStorage.getItem(user);
@@ -459,11 +458,10 @@ app.get('/cart', async (req, res) => {
             var stock = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', object.id); 
         
             subtotal = subtotal + (object.precio * object.cantidad);
-            object.stock = stock[0].product_quantity;   
-        
+            object.stock = stock[0].product_quantity;
         }
 
-        var array = JSON.stringify(jsonCart)
+        var array = JSON.stringify(jsonCart);
 
         const data = {
             username: user,
@@ -477,7 +475,8 @@ app.get('/cart', async (req, res) => {
             array: array,
             count: items,
             subtotal: subtotal,
-            total: (subtotal + parseInt(regionPrice[0].blue_price))
+            total: (subtotal + parseInt(jsonCart[0].envio))
+            // total: (subtotal + parseInt(regionPrice[0].blue_price))
         };
 
         const renewStock = setInterval(async function(){
@@ -511,17 +510,34 @@ app.post('/cart', async (req, res) => {
 
     const token = req.session.token;
     const idtochange = req.body.cart;
-    const prodqty = parseInt(req.body.prodquantity);
     const selectedOption = req.body.selectedOption;
+    const prodqty = parseInt(req.body.prodquantity);
     const user = verifyJWT(token);
-
-    console.log(selectedOption);
-   
+       
     try {
 
         var cart = localStorage.getItem(user);
 
         var jsonCart = JSON.parse(cart);
+
+        const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
+        const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
+
+        for(let x = 0; x < jsonCart.length; x++){
+
+            var item = jsonCart[x];
+
+            if(selectedOption == 'blue'){
+                item.envio = parseInt(regionPrice[0].blue_price);
+                localStorage.setItem(user, JSON.stringify(jsonCart));
+                
+            } else {
+                item.envio = 0;
+                localStorage.setItem(user, JSON.stringify(jsonCart));
+                
+            }
+            
+        }   
 
         for(let i = 0; i < jsonCart.length; i++){
 
@@ -548,6 +564,43 @@ app.post('/cart', async (req, res) => {
     }
 });
 
+app.post('/envio', async (req, res) => {
+
+    const token = req.session.token;
+    const selectedOption = req.body.selectedOption;
+    const user = verifyJWT(token);
+       
+    try {
+
+        var cart = localStorage.getItem(user);
+
+        var jsonCart = JSON.parse(cart);
+
+        const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
+        const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
+
+        for(let x = 0; x < jsonCart.length; x++){
+
+            var item = jsonCart[x];
+
+            if(selectedOption == 'blue'){
+                item.envio = parseInt(regionPrice[0].blue_price);
+                localStorage.setItem(user, JSON.stringify(jsonCart));
+            } else {
+                item.envio = 0;
+                localStorage.setItem(user, JSON.stringify(jsonCart));
+            }
+            
+        }   
+
+        res.redirect('/cart');
+        
+    } catch (error) {
+        console.log(error)
+        res.status(500).redirect('/');
+    }
+});
+
 function orderParams(params) {
     return Object.keys(params)
     .map(key => key)
@@ -564,6 +617,7 @@ app.post('/pagar', async (req, res) => {
     const token = req.session.token;
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
+    const shipping = req.body.shipping;
     const user = verifyJWT(token);
     const cart = localStorage.getItem(user);
 
@@ -619,25 +673,30 @@ app.post('/pagar', async (req, res) => {
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
     const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-    const values = `'${0}', '${cart}', ${subtotalToPay}, ${0}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+    const values = `'${0}', '${cart}', ${subtotalToPay}, ${shipping}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
 
     const insertedCart = await getFromTable('username, cart, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-    if(insertedCart === '[]'){
+    if(insertedCart.toString().trim() === ''){
         await intoTable('sales', columns, values);
+    } else {
+        const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
+
+        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart){
+            const set = `cart = '${cart}',
+                        subtotal = '${subtotalToPay}', 
+                        shipping = '${1}', 
+                        total = '${totalToPay}'`;
+
+            await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+        }
     }
 
-    const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
-
-    if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart){
-        const set = `cart = '${cart}'`;
-
-        await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
-    }
-
-    const redirectTo = response.output.url + "?token=" + response.output.token;
     
-    res.redirect(redirectTo);
+
+    // const redirectTo = response.output.url + "?token=" + response.output.token;
+    
+    // res.redirect(redirectTo);
 
 });
 
@@ -798,6 +857,7 @@ app.post('/producto/', async (req, res) => {
             precio: parseInt(cartItems.product_price),
             cantidad: prodquantity,
             stock: parseInt(cartItems.product_quantity),
+            envio: 1,
             id: cartItems.product_id
         };
         
