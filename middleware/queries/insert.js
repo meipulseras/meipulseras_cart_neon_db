@@ -8,7 +8,6 @@ const sql = neon(
 
 async function intoTable(tabla, columns, values) {
     const query = `INSERT INTO ${tabla} (${columns}) VALUES (${values})`;
-    console.log(query);
     const result = await sql.query(query);
     return result;
 };
