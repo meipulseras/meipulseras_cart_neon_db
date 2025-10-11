@@ -6,8 +6,10 @@ const sql = neon(
     `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=${PGSSLMODE}&channel_binding=${PGCHANNELBINDING}`
 );
 
-async function getProducts() {
-    const result = await sql`SELECT * FROM products`;
+async function deleteFromTable(tabla, comp1, comp2) {
+    const query = `DELETE FROM ${tabla} WHERE ${comp1} = '${comp2}'`;
+    const result = await sql.query(query);
+    return result;
 };
         
-export default getProducts;
+export default deleteFromTable;

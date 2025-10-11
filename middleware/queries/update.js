@@ -8,7 +8,6 @@ const sql = neon(
 
 async function updateTable(tabla, set, comp1, comp2) {
     const query = `UPDATE ${tabla} SET ${set} WHERE ${comp1} = '${comp2}'`;
-    console.log(query);
     const result = await sql.query(query);
     return result;
 };

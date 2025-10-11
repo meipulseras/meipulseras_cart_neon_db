@@ -19,6 +19,7 @@ import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
+import deleteFromTable from './middleware/queries/delete.js';
 
 let localStorage = new LocalStorage('./localstorage');
 
@@ -57,9 +58,11 @@ app.get('/', async (req, res) => {
         
         const username = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
 
-        var length = localStorage.getItem(username);
+        // var length = localStorage.getItem(username);
 
-        const items = cartNumeration(length, username);    
+        var length = await getFromTable('cart', 'user_cart', 'username', username);
+
+        const items = cartNumeration(length[0], username);    
 
         var data = {
             username: username,
@@ -158,11 +161,11 @@ app.get("/user/info", async (req, res) => {
     try {
         const data = verifyJWT(token);
 
-        console.log(data);
+        // var length = localStorage.getItem(data);
 
-        var length = localStorage.getItem(data);
+        var length = await getFromTable('cart', 'user_cart', 'username', username);
 
-        const items = cartNumeration(length, data);
+        const items = cartNumeration(length[0], data);
 
         if(data == ''){
             return res.status(401).redirect("/auth/logout");
@@ -341,9 +344,11 @@ app.get('/personal', async (req, res) => {
         const token = req.session.token;
         const user = verifyJWT(token);
         
-        var length = localStorage.getItem(user);
+        // var length = localStorage.getItem(user);
 
-        const items = cartNumeration(length, user);
+        var length = await getFromTable('cart', 'user_cart', 'username', username);
+
+        const items = cartNumeration(length[0], user);
 
         const data = {
             username: user,
@@ -428,9 +433,11 @@ app.get('/cart', async (req, res) => {
         const token = req.session.token;
         const user = verifyJWT(token);
 
-        var length = localStorage.getItem(user);
+        // var length = localStorage.getItem(user);
 
-        const items = cartNumeration(length, user);
+        var length = await getFromTable('cart', 'user_cart', 'username', user);
+
+        const items = cartNumeration(length[0], user);
 
         if(user == ''){
             return res.status(401).redirect('/');
@@ -447,7 +454,7 @@ app.get('/cart', async (req, res) => {
 
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion);
 
-        var jsonCart = JSON.parse(length);
+        var jsonCart = JSON.parse(length[0].cart);
 
         var subtotal = 0;
 
@@ -515,9 +522,11 @@ app.post('/cart', async (req, res) => {
        
     try {
 
-        var cart = localStorage.getItem(user);
+        // var cart = localStorage.getItem(user);
 
-        var jsonCart = JSON.parse(cart);
+        var cart = await getFromTable('cart', 'user_cart', 'username', user);
+
+        var jsonCart = JSON.parse(cart[0].cart);
 
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
@@ -528,12 +537,16 @@ app.post('/cart', async (req, res) => {
 
             if(selectedOption == 'blue'){
                 item.envio = parseInt(regionPrice[0].blue_price);
-                localStorage.setItem(user, JSON.stringify(jsonCart));
-                
+                // localStorage.setItem(user, JSON.stringify(jsonCart));
+                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+
+                await updateTable('user_cart', set, 'username', user);
             } else {
                 item.envio = 0;
-                localStorage.setItem(user, JSON.stringify(jsonCart));
-                
+                // localStorage.setItem(user, JSON.stringify(jsonCart));
+                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+
+                await updateTable('user_cart', set, 'username', user);
             }
             
         }   
@@ -545,12 +558,16 @@ app.post('/cart', async (req, res) => {
             if(item.id == idtochange) {
                 if(prodqty > 0) {
                     item.cantidad = prodqty;
-                    localStorage.setItem(user, JSON.stringify(jsonCart));
+                    // localStorage.setItem(user, JSON.stringify(jsonCart));
+                    const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                    await updateTable('user_cart', set, 'username', user);
                     break;
                 } else {
                     const index = jsonCart.indexOf(item);                
                     jsonCart.splice(index, 1);
-                    localStorage.setItem(user, JSON.stringify(jsonCart));
+                    // localStorage.setItem(user, JSON.stringify(jsonCart));
+                    const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                    await updateTable('user_cart', set, 'username', user);
                 }
             }
         }
@@ -571,9 +588,11 @@ app.post('/envio', async (req, res) => {
        
     try {
 
-        var cart = localStorage.getItem(user);
+        // var cart = localStorage.getItem(user);
 
-        var jsonCart = JSON.parse(cart);
+        var cart = await getFromTable('cart', 'user_cart', 'username', user);
+
+        var jsonCart = JSON.parse(cart[0].cart);
 
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
@@ -584,10 +603,14 @@ app.post('/envio', async (req, res) => {
 
             if(selectedOption == 'blue'){
                 item.envio = parseInt(regionPrice[0].blue_price);
-                localStorage.setItem(user, JSON.stringify(jsonCart));
+                // localStorage.setItem(user, JSON.stringify(jsonCart));
+                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                await updateTable('user_cart', set, 'username', user);
             } else {
                 item.envio = 0;
-                localStorage.setItem(user, JSON.stringify(jsonCart));
+                // localStorage.setItem(user, JSON.stringify(jsonCart));
+                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                await updateTable('user_cart', set, 'username', user);
             }
             
         }   
@@ -616,9 +639,11 @@ app.post('/pagar', async (req, res) => {
     const token = req.session.token;
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
-    const shipping = req.body.shipping;
+    // const shipping = req.body.shipping;
     const user = verifyJWT(token);
-    const cart = localStorage.getItem(user);
+    // const cart = localStorage.getItem(user);
+
+    var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
@@ -669,11 +694,11 @@ app.post('/pagar', async (req, res) => {
                     }
                 });
 
-    const envio = JSON.parse(cart);
+    const envio = JSON.parse(cart[0].cart);
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
     const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-    const values = `'${0}', '${cart}', ${subtotalToPay}, ${envio[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+    const values = `'${0}', '${cart[0].cart}', ${subtotalToPay}, ${envio[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
 
     const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
@@ -682,8 +707,8 @@ app.post('/pagar', async (req, res) => {
     } else {
         const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
-        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart && insertedCart[0].total !== totalToPay){
-            const set = `cart = '${cart}',
+        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart[0] && insertedCart[0].total !== totalToPay){
+            const set = `cart = '${cart[0].cart}',
                         subtotal = '${subtotalToPay}', 
                         shipping = '${envio[0].envio}', 
                         total = '${totalToPay}'`;
@@ -763,6 +788,10 @@ app.post('/result', async (req, res) => {
                         AND sale_date = '${formattedDate}' 
                         AND username`;
         await updateTable('sales', set, comp1, user);
+
+        const set1 = `commerce_order = '${response.output.commerceOrder}'`;
+        await updateTable('user_cart', set1, 'username', user);
+        
         res.status(200).redirect('/confirmedpayment');
     }
 
@@ -772,19 +801,23 @@ app.get('/confirmedpayment', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
-    const array = localStorage.getItem(user);
+    // const array = localStorage.getItem(user);
+
+    var array = await getFromTable('cart, commerce_order', 'user_cart', 'username', user);
 
     const data = {
-        array: array
+        array: array[0].cart
     }
 
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
 
-    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
+    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${array[0].commerce_order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
 
     if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
-        localStorage.removeItem(user);
+        // localStorage.removeItem(user);
+
+        await deleteFromTable('user_cart', 'username', user);
 
         var jsonCart = JSON.parse(insertedCart[0].cart);
 
@@ -801,7 +834,9 @@ app.get('/confirmedpayment', async (req, res) => {
             
         }
 
-        res.render('confirmed', data);
+        console.log(data)
+
+        res.status(200).render('confirmed', data);
     }
 
     
@@ -817,9 +852,11 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         const data = verifyJWT(token);
 
-        var length = localStorage.getItem(data);
+        // var length = localStorage.getItem(data);
 
-        const items = cartNumeration(length, data);  
+        var length = await getFromTable('cart', 'user_cart', 'username', data);
+
+        const items = cartNumeration(length[0], data);  
 
         if(data == ''){
             return res.status(401).redirect("/login");
@@ -863,20 +900,31 @@ app.post('/producto/', async (req, res) => {
 
     const username = verifyJWT(token);
 
-    var length = localStorage.getItem(username);
+    // var length = localStorage.getItem(username);
 
-    const items = cartNumeration(length, username);
+    var length = await getFromTable('cart', 'user_cart', 'username', username);
+
+    const items = cartNumeration(length[0], username);
 
     if(username == ''){
         return res.status(401).redirect("/auth/login");
     }
     
     try {
-        var cart = JSON.parse(localStorage.getItem(username)) || [];
+        // var cart = JSON.parse(localStorage.getItem(username)) || [];
+        var cart = [];
+
+        if(length[0] === undefined) {
+            cart = [];
+        } else {
+            cart = JSON.parse(length[0].cart)
+        }
 
         for(let x = 0; x <= cart.length; x++){
 
             var object = cart[x];
+
+            console.log(cart)
             
             for(var producto in object){
                 if(object.id === ('PrMP' + prodnumber)){
@@ -898,12 +946,27 @@ app.post('/producto/', async (req, res) => {
             precio: parseInt(cartItems.product_price),
             cantidad: prodquantity,
             stock: parseInt(cartItems.product_quantity),
-            envio: 1,
+            envio: 0,
             id: cartItems.product_id
         };
         
         cart.push(datosVenta);
-        localStorage.setItem(username, JSON.stringify(cart));
+        // localStorage.setItem(username, JSON.stringify(cart));
+
+        var stringfiedCart = JSON.stringify(cart)
+
+        const set = `cart = '${stringfiedCart}'`;
+        
+        if(length[0] === undefined){
+            const columns = 'username, cart';
+
+            const values = `'${username}', '${stringfiedCart}'`;
+
+            await intoTable('user_cart', columns, values);
+        } else {
+            await updateTable('user_cart', set, 'username', username);
+        }
+        
 
         const data = {
             count: items,
@@ -927,9 +990,11 @@ app.get('/contact', async (req, res) => {
             username: verifyJWT(token)
         };
 
-        var length = localStorage.getItem(data.username);
+        // var length = localStorage.getItem(data.username);
 
-        const items = cartNumeration(length, data.username);
+        var length = await getFromTable('cart', 'user_cart', 'username', data.username);
+
+        const items = cartNumeration(length[0], data.username);
         
         let dataUser;
 
