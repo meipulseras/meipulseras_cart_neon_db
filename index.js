@@ -14,14 +14,14 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import verifyJWT from "./middleware/verifyJWT.js";
-import { LocalStorage } from 'node-localstorage';
+// import { LocalStorage } from 'node-localstorage';
 import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
 import deleteFromTable from './middleware/queries/delete.js';
 
-let localStorage = new LocalStorage('./localstorage');
+// let localStorage = new LocalStorage('./localstorage');
 
 const app = express();
 
