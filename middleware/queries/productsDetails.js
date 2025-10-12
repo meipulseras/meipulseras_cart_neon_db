@@ -1,10 +1,4 @@
-import { neon } from '@neondatabase/serverless';
-
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGSSLMODE, PGCHANNELBINDING} = process.env;
-
-const sql = neon(
-    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=${PGSSLMODE}&channel_binding=${PGCHANNELBINDING}`
-);
+import connectionToDB from "./connection.js";
 
 async function getProductDetail(numeroProducto) {
     const id = 'PrMP' + numeroProducto;
@@ -12,7 +6,7 @@ async function getProductDetail(numeroProducto) {
     products.product_image, price_quantity_products.product_price, price_quantity_products.product_quantity 
     FROM products INNER JOIN price_quantity_products 
     ON products.product_id = price_quantity_products.product_id WHERE products.product_id = '${id}'`;
-    const result = await sql.query(query);
+    const result = await connectionToDB().query(query);
     return result[0];
 };
         

@@ -1,10 +1,4 @@
-import { neon } from '@neondatabase/serverless';
-
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGSSLMODE, PGCHANNELBINDING} = process.env;
-
-const sql = neon(
-    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=${PGSSLMODE}&channel_binding=${PGCHANNELBINDING}`
-);
+import connectionToDB from "./connection.js";
 
 async function getFromTable(campo, tabla, comp1, comp2) {
     let where = '';
@@ -12,7 +6,7 @@ async function getFromTable(campo, tabla, comp1, comp2) {
         where = `WHERE ${comp1} = '${comp2}'`;
     }
     const query = `SELECT ${campo} FROM ${tabla} ${where}`;
-    const result = await sql.query(query);
+    const result = await connectionToDB().query(query);
     return result;
 };
         
