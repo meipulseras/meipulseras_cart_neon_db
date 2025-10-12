@@ -440,13 +440,18 @@ h4 {
     .cartbutton { text-align: center; width: 83%; }
     .fotiprod { padding-left: 15px;}
     .proddesc { padding-left: 5pxf;}
-    .h1 { font-size: 1.5rem;}
-    .lblenv { font-size: .9em;}
-    .total { font-size: .7rem;}
+    .h1 { font-size: 1.5rem; width: 100%; margin-left: 75px;}
+    .lblenv { font-size: .9em; margin-left: 10px; }
+    .total { font-size: .7rem; margin-left: 75px;}
     .lblprice { padding-top: 20px; font-size: 1rem;}
+    .radio { margin-left: 10px; }
+    .datosenvio { display: inline-flex; }
 
-    td, th { font-size: .7em;}
-    .container { padding: 20px 37px 20px 20px; margin-left: 2px; margin-right: 0   px;}
+    table { margin-left: 10px; margin-right: 10px;}
+
+    td, th { font-size: .7rem; overflow-wrap: break-word;}
+    .container { width: 100%; padding-left: 2px; padding-right: 150px; margin-left: 2px; margin-right: 2px; }
+
     .pagar { text-align: center;}
     .pipe { padding-left: 7px; padding-right: 7px;}
 
