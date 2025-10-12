@@ -39,7 +39,7 @@ app.use(session({
 
 app.use(
     cors({
-        origin: 'meipulseras.cl' || 3000,
+        origin: process.env.PORT || 3000,
         methods: ['POST', 'GET'],
         credentials: true
     })
@@ -639,8 +639,8 @@ app.post('/pagar', async (req, res) => {
     const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
     const paymentMethod = "9";
     const subject = "Prueba Mei Pulseras";
-    const urlConfirmation = "http://localhost:3000/confirmedpayment";
-    const urlReturn = "http://localhost:3000/result";
+    const urlConfirmation = process.env.PORT + "/confirmedpayment";
+    const urlReturn = process.env.PORT + "/result";
     
     const params = {
 
