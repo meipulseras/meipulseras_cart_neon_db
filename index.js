@@ -39,7 +39,7 @@ app.use(session({
 
 app.use(
     cors({
-        origin: process.env.PORT || 3000,
+        origin: 'meipulseras.cl' || 3000,
         methods: ['POST', 'GET'],
         credentials: true
     })
