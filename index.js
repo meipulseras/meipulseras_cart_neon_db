@@ -670,9 +670,6 @@ app.post('/pagar', async (req, res) => {
 
     const signed = CryptoJS.HmacSHA256(data, secretKey);
 
-    console.log(data)
-    console.log(signed)
-
     let response = await axios.post(createPayment, `${data}&s=${signed}`)
                 .then(response => {
                     return {
@@ -682,8 +679,6 @@ app.post('/pagar', async (req, res) => {
                         }
                     }
                 });
-
-    
 
     const envio = JSON.parse(cart[0].cart);
     const saleDate = new Date();
@@ -763,10 +758,15 @@ app.post('/result', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
+    console.log(token)
+    console.log(user)
+
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
 
     const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+
+    console.log(insertedCart)
 
     if(response.info.http_code = 200){
         const set = `paid = ${true},
