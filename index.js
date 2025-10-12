@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import cors from 'cors';
-// import userInfo from "./setUserInfo.js";
+import userInfo from "./setUserInfo.js";
 import express from 'express';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
@@ -40,7 +40,7 @@ app.use(session({
 app.use(
     cors({
         origin: process.env.PORT || 3000,
-        methods: ['POST', 'PUT', 'GET', 'OPTIONS', 'HEAD'],
+        methods: ['POST', 'GET'],
         credentials: true
     })
 );
@@ -813,8 +813,6 @@ app.get('/confirmedpayment', async (req, res) => {
             
         }
 
-        console.log(data)
-
         res.status(200).render('confirmed', data);
     }
 
@@ -896,8 +894,6 @@ app.post('/producto/', async (req, res) => {
         for(let x = 0; x <= cart.length; x++){
 
             var object = cart[x];
-
-            console.log(cart)
             
             for(var producto in object){
                 if(object.id === ('PrMP' + prodnumber)){
