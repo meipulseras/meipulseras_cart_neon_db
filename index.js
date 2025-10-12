@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { config } from "dotenv";
 import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
@@ -21,6 +22,8 @@ import updateTable from './middleware/queries/update.js';
 import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
+
+config();
 
 const resend = new Resend(process.env.RESEND_KEY);
 
@@ -630,7 +633,7 @@ app.post('/pagar', async (req, res) => {
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
     const createPayment = urlFlow + "/payment/create";
-    
+
     const amount = totalToPay;
     const apiKey =  process.env.API_KEY;
     const commerceOrder = Randomstring.generate(7);
