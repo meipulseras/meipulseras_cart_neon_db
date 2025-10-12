@@ -28,7 +28,7 @@ const resend = new Resend(process.env.RESEND_KEY);
 app.use(session({
     name: 'token',
     secret: process.env.JWT_SECRET,
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     cookie: {
         maxAge: (60 * 60 * 1000),
