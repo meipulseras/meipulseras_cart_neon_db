@@ -629,6 +629,8 @@ app.post('/pagar', async (req, res) => {
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
 
+    
+
     var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
     const secretKey = process.env.SECRET_KEY;
@@ -704,6 +706,8 @@ app.post('/pagar', async (req, res) => {
     }
 
     const redirectTo = response.output.url + "?token=" + response.output.token;
+
+    console.log("en pagar " + user + " token " + token)
     
     res.redirect(redirectTo);
 
@@ -758,8 +762,7 @@ app.post('/result', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
-    console.log(token)
-    console.log(user)
+    console.log("en result " + token + " user " + user)
 
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
