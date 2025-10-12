@@ -1,6 +1,5 @@
 import { Resend } from 'resend';
 import cors from 'cors';
-import userInfo from "./setUserInfo.js";
 import express from 'express';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
@@ -631,7 +630,7 @@ app.post('/pagar', async (req, res) => {
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
     const createPayment = urlFlow + "/payment/create";
-
+    
     const amount = totalToPay;
     const apiKey =  process.env.API_KEY;
     const commerceOrder = Randomstring.generate(7);
@@ -667,6 +666,9 @@ app.post('/pagar', async (req, res) => {
 
     const signed = CryptoJS.HmacSHA256(data, secretKey);
 
+    console.log(data)
+    console.log(signed)
+
     let response = await axios.post(createPayment, `${data}&s=${signed}`)
                 .then(response => {
                     return {
@@ -676,6 +678,8 @@ app.post('/pagar', async (req, res) => {
                         }
                     }
                 });
+
+    
 
     const envio = JSON.parse(cart[0].cart);
     const saleDate = new Date();
@@ -1037,4 +1041,4 @@ app.get('/noenviado', (req, res) => {
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => console.log(`Server running on ${port}, http://localhost:${port}`));
+app.listen(port, () => console.log(`Server running on ${port}`));

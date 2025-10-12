@@ -1,14 +1,8 @@
-import { neon } from '@neondatabase/serverless';
-
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGSSLMODE, PGCHANNELBINDING} = process.env;
-
-const sql = neon(
-    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=${PGSSLMODE}&channel_binding=${PGCHANNELBINDING}`
-);
+import connectionToDB from "./connection.js";
 
 async function intoTable(tabla, columns, values) {
     const query = `INSERT INTO ${tabla} (${columns}) VALUES (${values})`;
-    const result = await sql.query(query);
+    const result = await connectionToDB().query(query);
     return result;
 };
         

@@ -1,14 +1,8 @@
-import { neon } from '@neondatabase/serverless';
-
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGSSLMODE, PGCHANNELBINDING} = process.env;
-
-const sql = neon(
-    `postgresql://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?sslmode=${PGSSLMODE}&channel_binding=${PGCHANNELBINDING}`
-);
+import connectionToDB from "./connection.js";
 
 async function deleteFromTable(tabla, comp1, comp2) {
     const query = `DELETE FROM ${tabla} WHERE ${comp1} = '${comp2}'`;
-    const result = await sql.query(query);
+    const result = await connectionToDB().query(query);
     return result;
 };
         
