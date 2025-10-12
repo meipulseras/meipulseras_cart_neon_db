@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import cors from 'cors';
-import userInfo from "./setUserInfo.js";
+// import userInfo from "./setUserInfo.js";
 import express from 'express';
 import session from 'express-session';
 import jwt from 'jsonwebtoken';
