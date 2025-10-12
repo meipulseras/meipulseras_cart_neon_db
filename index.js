@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { config } from "dotenv";
+// import { config } from "dotenv";
 import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
@@ -23,7 +23,7 @@ import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
 
-config();
+// config();
 
 const resend = new Resend(process.env.RESEND_KEY);
 
@@ -35,7 +35,6 @@ app.use(session({
     cookie: {
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
-        secure: true,
         sameSite: true,
         path: "/"
     }
