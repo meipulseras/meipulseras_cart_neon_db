@@ -1,8 +1,9 @@
 import { Resend } from 'resend';
-// import { config } from "dotenv";
 import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
+import { RedisStore } from 'connect-redis';
+import { createClient } from 'redis';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import CryptoJS from 'crypto-js';
@@ -23,15 +24,23 @@ import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
 
-// config();
+const redisClient = createClient({
+    url: process.env.REDIS_URL
+});
+
+redisClient.on('error', (err) => console.log('Error Cliente Redis', err));
+redisClient.connect().catch(console.error);
+
+const redisStore = new RedisStore( { client: redisClient });
 
 const resend = new Resend(process.env.RESEND_KEY);
 
 app.use(session({
+    store: redisStore,
     name: 'token',
     secret: process.env.JWT_SECRET,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
@@ -629,8 +638,6 @@ app.post('/pagar', async (req, res) => {
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
 
-    
-
     var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
     const secretKey = process.env.SECRET_KEY;
@@ -644,9 +651,12 @@ app.post('/pagar', async (req, res) => {
     const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
     const paymentMethod = "9";
     const subject = "Prueba Mei Pulseras";
-    const urlConfirmation = process.env.PORT + "/confirmedpayment";
-    const urlReturn = process.env.PORT + "/result";
+    // const urlConfirmation = process.env.PORT + "/confirmedpayment";
+    // const urlReturn = process.env.PORT + "/result";
     
+    const urlConfirmation = "localhost:3000/confirmedpayment";
+    const urlReturn = "localhost:3000/result";
+
     const params = {
 
         "amount": amount,
