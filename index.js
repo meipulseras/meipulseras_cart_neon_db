@@ -1057,6 +1057,11 @@ app.get('/noenviado', (req, res) => {
     res.sendFile(path.join(__dirname + '/views/error.html'));
 });
 
+//LOG OUT usuario LOGGED
+app.get('/policy', (req, res) => {
+    res.sendFile(path.join(__dirname + '/views/terms.html'));
+});
+
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => console.log(`Server running on ${port}`));
