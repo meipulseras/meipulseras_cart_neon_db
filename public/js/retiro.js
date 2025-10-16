@@ -5,7 +5,7 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
         setTimeout(function() {
         // window.location.reload(true);
         history.go(0);
-    }, 500); 
+    }, 1000); 
     });
 });
 
