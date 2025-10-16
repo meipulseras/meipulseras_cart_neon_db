@@ -520,7 +520,6 @@ app.post('/cart', async (req, res) => {
 
     const token = req.session.token;
     const idtochange = req.body.cart;
-    const selectedOption = req.body.selectedOption;
     const prodqty = parseInt(req.body.prodquantity);
     const user = verifyJWT(token);
        
@@ -529,34 +528,7 @@ app.post('/cart', async (req, res) => {
 
         var cart = await redisClient.get(user);
 
-        var jsonCart = JSON.parse(cart);
-
-        const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
-        const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
-
-        for(let x = 0; x < jsonCart.length; x++){
-
-            var item = jsonCart[x];
-
-            if(selectedOption == 'blue'){
-                item.envio = parseInt(regionPrice[0].blue_price);
-                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-
-                // await updateTable('user_cart', set, 'username', user);
-
-                await redisClient.set(user, JSON.stringify(jsonCart));
-
-            } else {
-                item.envio = 0;
-                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-
-                // await updateTable('user_cart', set, 'username', user);
-
-                await redisClient.set(user, JSON.stringify(jsonCart));
-
-            }
-            
-        }   
+        var jsonCart = JSON.parse(cart);   
 
         for(let i = 0; i < jsonCart.length; i++){
 
@@ -665,8 +637,8 @@ app.post('/pagar', async (req, res) => {
     // const urlConfirmation = process.env.PORT + "/confirmedpayment";
     // const urlReturn = process.env.PORT + "/result";
     
-    const urlConfirmation = "http://localhost:3000/confirmedpayment";
-    const urlReturn = "http://localhost:3000/result";
+    const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmedpayment" : process.env.PORT + "/confirmedpayment";
+    const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
     const params = {
         "amount": amount,
