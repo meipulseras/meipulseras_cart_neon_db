@@ -3,6 +3,12 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.policies {
+    width: 80%;
+    display: inline-block;
+    margin: 5% 10% 5% 10%;
+}
+
 .fotopagado {
     width: 45px; 
     height: 45px;
