@@ -3,7 +3,8 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
         const selectedValue = this.value;
         sendDataToNodeJS(selectedValue);
         setTimeout(function() {
-        window.location.reload(true);
+        // window.location.reload(true);
+        history.go(0);
     }, 500); 
     });
 });
