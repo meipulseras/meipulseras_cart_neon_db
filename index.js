@@ -74,49 +74,39 @@ app.get('/', async (req, res) => {
         
         const username = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
 
-        var length = await getFromTable('cart', 'user_cart', 'username', username);
+        // var length = await getFromTable('cart', 'user_cart', 'username', username);
 
-        const items = cartNumeration(length[0], username);    
+        var length = await redisClient.get(username);
+
+        const items = cartNumeration(length, username);    
 
         var data = {
             username: username,
             count: items,
-            prod_1: 'Pulsera macramé roja',
-            prod_2: 'Feria septiembre 2023',
+            prod_1: 'Pulseras para compartir',
+            prod_2: 'Amuleto protector',
             prod_3: 'Pulseras para compartir',
-            prod_4: 'Amuleto Protector',
-            prod_5: 'Pulsera amazonita 6mm',
-            prod_6: 'Pulseras cuarzo cristal',
-            prod_7: 'Pulsera Amatista 8mm',
-            prod_8: 'Pulseras cuarzo cristal',
-            prod_9: 'Pulseras macramé',
-            prod_10: 'Pulsera ágatas 3mm',
-            prod_11: 'Pulseras para compartir',
-            prod_12: 'Pulseras macramé morado',
-            prec_1: '5.000',
-            prec_2: '5.000',
-            prec_3: '5.000',
-            prec_4: '5.000',
-            prec_5: '5.000',
-            prec_6: '5.000',
-            prec_7: '5.000',
-            prec_8: '5.000',
-            prec_9: '5.000',
-            prec_10: '5.000',
-            prec_11: '5.000',
-            prec_12: '5.000',
-            imag_1: '/images/webp/image101.webp',
-            imag_2: '/images/webp/image102.webp',
-            imag_3: '/images/webp/image103.webp',
-            imag_4: '/images/webp/image104.webp',
-            imag_5: '/images/webp/image105.webp',
-            imag_6: '/images/webp/image106.webp',
-            imag_7: '/images/webp/image107.webp',
-            imag_8: '/images/webp/image108.webp',
-            imag_9: '/images/webp/image109.webp',
-            imag_10: '/images/webp/image110.webp',
-            imag_11: '/images/webp/image111.webp',
-            imag_12: '/images/webp/image112.webp',
+            prod_4: 'Pulsera macramé individual',
+            prod_5: 'Pulseras para compartir',
+            prod_6: 'Pulseras para compartir',
+            prod_7: 'Pulsera cuarzo rosa',
+            prod_8: 'Pulsera macramé cerámica',
+            prec_1: '6.500',
+            prec_2: '3.500',
+            prec_3: '6.500',
+            prec_4: '3.500',
+            prec_5: '5.500',
+            prec_6: '5.500',
+            prec_7: '5.500',
+            prec_8: '5.500',
+            imag_1: '/images/webp/1image.webp?v=1',
+            imag_2: '/images/webp/2image.webp?v=1',
+            imag_3: '/images/webp/3image.webp?v=1',
+            imag_4: '/images/webp/4image.webp?v=1',
+            imag_5: '/images/webp/5image.webp?v=1',
+            imag_6: '/images/webp/6image.webp?v=1',
+            imag_7: '/images/webp/7image.webp?v=1',
+            imag_8: '/images/webp/8image.webp?v=1'
         };
 
         res.render('index', data);
@@ -175,9 +165,11 @@ app.get("/user/info", async (req, res) => {
     try {
         const data = verifyJWT(token);
 
-        var length = await getFromTable('cart', 'user_cart', 'username', data);
+        // var length = await getFromTable('cart', 'user_cart', 'username', data);
 
-        const items = cartNumeration(length[0], data);
+        var length = await redisClient.get(data);
+
+        const items = cartNumeration(length, data);
 
         if(data == ''){
             return res.status(401).redirect("/auth/logout");
@@ -356,9 +348,11 @@ app.get('/personal', async (req, res) => {
         const token = req.session.token;
         const user = verifyJWT(token);
         
-        var length = await getFromTable('cart', 'user_cart', 'username', user);
+        // var length = await getFromTable('cart', 'user_cart', 'username', user);
 
-        const items = cartNumeration(length[0], user);
+        var length = await redisClient.get(user);
+
+        const items = cartNumeration(length, user);
 
         const data = {
             username: user,
@@ -443,9 +437,11 @@ app.get('/cart', async (req, res) => {
         const token = req.session.token;
         const user = verifyJWT(token);
 
-        var length = await getFromTable('cart', 'user_cart', 'username', user);
+        // var length = await getFromTable('cart', 'user_cart', 'username', user);
 
-        const items = cartNumeration(length[0], user);
+        var length = await redisClient.get(user);
+
+        const items = cartNumeration(length, user);
 
         if(user == ''){
             return res.status(401).redirect('/');
@@ -462,7 +458,7 @@ app.get('/cart', async (req, res) => {
 
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion);
 
-        var jsonCart = JSON.parse(length[0].cart);
+        var jsonCart = JSON.parse(length);
 
         var subtotal = 0;
 
@@ -529,9 +525,11 @@ app.post('/cart', async (req, res) => {
     const user = verifyJWT(token);
        
     try {
-        var cart = await getFromTable('cart', 'user_cart', 'username', user);
+        // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
-        var jsonCart = JSON.parse(cart[0].cart);
+        var cart = await redisClient.get(user);
+
+        var jsonCart = JSON.parse(cart);
 
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
@@ -542,14 +540,20 @@ app.post('/cart', async (req, res) => {
 
             if(selectedOption == 'blue'){
                 item.envio = parseInt(regionPrice[0].blue_price);
-                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
 
-                await updateTable('user_cart', set, 'username', user);
+                // await updateTable('user_cart', set, 'username', user);
+
+                await redisClient.set(user, JSON.stringify(jsonCart));
+
             } else {
                 item.envio = 0;
-                const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
 
-                await updateTable('user_cart', set, 'username', user);
+                // await updateTable('user_cart', set, 'username', user);
+
+                await redisClient.set(user, JSON.stringify(jsonCart));
+
             }
             
         }   
@@ -561,14 +565,16 @@ app.post('/cart', async (req, res) => {
             if(item.id == idtochange) {
                 if(prodqty > 0) {
                     item.cantidad = prodqty;
-                    const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                    await updateTable('user_cart', set, 'username', user);
+                    // const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                    // await updateTable('user_cart', set, 'username', user);
+                    await redisClient.set(user, JSON.stringify(jsonCart));
                     break;
                 } else {
                     const index = jsonCart.indexOf(item);                
                     jsonCart.splice(index, 1);
-                    const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                    await updateTable('user_cart', set, 'username', user);
+                    // const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                    // await updateTable('user_cart', set, 'username', user);
+                    await redisClient.set(user, JSON.stringify(jsonCart));
                 }
             }
         }
@@ -588,9 +594,11 @@ app.post('/envio', async (req, res) => {
     const user = verifyJWT(token);
        
     try {
-        var cart = await getFromTable('cart', 'user_cart', 'username', user);
+        // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
-        var jsonCart = JSON.parse(cart[0].cart);
+        var cart = await redisClient.get(user);
+
+        var jsonCart = JSON.parse(cart);
 
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
@@ -601,12 +609,14 @@ app.post('/envio', async (req, res) => {
 
             if(selectedOption == 'blue'){
                 item.envio = parseInt(regionPrice[0].blue_price);
-                const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                await updateTable('user_cart', set, 'username', user);
+                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                // await updateTable('user_cart', set, 'username', user);
+                await redisClient.set(user, JSON.stringify(jsonCart));
             } else {
                 item.envio = 0;
-                const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                await updateTable('user_cart', set, 'username', user);
+                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
+                // await updateTable('user_cart', set, 'username', user);
+                await redisClient.set(user, JSON.stringify(jsonCart));
             }
             
         }   
@@ -637,13 +647,13 @@ app.post('/pagar', async (req, res) => {
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
 
-    var cart = await getFromTable('cart', 'user_cart', 'username', user);
+    // var cart = await getFromTable('cart', 'user_cart', 'username', user);
+
+    var cart = await redisClient.get(user);
 
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
     const createPayment = urlFlow + "/payment/create";
-
-    console.log(createPayment)
 
     const amount = totalToPay;
     const apiKey =  process.env.API_KEY;
@@ -652,14 +662,13 @@ app.post('/pagar', async (req, res) => {
     const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
     const paymentMethod = "9";
     const subject = "Prueba Mei Pulseras";
-    const urlConfirmation = process.env.PORT + "/confirmedpayment";
-    const urlReturn = process.env.PORT + "/result";
+    // const urlConfirmation = process.env.PORT + "/confirmedpayment";
+    // const urlReturn = process.env.PORT + "/result";
     
-    // const urlConfirmation = "localhost:3000/confirmedpayment";
-    // const urlReturn = "localhost:3000/result";
+    const urlConfirmation = "http://localhost:3000/confirmedpayment";
+    const urlReturn = "http://localhost:3000/result";
 
     const params = {
-
         "amount": amount,
         "apiKey": apiKey,
         "commerceOrder": commerceOrder,
@@ -693,11 +702,11 @@ app.post('/pagar', async (req, res) => {
                     }
                 });
 
-    const envio = JSON.parse(cart[0].cart);
+    const carro = JSON.parse(cart);
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
     const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-    const values = `'${0}', '${cart[0].cart}', ${subtotalToPay}, ${envio[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+    const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
 
     const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
@@ -706,10 +715,10 @@ app.post('/pagar', async (req, res) => {
     } else {
         const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
-        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== cart[0] && insertedCart[0].total !== totalToPay){
-            const set = `cart = '${cart[0].cart}',
+        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro && insertedCart[0].total !== totalToPay){
+            const set = `cart = '${JSON.stringify(carro)}',
                         subtotal = '${subtotalToPay}', 
-                        shipping = '${envio[0].envio}', 
+                        shipping = '${carro[0].envio}', 
                         total = '${totalToPay}'`;
 
             await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
@@ -717,8 +726,6 @@ app.post('/pagar', async (req, res) => {
     }
 
     const redirectTo = response.output.url + "?token=" + response.output.token;
-
-    console.log("en pagar " + user + " token " + token)
     
     res.redirect(redirectTo);
 
@@ -773,14 +780,10 @@ app.post('/result', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
-    console.log("en result " + token + " user " + user)
-
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
 
     const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
-
-    console.log(insertedCart)
 
     if(response.info.http_code = 200){
         const set = `paid = ${true},
@@ -792,10 +795,13 @@ app.post('/result', async (req, res) => {
                         AND paid = ${false} 
                         AND sale_date = '${formattedDate}' 
                         AND username`;
+
         await updateTable('sales', set, comp1, user);
 
-        const set1 = `commerce_order = '${response.output.commerceOrder}'`;
-        await updateTable('user_cart', set1, 'username', user);
+        // const set1 = `commerce_order = '${response.output.commerceOrder}'`;
+        // await updateTable('user_cart', set1, 'username', user);
+
+        await redisClient.set(user, response.output.commerceOrder);
         
         res.status(200).redirect('/confirmedpayment');
     }
@@ -806,7 +812,9 @@ app.get('/confirmedpayment', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
-    var array = await getFromTable('cart, commerce_order', 'user_cart', 'username', user);
+    var order = await redisClient.get(user);
+
+    var array = await getFromTable('cart', 'sales', `sale_order = '${order}' AND username`, user);
 
     const data = {
         array: array[0].cart
@@ -815,10 +823,12 @@ app.get('/confirmedpayment', async (req, res) => {
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
 
-    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${array[0].commerce_order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
+    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
 
     if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
-        await deleteFromTable('user_cart', 'username', user);
+        // await deleteFromTable('user_cart', 'username', user);
+
+        await redisClient.del(user);
 
         var jsonCart = JSON.parse(insertedCart[0].cart);
 
@@ -837,8 +847,6 @@ app.get('/confirmedpayment', async (req, res) => {
 
         res.status(200).render('confirmed', data);
     }
-
-    
 });
 
 //Ruta PRODUCTO - Requiere LOGGED
@@ -848,11 +856,14 @@ app.get('/producto/:productnumber', async (req, res) => {
     const token = req.session.token;
 
     try {
+
         const data = verifyJWT(token);
 
-        var length = await getFromTable('cart', 'user_cart', 'username', data);
+        // var length = await getFromTable('cart', 'user_cart', 'username', data);
 
-        const items = cartNumeration(length[0], data);  
+        var length = await redisClient.get(data);
+
+        const items = cartNumeration(length, data);  
 
         if(data == ''){
             return res.status(401).redirect("/login");
@@ -896,9 +907,13 @@ app.post('/producto/', async (req, res) => {
 
     const username = verifyJWT(token);
 
-    var length = await getFromTable('cart', 'user_cart', 'username', username);
+    // var length = await getFromTable('cart', 'user_cart', 'username', username);
 
-    const items = cartNumeration(length[0], username);
+    var length = await redisClient.get(username);
+
+    // console.log(length[0])
+
+    const items = cartNumeration(length, username);
 
     if(username == ''){
         return res.status(401).redirect("/auth/login");
@@ -907,10 +922,10 @@ app.post('/producto/', async (req, res) => {
     try {
         var cart = [];
 
-        if(length[0] === undefined) {
+        if(length === undefined || length === null) {
             cart = [];
         } else {
-            cart = JSON.parse(length[0].cart)
+            cart = JSON.parse(length);
         }
 
         for(let x = 0; x <= cart.length; x++){
@@ -943,25 +958,28 @@ app.post('/producto/', async (req, res) => {
         
         cart.push(datosVenta);
 
-        var stringfiedCart = JSON.stringify(cart)
+        var stringfiedCart = JSON.stringify(cart);
 
-        const set = `cart = '${stringfiedCart}'`;
+        await redisClient.set(username, stringfiedCart);
+
+        // const set = `cart = '${stringfiedCart}'`;
         
-        if(length[0] === undefined){
-            const columns = 'username, cart';
+        // if(length[0] === undefined || length[0] === null){
+        //     const columns = 'username, cart';
 
-            const values = `'${username}', '${stringfiedCart}'`;
+        //     const values = `'${username}', '${stringfiedCart}'`;
 
-            await intoTable('user_cart', columns, values);
-        } else {
-            await updateTable('user_cart', set, 'username', username);
-        }
+        //     await intoTable('user_cart', columns, values);
+
+        // } else {
+        //     await updateTable('user_cart', set, 'username', username);
+        // }
         
 
-        const data = {
-            count: items,
-            username: username
-        }
+        // const data = {
+        //     count: items,
+        //     username: username   
+        // }
 
     res.redirect('/producto/' + prodnumber);
 
