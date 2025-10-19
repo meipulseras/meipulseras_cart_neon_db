@@ -1,6 +1,6 @@
 var modal = document.getElementById("modalfotos");
 
-const images = document.getElementsByClassName("foto");
+const images = document.getElementsByClassName("foto1");
 
 const clicked = e => {
     console.log(e.target.src);
