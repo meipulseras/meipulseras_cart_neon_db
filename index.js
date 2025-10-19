@@ -21,7 +21,6 @@ import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-// import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
 
@@ -883,10 +882,6 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         const items = cartNumeration(length, data);  
 
-        if(data == ''){
-            return res.status(401).redirect("/login");
-        }
-
         const prodtosell = await getProductDetail(numproduct);
 
         const image = prodtosell.product_image;
@@ -934,7 +929,7 @@ app.post('/producto/', async (req, res) => {
     const items = cartNumeration(length, username);
 
     if(username == ''){
-        return res.status(401).redirect("/auth/login");
+        return res.status(401).redirect("/login");
     }
     
     try {
