@@ -1,6 +1,6 @@
-
 var username = document.getElementById("username");
-console.log(username);
+var counter = document.getElementById("counter").innerText;
+
 
 if(username !== null) {
     if(username.innerText == 'index'){
@@ -8,13 +8,11 @@ if(username !== null) {
         document.getElementById('logout').style.display = 'none';
         document.getElementById('pipe').style.display = 'none';
         document.getElementById("username").style.display = 'none';
+        document.getElementById("counter").style= "display: none";
+
     } else {
         document.getElementById('login').style.display = 'none';
+        document.getElementById("counter").style= "display: block";
+
     }
-}
-
-var counter = document.getElementById("counter").innerText;
-
-if(counter == 0){
-    document.getElementById("counter").style= "display: none";
 }

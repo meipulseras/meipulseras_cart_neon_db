@@ -874,7 +874,7 @@ app.get('/producto/:productnumber', async (req, res) => {
 
     try {
 
-        const data = verifyJWT(token);
+        const data = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
 
         // var length = await getFromTable('cart', 'user_cart', 'username', data);
 
@@ -923,8 +923,6 @@ app.post('/producto/', async (req, res) => {
     // var length = await getFromTable('cart', 'user_cart', 'username', username);
 
     var length = await redisClient.get(username);
-
-    // console.log(length[0])
 
     const items = cartNumeration(length, username);
 
