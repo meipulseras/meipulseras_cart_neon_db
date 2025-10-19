@@ -178,7 +178,8 @@ margin-top: 5px; width: 60%;
 .proddesc {
     font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
     font-size: 1em; font-weight: thin; padding-left: 30px; padding-right: 30px;
-    width: 96%;
+    width: 80%;
+    margin: auto;
     height: auto;
     text-align: center;
     overflow: hidden;
