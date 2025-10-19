@@ -46,6 +46,13 @@
     text-align: right;
 }
 
+.totalpagado {
+    font-family: Quicksand; 
+    letter-spacing: .1rem; 
+    color: #7b7d7b;
+    text-align: center;
+}
+
 .h1 {
     text-align: center;
     font-family: Quicksand; 
