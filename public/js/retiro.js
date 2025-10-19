@@ -2,10 +2,13 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
     radio.addEventListener('change', function(){
         const selectedValue = this.value;
         sendDataToNodeJS(selectedValue);
+        const pagar = document.getElementById("botonpagar");
+        pagar.disabled = true;
         setTimeout(function() {
-        // window.location.reload(true);
-        history.go(0);
-    }, 1000); 
+            history.go(0);
+        }, 1200); 
+        
+        pagar.disabled = false;
     });
 });
 

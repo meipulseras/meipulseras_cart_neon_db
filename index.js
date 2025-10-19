@@ -816,10 +816,16 @@ app.get('/confirmedpayment', async (req, res) => {
 
     var order = await redisClient.get(user);
 
-    var array = await getFromTable('cart', 'sales', `sale_order = '${order}' AND username`, user);
+    if(order === null) {
+        return res.status(401).redirect('/');
+    }
+
+    var array = await getFromTable('cart, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
 
     const data = {
-        array: array[0].cart
+        array: array[0].cart,
+        envio: array[0].shipping,
+        total: array[0].total
     }
 
     const saleDate = new Date();

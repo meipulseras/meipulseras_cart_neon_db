@@ -105,3 +105,7 @@ const container = document.getElementById('table-container');
 const table = generateTable(jsonData.data);
 const td = document.getElementsByTagName('table');
 if (table) container.appendChild(table);
+
+setInterval(function() {
+        window.location.reload();
+    }, 1000 * 60 * 15); 
