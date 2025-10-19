@@ -3,6 +3,8 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.dire { padding-left: 26px;}
+
 .policies {
     width: 80%;
     display: inline-block;
