@@ -186,7 +186,7 @@ margin-top: 5px; width: 60%;
 }
 
 .lblprice { display: inline-block; width: 100%; text-align: right   ;}
-.lblenv { font-size: 1.2em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; }
+.lblenv, .error { font-size: 1.2em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; }
 .lblform { font-size: .8em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; }
 .lblprod { font-size: 1.0em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none; font-weight: thin;}
 .lblprec { font-size: 1.0em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none; font-weight: bolder;}
