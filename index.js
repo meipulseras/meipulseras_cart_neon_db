@@ -1,3 +1,4 @@
+import compression from 'compression';
 import { Resend } from 'resend';
 import cors from 'cors';
 import express from 'express';
@@ -23,6 +24,8 @@ import updateTable from './middleware/queries/update.js';
 // import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
+
+app.use(compression());
 
 const redisClient = createClient({
     url: process.env.REDIS_URL

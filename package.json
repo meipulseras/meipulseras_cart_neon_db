@@ -16,6 +16,7 @@
     "alert": "^6.0.2",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
