@@ -20,7 +20,7 @@ import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-import deleteFromTable from './middleware/queries/delete.js';
+// import deleteFromTable from './middleware/queries/delete.js';
 
 const app = express();
 
@@ -331,7 +331,14 @@ app.post("/auth/forgot", async (req, res) => {
 });
 
 //LOG OUT usuario LOGGED
-app.get('/auth/logout', (req, res) => {
+app.get('/auth/logout', async (req, res) => {
+
+    const token = req.session.token;
+
+    const user = verifyJWT(token);
+
+    await redisClient.del(user);
+
     res.status(200).clearCookie('token', "", {
         path: "/"
     });
@@ -622,6 +629,17 @@ app.post('/pagar', async (req, res) => {
     // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
     var cart = await redisClient.get(user);
+    const carro = JSON.parse(cart);
+
+    var concepto = [];
+
+    for(let x = 0; x < carro.length; x++){
+
+        var item = carro[x];
+
+        concepto.push(item.nombre + ' x ' + item.cantidad)
+        
+    }  
 
     const secretKey = process.env.SECRET_KEY;
     const urlFlow = process.env.URI_FLOW;
@@ -633,10 +651,7 @@ app.post('/pagar', async (req, res) => {
     const currency = "CLP";
     const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
     const paymentMethod = "9";
-    const subject = "Prueba Mei Pulseras";
-    // const urlConfirmation = process.env.PORT + "/confirmedpayment";
-    // const urlReturn = process.env.PORT + "/result";
-    
+    const subject = concepto.toString();
     const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmedpayment" : process.env.PORT + "/confirmedpayment";
     const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
@@ -674,7 +689,7 @@ app.post('/pagar', async (req, res) => {
                     }
                 });
 
-    const carro = JSON.parse(cart);
+    
     const saleDate = new Date();
     const formattedDate = saleDate.toISOString().split('T')[0];
     const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
@@ -776,11 +791,23 @@ app.post('/result', async (req, res) => {
         await redisClient.set(user, response.output.commerceOrder);
         
         res.status(200).redirect('/confirmedpayment');
+    } else {
+
+        const dataError = {
+            error: "Hubo un error al procesr su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+        }
+
+        await redisClient.set(user, insertedCart[0].cart);
+
+        res.status(500).render('notconfirmed', dataError);
+
+        
     }
 
 });
 
 app.get('/confirmedpayment', async (req, res) => {
+
     const token = req.session.token;
     const user = verifyJWT(token);
 
@@ -818,6 +845,16 @@ app.get('/confirmedpayment', async (req, res) => {
         }
 
         res.status(200).render('confirmed', data);
+    } else {
+
+        const dataError = {
+            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
+        }
+
+        await redisClient.set(user, insertedCart[0].cart);
+
+        res.status(500).render('notconfirmed', dataError);
+
     }
 });
 
@@ -933,25 +970,6 @@ app.post('/producto/', async (req, res) => {
         var stringfiedCart = JSON.stringify(cart);
 
         await redisClient.set(username, stringfiedCart);
-
-        // const set = `cart = '${stringfiedCart}'`;
-        
-        // if(length[0] === undefined || length[0] === null){
-        //     const columns = 'username, cart';
-
-        //     const values = `'${username}', '${stringfiedCart}'`;
-
-        //     await intoTable('user_cart', columns, values);
-
-        // } else {
-        //     await updateTable('user_cart', set, 'username', username);
-        // }
-        
-
-        // const data = {
-        //     count: items,
-        //     username: username   
-        // }
 
     res.redirect('/producto/' + prodnumber);
 

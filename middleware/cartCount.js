@@ -1,10 +1,13 @@
 function cartNumeration(cartLength, user){
 
-    // console.log(cartLength)
-
     if(cartLength !== null && user !== 'index' && cartLength !== '[]' ) {
-        var jsonCart = JSON.parse(cartLength);
-        return jsonCart.length;
+        try {
+            var jsonCart = JSON.parse(cartLength);
+
+            return jsonCart.length;
+        } catch (error) {
+            return 0
+        }
     } else {
         return 0
     }
