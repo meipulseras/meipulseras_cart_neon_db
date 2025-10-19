@@ -102,14 +102,14 @@ app.get('/', async (req, res) => {
             prec_6: '5.500',
             prec_7: '5.500',
             prec_8: '5.500',
-            imag_1: '/images/webp/1image.webp?v=1',
-            imag_2: '/images/webp/2image.webp?v=1',
-            imag_3: '/images/webp/3image.webp?v=1',
-            imag_4: '/images/webp/4image.webp?v=1',
-            imag_5: '/images/webp/5image.webp?v=1',
-            imag_6: '/images/webp/6image.webp?v=1',
-            imag_7: '/images/webp/7image.webp?v=1',
-            imag_8: '/images/webp/8image.webp?v=1'
+            imag_1: '/images/webp/1image.webp?v=2',
+            imag_2: '/images/webp/2image.webp?v=2',
+            imag_3: '/images/webp/3image.webp?v=2',
+            imag_4: '/images/webp/4image.webp?v=2',
+            imag_5: '/images/webp/5image.webp?v=2',
+            imag_6: '/images/webp/6image.webp?v=2',
+            imag_7: '/images/webp/7image.webp?v=2',
+            imag_8: '/images/webp/8image.webp?v=2'
         };
 
         res.render('index', data);
