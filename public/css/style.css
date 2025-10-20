@@ -181,12 +181,16 @@ margin-top: 5px; width: 60%;
     width: 80%;
     margin: auto;
     height: auto;
-    text-align: center;
+    text-align: left;
     overflow: hidden;
 }
 
 .btnqty {
     width: 180px;
+}
+
+.delete {
+    text-align: center;
 }
 
 .vaciar {
