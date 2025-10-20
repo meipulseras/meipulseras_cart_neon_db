@@ -9,7 +9,7 @@
     <title>Datos de Usuario</title>
 </head>
 
-<body>
+<body onload="eliminar()">
     <div class="nav" id="nav">
         <ul class="navbar" id="navbar">
             <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
@@ -32,52 +32,51 @@
             <div class="inputforms">
                 <div class="lblinput">
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F1" for="fullname">NOMBRE COMPLETO:</label>
+                        <label class="lblform" key="F1" for="fullname">NOMBRE COMPLETO:</label>
                         <input class="forminput" value="<%= fullname %>" type="text" id="fullname" name="fullname" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="birthdate">FECHA DE NACIMIENTO:</label><br />
+                        <label class="lblform" key="F2" for="birthdate">FECHA DE NACIMIENTO:</label><br />
                         <input class="forminput" value="<%= birthdate %>" maxlength="10" type="text" id="birthdate" name="birthdate" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="address">DIRECCIÓN:</label>
+                        <label class="lblform" key="F2" for="address">DIRECCIÓN:</label>
                         <input class="forminput" value="<%= address %>" type="text" id="address" name="address" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="comune">COMUNA:</label>
+                        <label class="lblform" key="F2" for="comune">COMUNA:</label>
                         <input class="forminput" value="<%= comune %>" type="text" id="comune" name="comune" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="region">REGIÓN:</label>
+                        <label class="lblform" key="F2" for="region">REGIÓN:</label>
                         <input class="forminput" value="<%= region %>" type="text" id="region1" name="region1" required><br />
                         <br />
                         <select class="select" name="region" id="regionSelect"></select>
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="country">PAÍS:</label>
+                        <label class="lblform" key="F2" for="country">PAÍS:</label>
                         <input class="forminput" value="<%= country %>" type="text" id="country" name="country" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="phone">TELÉFONO:</label>
+                        <label class="lblform" key="F2" for="phone">TELÉFONO:</label>
                         <input class="forminput" value="<%= phone %>" type="text" id="phone" name="phone" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="mail">EMAIL:</label>
-                        <input class="forminput" value="<%= mail %>" type="text" id="mail" name="mail" required><br />
+                        <label class="lblform" key="F2" for="mail">EMAIL:</label>
+                        <input class="forminput" value="<%= mail %>" type="text" id="mail" name="mail" disabled><br />
                     </div>
                     <br />
                     <br />
-                    <input class="cotiza pe lang" type="submit" value="Actualizar" id="aceptar">
+                    <input class="cotiza pe" type="submit" value="Actualizar" id="aceptar">
                 </div>
             </div>
-           
         </form>
         <br />
         <br />
@@ -87,21 +86,67 @@
             <div class="inputforms">
                 <div class="lblinput">
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F1" for="oldpass">CONTRASEÑA ANTERIOR/PROVISORIA:</label>
+                        <label class="lblform" key="F1" for="oldpass">CONTRASEÑA ANTERIOR/PROVISORIA:</label>
                         <input class="forminput" type="password" id="oldpass" name="oldpass" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
-                        <label class="lang lblform" key="F2" for="newpass">CONTRASEÑA NUEVA:</label><br />
+                        <label class="lblform" key="F2" for="newpass">CONTRASEÑA NUEVA:</label><br />
                         <input class="forminput" type="password" id="newpass" name="newpass" required><br />
                     </div>
                     <br />
                     <br />
-            <input class="cotiza pe lang" type="submit" value="Actualizar" id="aceptar">
+                    <input class="cotiza pe" type="submit" value="Actualizar" id="aceptar">
+                </div>
+            </div>
         </form>
+        <br />
+        <br />
+        <br />
+        <br />
+        <form action="/delete" method="post" id="eliminar">
+            <div class="inputforms">
+                <div class="lblinput">
+                    <div class="inputlbl">
+                        <p class="lblform delete">¿DESEA ELIMINAR SU REGISTRO DE MEIPULSERAS.CL?</p>
+                    </div>
+                    <br />
+                    <br />
+                    <input class="cotiza pe" name="eliminar" type="submit" value="ELIMINAR" id="eliminar">
+                </div>
+            </div>
+        </form>
+        <br />
+        <br />
+        <br />
+        <br />
     </div>
     <script src="/js/date.js" type="text/javascript"></script>
     <script src="/js/hide.js" type="text/javascript"></script>
     <script src="/js/region.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>    
+    <script>
+        function eliminar(){
+
+            document.getElementById('eliminar').addEventListener('submit', function(event){
+                event.preventDefault();
+
+                const form = this;
+
+                Swal.fire({
+                title: 'Borrar Registro Usuario',
+                text: '¿Está seguro que desea borrar su registro de usuario?',
+                icon: 'question',
+                confirmButtonText: 'Aceptar',
+                showConfirmButton: true,
+                showCancelButton: true
+                }).then((result) => {
+                    if(result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        }
+    </script>
 </body>
 </html>

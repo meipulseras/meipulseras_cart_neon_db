@@ -21,6 +21,7 @@ import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
+import deleteFromTable from './middleware/queries/delete.js'
 
 const app = express();
 
@@ -286,7 +287,6 @@ app.get('/forgot', (req, res) => {
 app.post("/auth/forgot", async (req, res) => {
     try {
         const username = req.body.user;
-
         const email = req.body.mail;
 
         const user = await getFromTable('mail', 'user_info', 'username', username);
@@ -385,7 +385,12 @@ app.get('/signup', async (req, res) => {
     try {
         const region = await getFromTable('region_name', 'regions', null, null);
 
-        res.render('register', {region: JSON.stringify(region)});
+        const data = {
+            registrado: 'no',
+            region: JSON.stringify(region)
+        }
+
+        res.render('register', data);
     } catch (error) {
         res.status(500).redirect('/');
     }
@@ -395,9 +400,24 @@ app.get('/signup', async (req, res) => {
 app.post("/signup", async (req, res) => {
     try {
         const username = req.body.user;
-        const password = hashPassword(req.body.pass);
         const mail = req.body.mail;
+        const rut = req.body.rut;
 
+        const userExists = await getFromTable('username', 'user_info', 'username', username);
+        const mailExists = await getFromTable('mail', 'user_info', 'mail', mail);
+
+        if(userExists.toString().trim() !== '' && userExists[0].username.toString().toUpperCase() === username.toString().toUpperCase() ||
+            mailExists.toString().trim() !== '' && mailExists[0].mail.toString().toUpperCase() === mail.toString().toUpperCase()) {
+            const region = await getFromTable('region_name', 'regions', null, null);
+
+            const data = {
+                registrado: 'yes',
+                region: JSON.stringify(region)
+            }
+            return res.render('register', data);
+        }
+
+        const password = hashPassword(req.body.pass);
         const fullname = req.body.fullname;
         const birthdate = req.body.birthdate;
         const address = req.body.address;
@@ -406,16 +426,16 @@ app.post("/signup", async (req, res) => {
         const country = req.body.country;
         const phone = req.body.phone;
 
-        const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password';
+        const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
 
-        const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}'`;
+        const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}', '${rut}'`;
 
         await intoTable("user_info", columns, values);
 
         resend.emails.send({
             from: 'contacto@meipulseras.cl',
             to: mail,
-            subject: 'Registro exitoso ' + username,
+            subject: 'Registro exitoso, ' + username,
             html: '<br>'+
                 '<br>'+      
                 '<div style="text-align: center;">'+
@@ -426,6 +446,7 @@ app.post("/signup", async (req, res) => {
                 '<div style="text-align: center;">'+
                 '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
                     '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
+                    '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>'+
                 '</div>'+
                 '<br>'+
                 '<br>'
@@ -435,6 +456,21 @@ app.post("/signup", async (req, res) => {
         
     } catch (error) {
         console.log(error)
+        res.status(500).redirect('/');
+    }
+});
+
+//Delete - elimina registro de usuario
+app.post('/delete', async (req, res) => {
+
+    const token = req.session.token;
+    const user = verifyJWT(token);
+
+    try {
+        const deleteUser = await deleteFromTable('user_info', 'username', user);
+
+        return res.status(200).redirect('/auth/logout');
+    } catch (error) {
         res.status(500).redirect('/');
     }
 });
