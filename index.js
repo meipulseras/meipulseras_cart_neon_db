@@ -950,33 +950,36 @@ app.post('/result', async (req, res) => {
     const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
     if(response.info.http_code = 200){
-        const set = `paid = ${true},
+
+        try {
+            const set = `paid = ${true},
                     sale_order = '${response.output.commerceOrder}'`;
-        const comp1 = `cart = '${insertedCart[0].cart}' 
-                        AND subtotal = '${insertedCart[0].subtotal}' 
-                        AND shipping = '${insertedCart[0].shipping}' 
-                        AND total = '${insertedCart[0].total}' 
-                        AND paid = ${false} 
-                        AND sale_date = '${formattedDate}' 
-                        AND username`;
+            const comp1 = `cart = '${insertedCart[0].cart}' 
+                            AND subtotal = '${insertedCart[0].subtotal}' 
+                            AND shipping = '${insertedCart[0].shipping}' 
+                            AND total = '${insertedCart[0].total}' 
+                            AND paid = ${false} 
+                            AND sale_date = '${formattedDate}' 
+                            AND username`;
 
-        await updateTable('sales', set, comp1, user);
+            await updateTable('sales', set, comp1, user);
 
-        // const set1 = `commerce_order = '${response.output.commerceOrder}'`;
-        // await updateTable('user_cart', set1, 'username', user);
+            // const set1 = `commerce_order = '${response.output.commerceOrder}'`;
+            // await updateTable('user_cart', set1, 'username', user);
 
-        await redisClient.set(user, response.output.commerceOrder);
-        
-        res.status(200).redirect('/confirmedpayment');
-    } else {
+            await redisClient.set(user, response.output.commerceOrder);
+            
+            res.status(200).redirect('/confirmedpayment');
+        } catch (error) {
+            const dataError = {
+                error: "Hubo un error al procesr su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+            }
 
-        const dataError = {
-            error: "Hubo un error al procesr su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+            await redisClient.set(user, insertedCart[0].cart);
+
+            res.status(500).render('notconfirmed', dataError);
         }
-
-        await redisClient.set(user, insertedCart[0].cart);
-
-        res.status(500).render('notconfirmed', dataError);
+        
     }
 });
 
@@ -1007,33 +1010,35 @@ app.get('/confirmedpayment', async (req, res) => {
     if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
         // await deleteFromTable('user_cart', 'username', user);
 
-        await redisClient.del(user);
+        try {
+            await redisClient.del(user);
 
-        var jsonCart = JSON.parse(insertedCart[0].cart);
+            var jsonCart = JSON.parse(insertedCart[0].cart);
 
-        for(let x = 0; x < jsonCart.length; x++){
+            for(let x = 0; x < jsonCart.length; x++){
 
-            var item = jsonCart[x];
+                var item = jsonCart[x];
 
-            var stockDB = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', item.id);
+                var stockDB = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', item.id);
 
-            var newStock = parseInt(stockDB[0].product_quantity) - parseInt(item.cantidad);
+                var newStock = parseInt(stockDB[0].product_quantity) - parseInt(item.cantidad);
 
-            const set = `product_quantity = ${newStock}`;
-            await updateTable('price_quantity_products', set, 'product_id', item.id);
-            
+                const set = `product_quantity = ${newStock}`;
+                await updateTable('price_quantity_products', set, 'product_id', item.id);
+                
+            }
+
+            res.status(200).render('confirmed', data);
+        } catch (error) {
+            const dataError = {
+                error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
+            }
+
+            await redisClient.set(user, insertedCart[0].cart);
+
+            res.status(500).render('notconfirmed', dataError);
         }
-
-        res.status(200).render('confirmed', data);
-    } else {
-
-        const dataError = {
-            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
-        }
-
-        await redisClient.set(user, insertedCart[0].cart);
-
-        res.status(500).render('notconfirmed', dataError);
+        
     }
 });
 
