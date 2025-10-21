@@ -75,7 +75,7 @@ app.get('/', async (req, res) => {
     try {
         const token = req.session.token;
         
-        const username = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
+        const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
         // var length = await getFromTable('cart', 'user_cart', 'username', username);
 
@@ -1045,7 +1045,7 @@ app.get('/producto/:productnumber', async (req, res) => {
 
     try {
 
-        const data = verifyJWT(token) == '' ? 'index' : verifyJWT(token);
+        const data = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
         // var length = await getFromTable('cart', 'user_cart', 'username', data);
 
@@ -1172,7 +1172,7 @@ app.get('/contact', async (req, res) => {
                 fullname: '',
                 phone: '',
                 mail: '',
-                username: 'index',
+                username: '',
                 count: items
             }
         } else {
