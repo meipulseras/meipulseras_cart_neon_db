@@ -9,7 +9,7 @@
     <title>Datos de Usuario</title>
 </head>
 
-<body onload="eliminar()">
+<body onload="eliminar(); alerta();">
     <div class="nav" id="nav">
         <ul class="navbar" id="navbar">
             <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
@@ -33,22 +33,27 @@
                 <div class="lblinput">
                     <div class="inputlbl">
                         <label class="lblform" key="F1" for="fullname">NOMBRE COMPLETO:</label>
-                        <input class="forminput" value="<%= fullname %>" type="text" id="fullname" name="fullname" required><br />
+                        <input class="forminput" value="<%= fullname %>" type="text" id="fullname" name="fullname" minlength="10" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lblform" key="F2" for="birthdate">FECHA DE NACIMIENTO:</label><br />
-                        <input class="forminput" value="<%= birthdate %>" maxlength="10" type="text" id="birthdate" name="birthdate" required><br />
+                        <input class="forminput" value="<%= birthdate %>" maxlength="10" type="text" id="birthdate" name="birthdate" disabled><br />
+                    </div>
+                    <br />
+                    <div class="inputlbl">
+                        <label class="lblform" key="F2" for="rut">RUT:</label><br />
+                        <input class="forminput" value="<%= rut %>" type="text" id="rut" name="rut" disabled><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lblform" key="F2" for="address">DIRECCIÓN:</label>
-                        <input class="forminput" value="<%= address %>" type="text" id="address" name="address" required><br />
+                        <input class="forminput" value="<%= address %>" type="text" id="address" name="address" minlength="5" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lblform" key="F2" for="comune">COMUNA:</label>
-                        <input class="forminput" value="<%= comune %>" type="text" id="comune" name="comune" required><br />
+                        <input class="forminput" value="<%= comune %>" type="text" id="comune" name="comune" minlength="3" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
@@ -60,12 +65,12 @@
                     <br />
                     <div class="inputlbl">
                         <label class="lblform" key="F2" for="country">PAÍS:</label>
-                        <input class="forminput" value="<%= country %>" type="text" id="country" name="country" required><br />
+                        <input class="forminput" value="<%= country %>" type="text" id="country" name="country" minlength="3" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lblform" key="F2" for="phone">TELÉFONO:</label>
-                        <input class="forminput" value="<%= phone %>" type="text" id="phone" name="phone" required><br />
+                        <input class="forminput" value="<%= phone %>" type="text" id="phone" name="phone" minlength="9" maxlength="12" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
@@ -121,6 +126,7 @@
         <br />
         <br />
     </div>
+    <p id="data" style="display: none;"><%= problem %></p>
     <script src="/js/date.js" type="text/javascript"></script>
     <script src="/js/hide.js" type="text/javascript"></script>
     <script src="/js/region.js" type="text/javascript"></script>
@@ -146,6 +152,30 @@
                     }
                 });
             });
+        }
+    </script>
+    <script>
+        function alerta(){
+            var alerta = document.getElementById('data').innerText;
+
+            function swalMessage(message, icon, title) {
+                Swal.fire({
+                    title: title,
+                    text: message,
+                    icon: icon,
+                    confirmButtonText: 'Aceptar',
+                    showConfirmButton: true,
+                }).then(function() {
+                    window.location = "/user/info";
+                    alerta = 'no';
+                });
+            }
+        
+            if(alerta === 'yes') {      
+                swalMessage('Ha utilizado caracteres no permitidos al actualizar su registro. Valide los datos ingresados e intente de nuevo.', 'error', 'Error')
+            } else if(alerta === 'ok'){
+                swalMessage('Sus datos se actualizaron correctamente.', 'success', 'Actualización Correcta')
+            }    
         }
     </script>
 </body>
