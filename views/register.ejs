@@ -23,17 +23,17 @@
                 <div class="lblinput">
                     <div class="inputlbl">
                         <label class="lang lblform" key="F1" for="user">USUARIO:</label>
-                        <input class="forminput" type="text" id="user" name="user" required><br />
+                        <input class="forminput" type="text" id="user" name="user" minlength="6" maxlength="12" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F1" for="fullname">NOMBRE COMPLETO:</label>
-                        <input class="forminput" type="text" id="fullname" name="fullname" required><br />
+                        <input class="forminput" type="text" id="fullname" minlength="10" name="fullname" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F1" for="rut">RUT:</label>
-                        <input class="forminput" type="text" id="rut" name="rut" placeholder="12345678-k" maxlength="10"  required><br />
+                        <input class="forminput" type="text" id="rut" name="rut" placeholder="12345678-k" minlength="9"  maxlength="10"  required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
@@ -43,12 +43,12 @@
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F2" for="address">DIRECCIÓN:</label>
-                        <input class="forminput" type="text" id="address" name="address" required><br />
+                        <input class="forminput" type="text" id="address" name="address" minlength="5" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F2" for="comune">COMUNA:</label>
-                        <input class="forminput" type="text" id="comune" name="comune" required><br />
+                        <input class="forminput" type="text" id="comune" name="comune" minlength="3" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
@@ -59,12 +59,12 @@
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F2" for="country">PAÍS:</label>
-                        <input class="forminput" type="text" id="country" name="country" required><br />
+                        <input class="forminput" type="text" id="country" name="country" minlength="3" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
                         <label class="lang lblform" key="F2" for="phone">TELÉFONO:</label>
-                        <input class="forminput" type="text" id="phone" name="phone" maxlength="12" required><br />
+                        <input class="forminput" type="text" id="phone" name="phone" minlength="9" maxlength="12" required><br />
                     </div>
                     <br />
                     <div class="inputlbl">
@@ -107,19 +107,27 @@
     <script>
         function alerta(){
             var alerta = document.getElementById('data').innerText;
-        
-            if(alerta === 'yes'){
+
+            function swalMessage(message) {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Usuario y/o correo electronico ya registrado.',
+                    text: message,
                     icon: 'error',
                     confirmButtonText: 'Aceptar',
                     showConfirmButton: true,
                 }).then(function() {
                     window.location = "/signup";
+                    alerta = 'no';
                 });
-                alerta = 'no';
             }
+        
+            if(alerta === 'yes'){
+                swalMessage('Usuario y/o correo electronico ya registrado.')
+            } else if(alerta === 'invalidregister') {      
+                swalMessage('Ha utilizado caracteres no permitidos al registrarse. Valide los datos ingresados e intente de nuevo.')
+            } else if(alerta === 'yes+invalidregister') {      
+                swalMessage('Usuario y/o correo electronico ya registrado. Además ha utilizado caracteres no permitidos al registrarse. Valide los datos ingresados e intente de nuevo.')
+            }      
         }
     </script>
     <script>

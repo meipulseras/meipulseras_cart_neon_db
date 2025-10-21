@@ -160,6 +160,40 @@ app.post("/login", async (request, response) => {
     }
 });
 
+const newRut = (rut) => {
+    const numRut = rut.indexOf('-');
+    const numbers = rut.substring(0, numRut - 3);
+    const numbers3 = rut.substring(numRut - 3, numRut);
+    const verifNum = rut.substring(numRut + 1, numRut + 2);
+
+    var newNumbers = '';
+
+    for(const char of numbers) {
+        newNumbers = newNumbers + '*';
+    }
+
+    const newRut = newNumbers + numbers3 + '-' + verifNum;
+
+    return newRut;
+}
+
+const newMail = (mail) => {
+    const arrobaMail = mail.indexOf('@');
+    const mailInit = mail.substring(0, arrobaMail - 3);
+    const mail3 = mail.substring(arrobaMail - 3, arrobaMail);
+    const afterArroba = mail.substring(arrobaMail + 1, mail.length);
+
+    var newMailInit = '';
+
+    for(const char of mailInit) {
+        newMailInit = newMailInit + '*';
+    }
+
+    const newmail = newMailInit + mail3 + '@' + afterArroba;
+
+    return newmail;
+}
+
 //Ruta Signup - Info de Usuario(s)
 app.get("/user/info", async (req, res) => {
 
@@ -178,7 +212,7 @@ app.get("/user/info", async (req, res) => {
             return res.status(401).redirect("/auth/logout");
         }
 
-        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail', 'user_info', 'username', data);
+        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
 
         const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
 
@@ -190,8 +224,10 @@ app.get("/user/info", async (req, res) => {
             region: datos[0].region,
             country: datos[0].country,
             phone: datos[0].phone,
-            mail: datos[0].mail,
-            count: items
+            mail: newMail(datos[0].mail),
+            rut: newRut(datos[0].rut),
+            count: items,
+            problem: 'no'
         }
         
         res.render('userinfo', dataUser);
@@ -206,10 +242,13 @@ app.get("/user/info", async (req, res) => {
 //Actualizar datos usuario LOGGED
 app.post("/user/info", async (req, res) => {
 
+    const onlyLettersSpaces = /^[a-zA-Z ]+$/;
+    const onlyLettersNumbersSpaces = /^[a-zA-Z0-9 ]+$/;
+    const plusNumbers = /^\+?\d+$/;
+
     const token = req.session.token;
 
     const fullnameRB = req.body.fullname;
-    const birthdateRB = req.body.birthdate;
     const addressRB = req.body.address;
     const comuneRB = req.body.comune;
     const regionRB = req.body.region;
@@ -217,24 +256,77 @@ app.post("/user/info", async (req, res) => {
     const phoneRB = req.body.phone;
 
     try {
+
         const data = verifyJWT(token);
 
+        var length = await redisClient.get(data);
+
+        const items = cartNumeration(length, data);
+        
         if(data == ''){
             return res.status(401).redirect("/auth/logout");
         }
-           
-        const set = `fullname = '${fullnameRB}', 
-                birthdate = '${birthdateRB}',
+
+        var erroresValidar = 0;
+
+        if(!onlyLettersSpaces.test(fullnameRB)){
+            erroresValidar++;
+        }
+
+        if(!onlyLettersNumbersSpaces.test(addressRB)){
+            erroresValidar++;
+        }
+
+        if(!onlyLettersSpaces.test(comuneRB)){
+            erroresValidar++;
+        }
+        
+        if(!onlyLettersSpaces.test(countryRB)){
+            erroresValidar++;
+        }
+
+        if(!plusNumbers.test(phoneRB)){
+            erroresValidar++;
+        }
+
+        async function actualizar(code){
+            const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
+
+            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
+
+            const userData = {
+                fullname: datos[0].fullname,
+                birthdate: datos[0].birthdate.toLocaleDateString('es-CL', dateOptions).replace(/\//g, '-'),
+                address: datos[0].address,
+                comune: datos[0].comune,
+                region: datos[0].region,
+                country: datos[0].country,
+                phone: datos[0].phone,
+                mail: newMail(datos[0].mail),
+                rut: newRut(datos[0].rut),
+                count: items,
+                problem: code
+            }
+            
+            return res.render('userinfo', userData);
+        }   
+
+        if(erroresValidar === 0) {
+            const set = `fullname = '${fullnameRB}', 
                 address = '${addressRB}', 
                 comune = '${comuneRB}', 
                 region = '${regionRB}',
                 country = '${countryRB}', 
                 phone = '${phoneRB}'`;
 
-        await updateTable('user_info', set, 'username', data);
+            await updateTable('user_info', set, 'username', data);
 
-        res.redirect('/user/info');
-
+            actualizar('ok');
+        } else {
+            actualizar('yes');
+            
+        }
+        
     } catch (error) {
         res.status(500).redirect('/');
     }
@@ -383,6 +475,7 @@ app.get('/personal', async (req, res) => {
 app.get('/signup', async (req, res) => {
 
     try {
+
         const region = await getFromTable('region_name', 'regions', null, null);
 
         const data = {
@@ -399,24 +492,17 @@ app.get('/signup', async (req, res) => {
 //Ruta Signup - Registro de Usuario(s)
 app.post("/signup", async (req, res) => {
     try {
+
+        const onlyLettersSpaces = /^[a-zA-Z ]+$/;
+        const onlyLettersNumbers = /^[a-zA-Z0-9]+$/;
+        const onlyLettersNumbersSpaces = /^[a-zA-Z0-9 ]+$/;
+        const plusNumbers = /^\+?\d+$/;
+
+        const regiones = await getFromTable('region_name', 'regions', null, null);
+
         const username = req.body.user;
         const mail = req.body.mail;
         const rut = req.body.rut;
-
-        const userExists = await getFromTable('username', 'user_info', 'username', username);
-        const mailExists = await getFromTable('mail', 'user_info', 'mail', mail);
-
-        if(userExists.toString().trim() !== '' && userExists[0].username.toString().toUpperCase() === username.toString().toUpperCase() ||
-            mailExists.toString().trim() !== '' && mailExists[0].mail.toString().toUpperCase() === mail.toString().toUpperCase()) {
-            const region = await getFromTable('region_name', 'regions', null, null);
-
-            const data = {
-                registrado: 'yes',
-                region: JSON.stringify(region)
-            }
-            return res.render('register', data);
-        }
-
         const password = hashPassword(req.body.pass);
         const fullname = req.body.fullname;
         const birthdate = req.body.birthdate;
@@ -426,34 +512,87 @@ app.post("/signup", async (req, res) => {
         const country = req.body.country;
         const phone = req.body.phone;
 
-        const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
+        function errorValidarDatos(code) {
+            const data = {
+                registrado: code,
+                region: JSON.stringify(regiones)
+            }
 
-        const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}', '${rut}'`;
+            res.render('register', data);
+        }
 
-        await intoTable("user_info", columns, values);
+        const userExists = await getFromTable('username', 'user_info', 'username', username);
+        const mailExists = await getFromTable('mail', 'user_info', 'mail', mail);
 
-        resend.emails.send({
-            from: 'contacto@meipulseras.cl',
-            to: mail,
-            subject: 'Registro exitoso, ' + username,
-            html: '<br>'+
-                '<br>'+      
-                '<div style="text-align: center;">'+
-                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                '</div>'+
-                '<br>'+
-                '<br>'+
-                '<div style="text-align: center;">'+
-                '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
-                    '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
-                    '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>'+
-                '</div>'+
-                '<br>'+
-                '<br>'
-        });
+        var erroresValidar = 0;
+
+        if(!onlyLettersNumbers.test(username)){
+            erroresValidar++;
+        }
+
+        if(!onlyLettersSpaces.test(fullname)){
+            erroresValidar++;
+        }
+
+        if(!onlyLettersNumbersSpaces.test(address)){
+            erroresValidar++;
+        }
+
+        if(!onlyLettersSpaces.test(comune)){
+            erroresValidar++;
+        }
         
-        return res.status(201).redirect('/');
+        if(!onlyLettersSpaces.test(country)){
+            erroresValidar++;
+        }
+
+        if(!plusNumbers.test(phone)){
+            erroresValidar++;
+        }
+
+        if(userExists.toString().trim() !== '' 
+            && userExists[0].username.toString().toUpperCase() === username.toString().toUpperCase() ||
+            mailExists.toString().trim() !== '' && mailExists[0].mail.toString().toUpperCase() === mail.toString().toUpperCase()) {
+
+            erroresValidar = erroresValidar + 10;
+        }
+
+        if(erroresValidar == 0) {
+            const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
+
+            const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}', '${rut}'`;
+
+            await intoTable("user_info", columns, values);
+
+            resend.emails.send({
+                from: 'contacto@meipulseras.cl',
+                to: mail,
+                subject: 'Registro exitoso, ' + username,
+                html: '<br>'+
+                    '<br>'+      
+                    '<div style="text-align: center;">'+
+                        '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
+                    '</div>'+
+                    '<br>'+
+                    '<br>'+
+                    '<div style="text-align: center;">'+
+                    '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
+                        '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
+                        '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>'+
+                    '</div>'+
+                    '<br>'+
+                    '<br>'
+            });
         
+            return res.status(201).redirect('/');
+        } else if(erroresValidar == 10){
+            errorValidarDatos('yes');
+        } else if(erroresValidar >= 10){ 
+            errorValidarDatos('yes+invalidregister');
+        } else {
+            errorValidarDatos('invalidregister');
+        }
+         
     } catch (error) {
         console.log(error)
         res.status(500).redirect('/');
@@ -838,10 +977,7 @@ app.post('/result', async (req, res) => {
         await redisClient.set(user, insertedCart[0].cart);
 
         res.status(500).render('notconfirmed', dataError);
-
-        
     }
-
 });
 
 app.get('/confirmedpayment', async (req, res) => {
@@ -898,7 +1034,6 @@ app.get('/confirmedpayment', async (req, res) => {
         await redisClient.set(user, insertedCart[0].cart);
 
         res.status(500).render('notconfirmed', dataError);
-
     }
 });
 
