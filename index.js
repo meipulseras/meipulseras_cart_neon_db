@@ -28,7 +28,16 @@ const app = express();
 app.use(compression());
 
 const redisClient = createClient({
-    url: process.env.REDIS_URL
+    url: process.env.REDIS_URL,
+    socket: {
+        reconnectStrategy: (retries) => {
+            if(retries >= 10) {
+                return new Error('Se completó la cantidad límite de reconexiones');
+            }
+
+            return Math.min(retries * 100, 5000);
+        }
+    }
 });
 
 redisClient.on('error', (err) => console.log('Error Cliente Redis', err));
@@ -805,93 +814,107 @@ app.post('/pagar', async (req, res) => {
 
     // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
-    var cart = await redisClient.get(user);
-    const carro = JSON.parse(cart);
+    try {
 
-    var concepto = [];
+        var cart = await redisClient.get(user);
+        const carro = JSON.parse(cart);
 
-    for(let x = 0; x < carro.length; x++){
+        var concepto = [];
 
-        var item = carro[x];
+        for(let x = 0; x < carro.length; x++){
 
-        concepto.push(item.nombre + ' x ' + item.cantidad)
-        
-    }  
+            var item = carro[x];
 
-    const secretKey = process.env.SECRET_KEY;
-    const urlFlow = process.env.URI_FLOW;
-    const createPayment = urlFlow + "/payment/create";
+            concepto.push(item.nombre + ' x ' + item.cantidad)
+            
+        }  
 
-    const amount = totalToPay;
-    const apiKey =  process.env.API_KEY;
-    const commerceOrder = Randomstring.generate(7);
-    const currency = "CLP";
-    const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
-    const paymentMethod = "9";
-    const subject = concepto.toString();
-    const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmedpayment" : process.env.PORT + "/confirmedpayment";
-    const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
+        const secretKey = process.env.SECRET_KEY;
+        const urlFlow = process.env.URI_FLOW;
+        const createPayment = urlFlow + "/payment/create";
 
-    const params = {
-        "amount": amount,
-        "apiKey": apiKey,
-        "commerceOrder": commerceOrder,
-        "currency": currency,
-        "email": emailpayer[0].mail,
-        "paymentMethod": paymentMethod,
-        "subject": subject,
-        "urlConfirmation": urlConfirmation,
-        "urlReturn": urlReturn
-    }
+        const amount = totalToPay;
+        const apiKey =  process.env.API_KEY;
+        const commerceOrder = Randomstring.generate(7);
+        const currency = "CLP";
+        const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
+        const paymentMethod = "9";
+        const subject = concepto.toString();
+        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmedpayment" : process.env.PORT + "/confirmedpayment";
+        const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
-    const keys = orderParams(params);
-
-    let data = [];
-
-    keys.map(key => {
-        data.push(key + "=" + params[key])
-    });
-
-    data = data.join("&");
-
-    const signed = CryptoJS.HmacSHA256(data, secretKey);
-
-    let response = await axios.post(createPayment, `${data}&s=${signed}`)
-                .then(response => {
-                    return {
-                        output: response.data,
-                        info: {
-                            http_code: response.status
-                        }
-                    }
-                });
-
-    
-    const saleDate = new Date();
-    const formattedDate = saleDate.toISOString().split('T')[0];
-    const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-    const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
-
-    const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
-
-    if(insertedCart.toString().trim() === ''){
-        await intoTable('sales', columns, values);
-    } else {
-        const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
-
-        if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro && insertedCart[0].total !== totalToPay){
-            const set = `cart = '${JSON.stringify(carro)}',
-                        subtotal = '${subtotalToPay}', 
-                        shipping = '${carro[0].envio}', 
-                        total = '${totalToPay}'`;
-
-            await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+        const params = {
+            "amount": amount,
+            "apiKey": apiKey,
+            "commerceOrder": commerceOrder,
+            "currency": currency,
+            "email": emailpayer[0].mail,
+            "paymentMethod": paymentMethod,
+            "subject": subject,
+            "urlConfirmation": urlConfirmation,
+            "urlReturn": urlReturn
         }
+
+        const keys = orderParams(params);
+
+        let data = [];
+
+        keys.map(key => {
+            data.push(key + "=" + params[key])
+        });
+
+        data = data.join("&");
+
+        const signed = CryptoJS.HmacSHA256(data, secretKey);
+
+        let response = await axios.post(createPayment, `${data}&s=${signed}`)
+                    .then(response => {
+                        return {
+                            output: response.data,
+                            info: {
+                                http_code: response.status
+                            }
+                        }
+                    });
+
+        
+        const saleDate = new Date();
+        const formattedDate = saleDate.toISOString().split('T')[0];
+        const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
+        const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+
+        const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+
+        if(insertedCart.toString().trim() === ''){
+            await intoTable('sales', columns, values);
+        } else {
+            const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
+
+            if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro && insertedCart[0].total !== totalToPay){
+                const set = `cart = '${JSON.stringify(carro)}',
+                            subtotal = '${subtotalToPay}', 
+                            shipping = '${carro[0].envio}', 
+                            total = '${totalToPay}'`;
+
+                await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+            }
+        }
+
+        const redirectTo = response.output.url + "?token=" + response.output.token;
+        
+        res.redirect(redirectTo);
+        
+    } catch (error) {
+        const dataError = {
+            error: "Hubo un error al iniciar el proceso de pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+        }
+
+        await redisClient.set(user, insertedCart[0].cart);
+
+        res.status(500).render('notconfirmed', dataError);
     }
 
-    const redirectTo = response.output.url + "?token=" + response.output.token;
     
-    res.redirect(redirectTo);
 
 });
 
@@ -899,59 +922,60 @@ app.post('/result', async (req, res) => {
 
     const apiKey = process.env.API_KEY;
 
-    const params = {
-        token: req.body.token,
-        apiKey: apiKey
-    }
+    try {
 
-    const secretKey = process.env.SECRET_KEY;
+        const params = {
+            token: req.body.token,
+            apiKey: apiKey
+        }
 
-    const urlFlow = process.env.URI_FLOW;
-    const getPayment = urlFlow + "/payment/getStatus";
+        const secretKey = process.env.SECRET_KEY;
 
-    const keys = orderParams(params);
+        const urlFlow = process.env.URI_FLOW;
+        const getPayment = urlFlow + "/payment/getStatus";
 
-    let data = [];
+        const keys = orderParams(params);
 
-    keys.map(key => {
-        data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-    });
+        let data = [];
 
-    data = data.join("&");
+        keys.map(key => {
+            data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+        });
 
-    let s = [];
+        data = data.join("&");
 
-    keys.map(key => {
-        s.push(key + "=" + params[key])
-    });
+        let s = [];
 
-    s = s.join("&");
+        keys.map(key => {
+            s.push(key + "=" + params[key])
+        });
 
-    const signed = CryptoJS.HmacSHA256(s, secretKey);
+        s = s.join("&");
 
-    const urlGet = getPayment + "?" + data + "&s=" + signed;
+        const signed = CryptoJS.HmacSHA256(s, secretKey);
 
-    let response = await axios.get(urlGet)
-                .then(response => {
-                    return {
-                        output: response.data,
-                        info: {
-                            http_code: response.status
+        const urlGet = getPayment + "?" + data + "&s=" + signed;
+
+        let response = await axios.get(urlGet)
+                    .then(response => {
+                        return {
+                            output: response.data,
+                            info: {
+                                http_code: response.status
+                            }
                         }
-                    }
-                });
-    
-    const token = req.session.token;
-    const user = verifyJWT(token);
+                    });
+        
+        const token = req.session.token;
+        const user = verifyJWT(token);
 
-    const saleDate = new Date();
-    const formattedDate = saleDate.toISOString().split('T')[0];
+        const saleDate = new Date();
+        const formattedDate = saleDate.toISOString().split('T')[0];
 
-    const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+        const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-    if(response.info.http_code = 200){
+        if(response.info.http_code = 200) {
 
-        try {
             const set = `paid = ${true},
                     sale_order = '${response.output.commerceOrder}'`;
             const comp1 = `cart = '${insertedCart[0].cart}' 
@@ -970,16 +994,17 @@ app.post('/result', async (req, res) => {
             await redisClient.set(user, response.output.commerceOrder);
             
             res.status(200).redirect('/confirmedpayment');
-        } catch (error) {
-            const dataError = {
-                error: "Hubo un error al procesr su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
-            }
-
-            await redisClient.set(user, insertedCart[0].cart);
-
-            res.status(500).render('notconfirmed', dataError);
+        
         }
         
+    } catch (error) {
+        const dataError = {
+            error: "Hubo un error al procesar su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+        }
+
+        await redisClient.set(user, insertedCart[0].cart);
+
+        res.status(500).render('notconfirmed', dataError);
     }
 });
 
@@ -988,29 +1013,29 @@ app.get('/confirmedpayment', async (req, res) => {
     const token = req.session.token;
     const user = verifyJWT(token);
 
-    var order = await redisClient.get(user);
+    try {
+        var order = await redisClient.get(user);
 
-    if(order === null) {
-        return res.status(401).redirect('/');
-    }
+        if(order === null) {
+            return res.status(401).redirect('/');
+        }
 
-    var array = await getFromTable('cart, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
+        var array = await getFromTable('cart, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
 
-    const data = {
-        array: array[0].cart,
-        envio: array[0].shipping,
-        total: array[0].total
-    }
+        const data = {
+            array: array[0].cart,
+            envio: array[0].shipping,
+            total: array[0].total
+        }
 
-    const saleDate = new Date();
-    const formattedDate = saleDate.toISOString().split('T')[0];
+        const saleDate = new Date();
+        const formattedDate = saleDate.toISOString().split('T')[0];
 
-    const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
+        const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
 
-    if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
-        // await deleteFromTable('user_cart', 'username', user);
+        if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
+            // await deleteFromTable('user_cart', 'username', user);
 
-        try {
             await redisClient.del(user);
 
             var jsonCart = JSON.parse(insertedCart[0].cart);
@@ -1029,16 +1054,16 @@ app.get('/confirmedpayment', async (req, res) => {
             }
 
             res.status(200).render('confirmed', data);
-        } catch (error) {
-            const dataError = {
-                error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
-            }
-
-            await redisClient.set(user, insertedCart[0].cart);
-
-            res.status(500).render('notconfirmed', dataError);
+            
         }
-        
+    } catch (error) {
+        const dataError = {
+            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
+        }
+
+        await redisClient.set(user, insertedCart[0].cart);
+
+        res.status(500).render('notconfirmed', dataError);
     }
 });
 
@@ -1097,16 +1122,17 @@ app.post('/producto/', async (req, res) => {
     const username = verifyJWT(token);
 
     // var length = await getFromTable('cart', 'user_cart', 'username', username);
-
-    var length = await redisClient.get(username);
-
-    const items = cartNumeration(length, username);
-
-    if(username == ''){
-        return res.status(401).redirect("/login");
-    }
     
     try {
+
+        var length = await redisClient.get(username);
+
+        const items = cartNumeration(length, username);
+
+        if(username == ''){
+            return res.status(401).redirect("/login");
+        }
+        
         var cart = [];
 
         if(length === undefined || length === null) {
