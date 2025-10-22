@@ -3,6 +3,60 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.prodnamemobile { display: none;}
+
+.foto { width: 280px; height: 280px;}
+
+.fotoprod1 {
+    border: 1px solid #303030; padding: 10px;
+    width: 500px; height: 500px;
+    float: left;
+}
+
+ .fotiprod { padding-left: 100px;}
+
+.foto1 { position: relative; 
+    width: 500px; 
+    height: 500px;
+    overflow: hidden;
+}
+
+.foto1__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-transition: -webkit-transform .5s ease-out;
+    transition: -webkit-transform .5s ease-out;
+    transition: transform .5s ease-out;
+    transition: transform .5s ease-out, -webkit-transform .5s ease-out;
+}
+
+.stock { 
+    font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
+    text-transform: uppercase; font-size: 1em; font-weight: thin; float: left; padding-left: 30px; padding-right: 30px;
+    padding-top: 15px; margin-top: 5px; width: 50%;
+    display: flex;
+    
+}
+
+.prodname, .prodprice { display: flex;}
+.prodcantidad { width: 12%;}
+
+.pricestock { width: 60%;}
+
+.prodnum { 
+    font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
+    text-transform: uppercase; font-size: 2em; font-weight: thin; float: left; padding-left: 30px; padding-right: 30px;
+    padding-top: 15px; margin-top: 5px; width: 50%;
+    display: flex;
+    
+}
+
 .tablacompras {
     width: 70%;
     margin-left: 15%;
@@ -183,23 +237,11 @@ tr:nth-child(even) td {
 
 .commentbox {width: 400px; height: 100px; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b;}
 
-.fotoprod1 {
-    border: 1px solid #303030; padding: 10px;
-    width: 280px; height: 280px;
-    float: left;
-}
 
 .prodtitle { 
     font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
     text-transform: uppercase; font-size: 2em; font-weight: bold; float: left; padding-left: 30px; padding-right: 30px;
     margin-top: 5px; width: 60%;
-}
-
-.prodnum { 
-    font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
-    text-transform: uppercase; font-size: 1em; font-weight: thin; float: left; padding-left: 30px; padding-right: 30px;
-    margin-top: 5px; width: 60%;
-    
 }
 
 .cartbutton { 
@@ -211,9 +253,9 @@ margin-top: 5px; width: 60%;
 
 .proddesc {
     font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
-    font-size: 1em; font-weight: thin; padding-left: 30px; padding-right: 30px;
-    width: 80%;
-    margin: auto;
+    font-size: 1em; font-weight: thin; padding-left: 30px; padding-right: 30px; padding-top: 60px;
+    width: 50%;
+    margin: 0;
     height: auto;
     text-align: left;
     overflow: hidden;
@@ -259,7 +301,7 @@ h4 {
 .pe {
     border: 1px solid #e4437e;
     border-radius: 20px;
-    padding: 9px 20px;
+    padding: 9px 80px;
     margin: 4px 2px;
     color: white;
     background-color: #e4437e;
@@ -323,8 +365,7 @@ h4 {
     grid-template-columns: auto auto auto auto;
     gap: 10px;
   }
-.foto { width: 280px; height: 280px;}
-.foto1 { width: 280px; height: 280px;}
+
 .grid-item { display: inline-block; text-align: center; width: 280px; height: 380px; border: 1px solid #303030; padding: 10px;}
 
 .welcome {font-family: Quicksand; font-weight: 400;  text-align: center; letter-spacing: .1rem; color: #303030; font-size: 2.0rem; }
@@ -485,15 +526,21 @@ h4 {
         grid-template-columns: auto auto;
         gap: 10px;
       }
-    .foto { width: 125px; height: 125px;}
-    .fotoprod1 { width: 250px; height: 250px;  border: 1px solid #303030; padding: 10px; text-align: center;}
-    .foto1 { width: 250px; height: 250px; padding-bottom: 10px; text-align: center;}
-    .prodtitle { font-size: 1em; padding-left: 0px; padding-top: 45px; width: 100%;}
-    .prodnum { padding-left: 0px; padding-top: 5px; padding-bottom: 5px; width: 100%; margin: 0px; }
+      
+    .foto { width: 125px; height: 125px; display: inline-block;}
+    .fotoprod1 { width: 310px; height: 310px;  border: 1px solid #303030; padding: 10px; text-align: center; display: inline-block;}
+    .foto1 { width: 310px; height: 310px; padding-bottom: 0px; text-align: center;}
+    .prodtitle { font-size: 1.5em; padding-left: 0px; padding-top: 45px; width: 100%; float: none;}
+    .prodname { display: none;}
+    .prodnamemobile { display: inline-block; text-align: center; width: 90%; padding-left: 5%; padding-right: 5%;}
+    .prodnum { padding-left: 0px; padding-top: 5px; padding-bottom: 5px; width: 100%; margin: 0px; display: inline-block; text-align: center;}
+    .prodprice { width: 100%; display: inline-block; }
+    .pricestock { text-align: center; width: 100%; padding-top: 30px;}
+    .stock { width: 70%; padding-left: 0; padding-top: 40px; padding-bottom: 10px; margin-left: 0; float: left;}
     .grid-item { width: 125px; height: 214px;}
     .cartbutton { text-align: center; width: 83%; }
     .fotiprod { padding-left: 15px;}
-    .proddesc { padding-left: 5pxf;}
+    .proddesc { width: 80%; padding-left: 10%; padding-right: 10%;}
     .h1 { font-size: 1.5rem; width: 100%; margin-left: auto;}
     .lblenv { font-size: .9em; margin-left: 10px; }
     .total { font-size: .7rem; text-align: center;}
@@ -538,22 +585,8 @@ h4 {
     
 }
 
-@media screen and (max-device-width: 412px) {
+@media screen and (max-device-width: 412px) AND (max-device-width: 375px) {
     .logo { margin-left: 84px; width: 50%;}
-    .table-container {
-        overflow-x: auto;
-    }
-    .tdproductos {
-        white-space: pre;    
-    }
-
-    .tablaproductos {
-        white-space: pre;    
-    }
-}
-
-@media screen and (max-device-width: 375px) {
-    .logo { margin-left: 65.5px; margin-right: 10px; width: 60%;}
     .table-container {
         overflow-x: auto;
     }
