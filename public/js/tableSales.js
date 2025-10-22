@@ -70,7 +70,7 @@ function generateTable(data) {
                 const prods = JSON.parse(item[key]);
 
                 for(let i = 0; i < prods.length; i++) {
-                    var prod = prods[0];
+                    var prod = prods[i];
 
                     td.textContent = td.textContent + '\n' + prod.nombre + ' x ' + prod.cantidad || "";
                     td.setAttribute("class", "tdproductos");
