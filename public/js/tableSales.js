@@ -73,24 +73,18 @@ function generateTable(data) {
                     var prod = prods[0];
 
                     td.textContent = td.textContent + '\n' + prod.nombre + ' x ' + prod.cantidad || "";
-                    td.style.whiteSpace = 'pre-line';
-                    td.style.paddingTop = '0px';
-                    td.style.paddingBottom = '15px';
+                    td.setAttribute("class", "tdproductos");
                     
                 }
-                
-                
             }
             
             row.appendChild(td);
             
         });
         table.appendChild(row);
-        table.style.width = '70%';
-        table.style.marginLeft = '15%';
-        table.style.marginRight = '15%';
-        table.setAttribute("class", "tdproductos");
+        table.setAttribute("class", "tablacompras");
     });
+    
     return table;
 }
 
