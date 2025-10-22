@@ -440,8 +440,6 @@ app.get('/auth/logout', async (req, res) => {
 
     const user = verifyJWT(token);
 
-    await redisClient.del(user);
-
     res.status(200).clearCookie('token', "", {
         path: "/"
     });
@@ -464,16 +462,20 @@ app.get('/personal', async (req, res) => {
 
         const items = cartNumeration(length, user);
 
+        if(user == ''){
+            return res.status(401).redirect('/');
+        }
+
+        const compras = await getFromTable('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user);
+
         const data = {
             username: user,
+            array: JSON.stringify(compras),
             count: items
         };
 
-        if(data.username == ''){
-            return res.status(401).redirect('/');
-        } else {
-            res.render('personal', data);
-        }
+        res.render('personal', data);
+        
 
     } catch (error) {
         res.status(500).redirect('/');
@@ -1132,7 +1134,7 @@ app.post('/producto/', async (req, res) => {
         if(username == ''){
             return res.status(401).redirect("/login");
         }
-        
+
         var cart = [];
 
         if(length === undefined || length === null) {

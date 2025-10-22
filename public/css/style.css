@@ -482,16 +482,18 @@ h4 {
     .cartbutton { text-align: center; width: 83%; }
     .fotiprod { padding-left: 15px;}
     .proddesc { padding-left: 5pxf;}
-    .h1 { font-size: 1.5rem; width: 100%; margin-left: 75px;}
+    .h1 { font-size: 1.5rem; width: 100%; margin-left: auto;}
     .lblenv { font-size: .9em; margin-left: 10px; }
-    .total { font-size: .7rem; margin-left: 75px;}
+    .total { font-size: .7rem; text-align: center;}
     .lblprice { padding-top: 20px; font-size: 1rem;}
     .radio { margin-left: 10px; }
     .datosenvio { display: inline-flex; }
 
     table { margin-left: 10px; margin-right: 10px;}
 
-    td, th { font-size: .7rem; overflow-wrap: break-word;}
+    td, th { font-size: .7rem; }
+    table.tdpropuctos { width: 100%;}
+
     .container { width: 100%; padding-left: 2px; padding-right: 150px; margin-left: 2px; margin-right: 2px; }
 
     .pagar { text-align: center;}
@@ -505,15 +507,23 @@ h4 {
     .forminput { width: 96%; margin: auto;}
     .lblinput { padding-left: 5%; padding-right: 5%; width: 92%; margin: auto;}
     .h4 { font-size: .8rem;}
+
+    .table-container {
+        overflow-x: auto;
+    }
     
 }
 
 @media screen and (max-device-width: 412px) {
  .logo { margin-left: 84px; width: 50%;}
- 
+ .table-container {
+        overflow-x: auto;
+    }
 }
 
 @media screen and (max-device-width: 375px) {
  .logo { margin-left: 65.5px; margin-right: 10px; width: 60%;}
- 
+ .table-container {
+        overflow-x: auto;
+    }
 }
