@@ -3,6 +3,18 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.tablacompras {
+    width: 70%;
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+.tdproductos {
+    white-space: pre-line;
+    padding-top: 0px;
+    padding-bottom: 15px;
+}
+
 .marquee {
     width: 100%;
     line-height: 8px;
@@ -492,7 +504,19 @@ h4 {
     table { margin-left: 10px; margin-right: 10px;}
 
     td, th { font-size: .7rem; }
-    table.tdpropuctos { width: 100%;}
+    .tablacompras {
+        width: 90%;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    .tdproductos {
+        white-space: pre;    
+    }
+
+    .tablaproductos {
+        white-space: pre;    
+    }
 
     .container { width: 100%; padding-left: 2px; padding-right: 150px; margin-left: 2px; margin-right: 2px; }
 
@@ -515,15 +539,29 @@ h4 {
 }
 
 @media screen and (max-device-width: 412px) {
- .logo { margin-left: 84px; width: 50%;}
- .table-container {
+    .logo { margin-left: 84px; width: 50%;}
+    .table-container {
         overflow-x: auto;
+    }
+    .tdproductos {
+        white-space: pre;    
+    }
+
+    .tablaproductos {
+        white-space: pre;    
     }
 }
 
 @media screen and (max-device-width: 375px) {
- .logo { margin-left: 65.5px; margin-right: 10px; width: 60%;}
- .table-container {
+    .logo { margin-left: 65.5px; margin-right: 10px; width: 60%;}
+    .table-container {
         overflow-x: auto;
+    }
+    .tdproductos {
+        white-space: pre;    
+    }
+
+    .tablaproductos {
+        white-space: pre;    
     }
 }

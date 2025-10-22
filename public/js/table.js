@@ -97,6 +97,7 @@ function generateTable(data) {
             
         });
         table.appendChild(row);
+        table.setAttribute('class', 'tablaproductos')
     });
     return table;
 }
