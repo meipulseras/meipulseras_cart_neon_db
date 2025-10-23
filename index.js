@@ -635,6 +635,7 @@ app.get('/cart', async (req, res) => {
         // var length = await getFromTable('cart', 'user_cart', 'username', user);
 
         var length = await redisClient.get(user);
+        const selecterRadio = await redisClient.get(user+'radiobutton');
 
         const items = cartNumeration(length, user);
 
@@ -681,7 +682,8 @@ app.get('/cart', async (req, res) => {
             array: array,
             count: items,
             subtotal: subtotal,
-            total: (subtotal + parseInt(jsonCart[0].envio))
+            total: (subtotal + parseInt(jsonCart[0].envio)),
+            radiobtn: selecterRadio
         };
 
         const renewStock = setInterval(async function(){
@@ -778,11 +780,13 @@ app.post('/envio', async (req, res) => {
                 item.envio = parseInt(regionPrice[0].blue_price);
                 // const set = `cart = '${JSON.stringify(jsonCart)}'`;
                 // await updateTable('user_cart', set, 'username', user);
+                await redisClient.set(user+'radiobutton', selectedOption);
                 await redisClient.set(user, JSON.stringify(jsonCart));
             } else {
                 item.envio = 0;
                 // const set = `cart = '${JSON.stringify(jsonCart)}'`;
                 // await updateTable('user_cart', set, 'username', user);
+                await redisClient.set(user+'radiobutton', selectedOption);
                 await redisClient.set(user, JSON.stringify(jsonCart));
             }
             
@@ -1057,6 +1061,8 @@ app.get('/confirmedpayment', async (req, res) => {
                 await updateTable('price_quantity_products', set, 'product_id', item.id);
                 
             }
+
+            await redisClient.del(user+'radiobutton');
 
             res.status(200).render('confirmed', data);
             
