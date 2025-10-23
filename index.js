@@ -22,6 +22,7 @@ import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
 import deleteFromTable from './middleware/queries/delete.js'
+import getFromTableOrder from './middleware/queries/selectOrder.js';
 
 const app = express();
 
@@ -466,7 +467,7 @@ app.get('/personal', async (req, res) => {
             return res.status(401).redirect('/');
         }
 
-        const compras = await getFromTable('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user);
+        const compras = await getFromTableOrder('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user, 'sale_date', 'DESC');
 
         const data = {
             username: user,
