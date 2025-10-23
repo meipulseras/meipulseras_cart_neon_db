@@ -920,6 +920,7 @@ app.post('/pagar', async (req, res) => {
 
 });
 
+//Resultado de compra FLOW
 app.post('/result', async (req, res) => {
 
     const apiKey = process.env.API_KEY;
@@ -997,6 +998,8 @@ app.post('/result', async (req, res) => {
             
             res.status(200).redirect('/confirmedpayment');
         
+        } else {
+            await redisClient.set(user, insertedCart[0].cart);
         }
         
     } catch (error) {
@@ -1004,18 +1007,18 @@ app.post('/result', async (req, res) => {
             error: "Hubo un error al procesar su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
         }
 
-        await redisClient.set(user, insertedCart[0].cart);
-
         res.status(500).render('notconfirmed', dataError);
     }
 });
 
+//Resultado MeiPulseras a clientes
 app.get('/confirmedpayment', async (req, res) => {
 
     const token = req.session.token;
     const user = verifyJWT(token);
 
     try {
+
         var order = await redisClient.get(user);
 
         if(order === null) {
@@ -1057,13 +1060,13 @@ app.get('/confirmedpayment', async (req, res) => {
 
             res.status(200).render('confirmed', data);
             
+        } else {
+            await redisClient.set(user, insertedCart[0].cart);
         }
     } catch (error) {
         const dataError = {
             error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
         }
-
-        await redisClient.set(user, insertedCart[0].cart);
 
         res.status(500).render('notconfirmed', dataError);
     }
