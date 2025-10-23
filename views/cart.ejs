@@ -3,7 +3,7 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=2.8">
+    <link rel="stylesheet" href="/css/style.css?v=2.9">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -66,7 +66,7 @@
     <br>
     <form action="/pagar" method="post">
         <div class="pagar">
-            <input id="botonpagar" class="cotiza pe lang" type="submit" value="PAGAR"></input>
+            <input id="botonpagar" class="cotiza pe lang" type="submit" value="PAGAR" disabled></input>
             <input name="total" value="<%= total %>" style="display: none;">
             <input name="subtotal" value="<%= subtotal %>" style="display: none;">
             <input name="shipping" value="<%= clientshipmentprice %>" style="display: none;">
@@ -86,6 +86,20 @@
         var rbtn = document.getElementById('data').innerText;
 
         document.getElementById(rbtn).checked = true;
+
+    }
+</script>
+<script>
+    function checked() {
+        var blue = document.getElementById('blue');
+        var zokko = document.getElementById('zokko');
+        var btnPagar = document.getElementById("botonpagar");
+        
+        if(blue.checked) {
+            btnPagar.disabled = false;
+        } else if (zokko.checked) {
+            btnPagar.disabled = false;
+        }
 
     }
 </script>   
