@@ -1046,6 +1046,7 @@ app.get('/confirmedpayment', async (req, res) => {
         if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
             // await deleteFromTable('user_cart', 'username', user);
 
+            await redisClient.del(user);
             await redisClient.del(user+'Order');
 
             var jsonCart = JSON.parse(insertedCart[0].cart);
