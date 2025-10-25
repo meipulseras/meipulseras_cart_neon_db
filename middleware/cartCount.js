@@ -6,10 +6,10 @@ function cartNumeration(cartLength, user){
 
             return jsonCart.length;
         } catch (error) {
-            return 0
+            return 0;
         }
     } else {
-        return 0
+        return '';
     }
 }
         
