@@ -999,7 +999,7 @@ app.post('/result', async (req, res) => {
             // const set1 = `commerce_order = '${response.output.commerceOrder}'`;
             // await updateTable('user_cart', set1, 'username', user);
 
-            await redisClient.set(user, response.output.commerceOrder);
+            await redisClient.set(user+'Order', response.output.commerceOrder);
             
             res.status(200).redirect('/confirmedpayment');
         
@@ -1024,7 +1024,7 @@ app.get('/confirmedpayment', async (req, res) => {
 
     try {
 
-        var order = await redisClient.get(user);
+        var order = await redisClient.get(user+'Order');
 
         if(order === null) {
             return res.status(401).redirect('/');
@@ -1046,7 +1046,7 @@ app.get('/confirmedpayment', async (req, res) => {
         if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
             // await deleteFromTable('user_cart', 'username', user);
 
-            await redisClient.del(user);
+            await redisClient.del(user+'Order');
 
             var jsonCart = JSON.parse(insertedCart[0].cart);
 
@@ -1074,6 +1074,8 @@ app.get('/confirmedpayment', async (req, res) => {
         const dataError = {
             error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
         }
+
+        await redisClient.del(user+'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
     }
