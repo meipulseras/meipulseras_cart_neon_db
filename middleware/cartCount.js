@@ -4,12 +4,14 @@ function cartNumeration(cartLength, user){
         try {
             var jsonCart = JSON.parse(cartLength);
 
+            console.log(jsonCart.length)
+
             return jsonCart.length;
         } catch (error) {
             return 0;
         }
     } else {
-        return '';
+        return 0;
     }
 }
         
