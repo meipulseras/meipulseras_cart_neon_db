@@ -887,8 +887,8 @@ app.post('/pagar', async (req, res) => {
         
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
-        const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid';
-        const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}`;
+        const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
+        const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
 
         const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
@@ -920,9 +920,6 @@ app.post('/pagar', async (req, res) => {
 
         res.status(500).render('notconfirmed', dataError);
     }
-
-    
-
 });
 
 //Resultado de compra FLOW
