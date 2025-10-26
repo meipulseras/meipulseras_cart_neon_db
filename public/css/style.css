@@ -533,12 +533,12 @@ h4 {
     .prodtitle { font-size: 1.5em; padding-left: 0px; padding-top: 0px; width: 100%; float: none;}
     .prodname { display: none;}
     .prodnamemobile { display: inline-block; text-align: center; width: 90%; padding-left: 5%; padding-right: 5%;}
-    .prodnum { padding-left: 0px; padding-top: 5px; padding-bottom: 5px; width: 100%; margin: 0px; display: inline-block; text-align: center;}
+    .prodnum { padding-left: 10%; padding-right: 10%; padding-top: 5px; padding-bottom: 5px; width: 80%; margin: 0px; display: inline-block; text-align: center;}
     .prodprice { width: 100%; display: inline-block; }
     .pricestock { text-align: center; width: 100%; padding-top: 30px;}
     .stock { width: 70%; padding-left: 0; padding-top: 40px; padding-bottom: 10px; margin-left: 0; float: left;}
     .grid-item { width: 125px; height: 214px;}
-    .cartbutton { text-align: center; width: 83%; padding-top: 20px;}
+    .cartbutton { text-align: center; width: 100%; padding-top: 20px; padding-left: 0%;}
     .fotiprod { padding-left: 15px;}
     .proddesc { width: 80%; padding-left: 10%; padding-right: 10%;}
     .h1 { font-size: 1.5rem; width: 100%; margin-left: auto;}
