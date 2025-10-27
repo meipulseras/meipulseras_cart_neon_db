@@ -493,7 +493,6 @@ h4 {
 
 
 @media screen and (max-device-width: 480px) {
-    div {border: 1px dotted green;}
     .lblprod, .lblprec { font-size: .8em;}
     .commentbox {width: 90%; height: 200px; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b;}
     .logomei { width: 200px; height: auto; padding-top: 30px;}
@@ -565,8 +564,6 @@ h4 {
     .tablaproductos {
         white-space: pre;    
     }
-
-    /* .container { width: 100%; padding-left: 2px; padding-right: 150px; margin-left: 2px; margin-right: 2px; } */
 
     .container { width: 80%; padding-left: 10%; padding-right: 10%;}
 
