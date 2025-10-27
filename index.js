@@ -24,6 +24,7 @@ import updateTable from './middleware/queries/update.js';
 import deleteFromTable from './middleware/queries/delete.js'
 import getFromTableOrder from './middleware/queries/selectOrder.js';
 import getSaleOrder from './middleware/queries/selectSaleOrder.js';
+import variables from './public/js/config.js';
 
 const app = express();
 
@@ -97,30 +98,30 @@ app.get('/', async (req, res) => {
         var data = {
             username: username,
             count: items,
-            prod_1: 'Pulseras para compartir',
-            prod_2: 'Amuleto protector',
-            prod_3: 'Pulseras para compartir',
-            prod_4: 'Pulsera macramé',
-            prod_5: 'Pulseras para compartir',
-            prod_6: 'Pulseras para compartir',
-            prod_7: 'Pulsera cuarzo rosa',
-            prod_8: 'Pulsera macramé',
-            prec_1: '6.500',
-            prec_2: '3.500',
-            prec_3: '6.500',
-            prec_4: '3.500',
-            prec_5: '5.500',
-            prec_6: '5.500',
-            prec_7: '5.500',
-            prec_8: '5.500',
-            imag_1: '/images/webp/1image.webp?v=2',
-            imag_2: '/images/webp/2image.webp?v=2',
-            imag_3: '/images/webp/3image.webp?v=2',
-            imag_4: '/images/webp/4image.webp?v=2',
-            imag_5: '/images/webp/5image.webp?v=2',
-            imag_6: '/images/webp/6image.webp?v=2',
-            imag_7: '/images/webp/7image.webp?v=2',
-            imag_8: '/images/webp/8image.webp?v=2'
+            prod_1: variables(1).product_name,
+            prod_2: variables(2).product_name,
+            prod_3: variables(3).product_name,
+            prod_4: variables(4).product_name,
+            prod_5: variables(5).product_name,
+            prod_6: variables(6).product_name,
+            prod_7: variables(7).product_name,
+            prod_8: variables(8).product_name,
+            prec_1: variables(1).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_2: variables(2).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_3: variables(3).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_4: variables(4).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_5: variables(5).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_6: variables(6).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_7: variables(7).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            prec_8: variables(8).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
+            imag_1: variables(1).product_image,
+            imag_2: variables(2).product_image,
+            imag_3: variables(3).product_image,
+            imag_4: variables(4).product_image,
+            imag_5: variables(5).product_image,
+            imag_6: variables(6).product_image,
+            imag_7: variables(7).product_image,
+            imag_8: variables(8).product_image
         };
 
         res.render('index', data);
@@ -438,10 +439,6 @@ app.post("/auth/forgot", async (req, res) => {
 //LOG OUT usuario LOGGED
 app.get('/auth/logout', async (req, res) => {
 
-    const token = req.session.token;
-
-    const user = verifyJWT(token);
-
     res.status(200).clearCookie('token', "", {
         path: "/"
     });
@@ -672,6 +669,14 @@ app.get('/cart', async (req, res) => {
 
         var array = JSON.stringify(jsonCart);
 
+        var envio;
+
+        if(JSON.stringify(jsonCart) === '[]') {
+            envio = 0;
+        } else {
+            envio = jsonCart[0].envio;
+        }
+
         const data = {
             username: user,
             clientname: clientName,
@@ -684,7 +689,7 @@ app.get('/cart', async (req, res) => {
             array: array,
             count: items,
             subtotal: subtotal,
-            total: (subtotal + parseInt(jsonCart[0].envio)),
+            total: (subtotal + parseInt(envio)),
             radiobtn: selecterRadio
         };
 
@@ -700,10 +705,9 @@ app.get('/cart', async (req, res) => {
             }
         }, 1000 * 60 * 15);
             
-        if(data.username == ''){
+        if(data.username === '' || data.total === 0){
+            await redisClient.del(user+'radiobutton');
             return res.status(401).redirect('/');
-        } else if(length.length == 2 && length == "[]") {
-            res.redirect('/');
         } else {
             res.render('cart', data);
         }
@@ -1118,11 +1122,11 @@ app.get('/producto/:productnumber', async (req, res) => {
 
         const prodtosell = await getProductDetail(numproduct);
 
-        const image = prodtosell.product_image;
-        const id = prodtosell.product_id;
-        const name = prodtosell.product_name;
-        const description = prodtosell.product_description;
-        const price = prodtosell.product_price;
+        const image = variables(numproduct).product_image;
+        const id = variables(numproduct).product_id;
+        const name = variables(numproduct).product_name;
+        const description = variables(numproduct).product_description;
+        const price = variables(numproduct).product_price;
         const stock = prodtosell.product_quantity;
 
         var prod = {
@@ -1193,13 +1197,13 @@ app.post('/producto/', async (req, res) => {
         var cartItems = await getProductDetail(prodnumber);
 
         let datosVenta = {
-            imagen: cartItems.product_image,
-            nombre: cartItems.product_name,
-            precio: parseInt(cartItems.product_price),
+            imagen: variables(prodnumber).product_image,
+            nombre: variables(prodnumber).product_name,
+            precio: parseInt(variables(prodnumber).product_price),
             cantidad: prodquantity,
             stock: parseInt(cartItems.product_quantity),
             envio: 0,
-            id: cartItems.product_id
+            id: variables(prodnumber).product_id
         };
         
         cart.push(datosVenta);
