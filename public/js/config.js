@@ -26,7 +26,7 @@ const arrarVariables = {
     4: {
         product_image: "/images/webp/4image.webp",
         product_id: "PrMP4",
-        product_name: "Pulsera macramé individual",
+        product_name: "Pulsera macramé",
         product_description: "Elaborada a mano con la técnica de macramé, utilizando hilo chino, dije y aplicaciones metálicas.",
         product_price: "3500"
 
@@ -58,7 +58,7 @@ const arrarVariables = {
     8: {
         product_image: "/images/webp/8image.webp",
         product_id: "PrMP8",
-        product_name: "Pulsera macramé cerámica",
+        product_name: "Pulsera macramé",
         product_description: "Hecha a mano con técnica de macramé espiral, utilizando hilo chino, figura de cerámica y aplicaciones de acero.",
         product_price: "5500"
 
