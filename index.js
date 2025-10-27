@@ -23,6 +23,7 @@ import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
 import deleteFromTable from './middleware/queries/delete.js'
 import getFromTableOrder from './middleware/queries/selectOrder.js';
+import getSaleOrder from './middleware/queries/selectSaleOrder.js';
 
 const app = express();
 
@@ -840,9 +841,24 @@ app.post('/pagar', async (req, res) => {
         const urlFlow = process.env.URI_FLOW;
         const createPayment = urlFlow + "/payment/create";
 
+        const orderDB = await getSaleOrder();
+
+        var order = "";
+
+        if(JSON.stringify(orderDB) === '[]' || JSON.stringify(orderDB).trim() === '') {
+            order = "ORDER1";
+        } else {
+            const stringValue = orderDB[0].sale_order;
+            let sinOrder = stringValue.replace('ORDER', '');
+            const intValue = parseInt(sinOrder);
+          
+            const newIntValue = 1 + intValue;
+            order = "ORDER" + newIntValue.toString();
+        }
+
         const amount = totalToPay;
         const apiKey =  process.env.API_KEY;
-        const commerceOrder = Randomstring.generate(7);
+        const commerceOrder = order;
         const currency = "CLP";
         const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
         const paymentMethod = "9";
@@ -884,15 +900,13 @@ app.post('/pagar', async (req, res) => {
                         }
                     });
 
-        
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
-        const values = `'${0}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
-
+        const values = `'${order}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
         const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-        if(insertedCart.toString().trim() === ''){
+        if(JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === ''){
             await intoTable('sales', columns, values);
         } else {
             const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
@@ -916,7 +930,14 @@ app.post('/pagar', async (req, res) => {
             error: "Hubo un error al iniciar el proceso de pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
         }
 
-        await redisClient.set(user, insertedCart[0].cart);
+        const saleDate = new Date();
+        const formattedDate = saleDate.toISOString().split('T')[0];
+
+        await redisClient.del(user+'radiobutton');
+
+        // const insertedCartError = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+
+        // await redisClient.set(user, insertedCartError[0].cart);
 
         res.status(500).render('notconfirmed', dataError);
     }
