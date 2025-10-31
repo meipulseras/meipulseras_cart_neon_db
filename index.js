@@ -903,7 +903,7 @@ app.post('/pagar', async (req, res) => {
                             }
                         }
                     });
-
+        
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
