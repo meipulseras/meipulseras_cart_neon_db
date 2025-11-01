@@ -2,13 +2,13 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.0">
+    <link rel="stylesheet" href="/css/style.css?v=3.1">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <title><%= prodname %></title>
 </head>
-<body>
+<body onload="valorCero()">
     <div class="nav" id="nav">
         <ul class="navbar" id="navbar">
             <li class="links"><a class="logosredes" href="/"> 
@@ -45,6 +45,7 @@
                 <div class="pricestock">
                     <p class="prodnum"><b>$<%= prodprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></b></p>
                     <p id="stock" class="stock"><b>Disponiblidad: <%= prodstock %></b></p>
+                    <p id="stockCero" class="stockCero" style="display: none;"><b>Renovación de stock próximamente.</b></p>
                 </div>
             </div>
             <div class="prodnum">
@@ -104,6 +105,17 @@
     }
 </script>
 <script>
+    function valorCero() {
+        const cero = document.getElementById('stock').innerText;
+
+        console.log(cero);
+
+        var reponerStock = document.getElementById('stockCero');
+
+        if(cero === 'DISPONIBLIDAD: 0'){
+            reponerStock.style.display = 'flex';
+        }
+    }
     
 </script>
 </body>
