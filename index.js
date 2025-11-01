@@ -845,24 +845,11 @@ app.post('/pagar', async (req, res) => {
         const urlFlow = process.env.URI_FLOW;
         const createPayment = urlFlow + "/payment/create";
 
-        const orderDB = await getSaleOrder();
-
-        var order = "";
-
-        if(JSON.stringify(orderDB) === '[]' || JSON.stringify(orderDB).trim() === '') {
-            order = "ORDER1";
-        } else {
-            const stringValue = orderDB[0].sale_order;
-            let sinOrder = stringValue.replace('ORDER', '');
-            const intValue = parseInt(sinOrder);
-          
-            const newIntValue = 1 + intValue;
-            order = "ORDER" + newIntValue.toString();
-        }
+        var order = Randomstring.generate(9);
 
         const amount = totalToPay;
         const apiKey =  process.env.API_KEY;
-        const commerceOrder = Randomstring.generate(9);
+        const commerceOrder = order;
         const currency = "CLP";
         const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
         const paymentMethod = "9";
