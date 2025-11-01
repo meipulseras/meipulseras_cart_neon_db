@@ -44,6 +44,12 @@
     
 }
 
+.stockCero { 
+    font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none;
+    text-transform: uppercase; font-size: 1em; font-weight: thin; float: left; padding-left: 30px; padding-right: 5%;
+     width: 85%;
+}
+
 .prodname, .prodprice { display: flex;}
 .prodcantidad { width: 12%;}
 
@@ -537,6 +543,7 @@ h4 {
     .prodprice { width: 100%; display: inline-block; }
     .pricestock { text-align: center; width: 100%; padding-top: 30px;}
     .stock { width: 70%; padding-left: 0; padding-top: 40px; padding-bottom: 10px; margin-left: 0; float: left;}
+    .stockCero {width: 70%; padding-left: 15%; padding-right: 15%; }
     .grid-item { width: 125px; height: 214px;}
     .cartbutton { text-align: center; width: 100%; padding-top: 20px; padding-left: 0%;}
     .fotiprod { padding-left: 15px;}

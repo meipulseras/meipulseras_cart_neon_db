@@ -1008,10 +1008,11 @@ app.get('/confirmedpayment', async (req, res) => {
             return res.status(401).redirect('/');
         }
 
-        var array = await getFromTable('cart, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
+        var array = await getFromTable('cart, subtotal, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
 
         const data = {
             array: array[0].cart,
+            subtotal: array[0].subtotal,
             envio: array[0].shipping,
             total: array[0].total
         }
