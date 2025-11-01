@@ -657,9 +657,9 @@ app.get('/cart', async (req, res) => {
 
         var subtotal = 0;
 
-        for(let i = 0; i < jsonCart.length; i++){
+        for(let i = 0; i < jsonCart.carrito.length; i++){
 
-            var object = jsonCart[i];
+            var object = jsonCart.carrito[i];
 
             var stock = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', object.id); 
         
@@ -667,15 +667,9 @@ app.get('/cart', async (req, res) => {
             object.stock = stock[0].product_quantity;
         }
 
-        var array = JSON.stringify(jsonCart);
+        var array = JSON.stringify(jsonCart.carrito);
 
-        var envio;
-
-        if(JSON.stringify(jsonCart) === '[]') {
-            envio = 0;
-        } else {
-            envio = jsonCart[0].envio;
-        }
+        var envio = jsonCart.envio;
 
         const data = {
             username: user,
@@ -692,21 +686,10 @@ app.get('/cart', async (req, res) => {
             total: (subtotal + parseInt(envio)),
             radiobtn: selecterRadio
         };
-
-        const renewStock = setInterval(async function(){
-            for(let i = 0; i < jsonCart.length; i++){
-
-                var object = jsonCart[i];
-
-                var stock = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', object.id);
-        
-                object.stock = stock[0].product_quantity;   
-        
-            }
-        }, 1000 * 60 * 15);
-            
-        if(data.username === '' || data.total === 0){
+      
+        if(array.length === 2 && array === '[]' || data.username === ''){
             await redisClient.del(user+'radiobutton');
+            await redisClient.del(user);
             return res.status(401).redirect('/');
         } else {
             res.render('cart', data);
@@ -731,24 +714,20 @@ app.post('/cart', async (req, res) => {
 
         var cart = await redisClient.get(user);
 
-        var jsonCart = JSON.parse(cart);   
+        var jsonCart = JSON.parse(cart);
+        
+        for(let i = 0; i < jsonCart.carrito.length; i++){
 
-        for(let i = 0; i < jsonCart.length; i++){
-
-            var item = jsonCart[i];
+            var item = jsonCart.carrito[i];
         
             if(item.id == idtochange) {
                 if(prodqty > 0) {
                     item.cantidad = prodqty;
-                    // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                    // await updateTable('user_cart', set, 'username', user);
                     await redisClient.set(user, JSON.stringify(jsonCart));
                     break;
                 } else {
-                    const index = jsonCart.indexOf(item);                
-                    jsonCart.splice(index, 1);
-                    // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                    // await updateTable('user_cart', set, 'username', user);
+                    const index = jsonCart.carrito.indexOf(item);                
+                    jsonCart.carrito.splice(index, 1);
                     await redisClient.set(user, JSON.stringify(jsonCart));
                 }
             }
@@ -778,26 +757,16 @@ app.post('/envio', async (req, res) => {
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
 
-        for(let x = 0; x < jsonCart.length; x++){
-
-            var item = jsonCart[x];
-
-            if(selectedOption == 'blue'){
-                item.envio = parseInt(regionPrice[0].blue_price);
-                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                // await updateTable('user_cart', set, 'username', user);
-                await redisClient.set(user+'radiobutton', selectedOption);
-                await redisClient.set(user, JSON.stringify(jsonCart));
-            } else {
-                item.envio = 0;
-                // const set = `cart = '${JSON.stringify(jsonCart)}'`;
-                // await updateTable('user_cart', set, 'username', user);
-                await redisClient.set(user+'radiobutton', selectedOption);
-                await redisClient.set(user, JSON.stringify(jsonCart));
-            }
+        if(selectedOption == 'blue'){
+            jsonCart.envio = parseInt(regionPrice[0].blue_price);
+            await redisClient.set(user+'radiobutton', selectedOption);
+            await redisClient.set(user, JSON.stringify(jsonCart));
+        } else {
+            jsonCart.envio = 0;
+            await redisClient.set(user+'radiobutton', selectedOption);
+            await redisClient.set(user, JSON.stringify(jsonCart));
+        }
             
-        }   
-
         res.redirect('/cart');
         
     } catch (error) {
@@ -833,9 +802,9 @@ app.post('/pagar', async (req, res) => {
 
         var concepto = [];
 
-        for(let x = 0; x < carro.length; x++){
+        for(let x = 0; x < carro.carrito.length; x++){
 
-            var item = carro[x];
+            var item = carro.carrito[x];
 
             concepto.push(item.nombre + ' x ' + item.cantidad)
             
@@ -894,7 +863,7 @@ app.post('/pagar', async (req, res) => {
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
-        const values = `'${order}', '${JSON.stringify(carro)}', ${subtotalToPay}, ${carro[0].envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
+        const values = `'${order}', '${JSON.stringify(carro.carrito)}', ${subtotalToPay}, ${carro.envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
         const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
         if(JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === ''){
@@ -902,10 +871,10 @@ app.post('/pagar', async (req, res) => {
         } else {
             const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
-            if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro && insertedCart[0].total !== totalToPay){
-                const set = `cart = '${JSON.stringify(carro)}',
+            if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro.carrito && insertedCart[0].total !== totalToPay){
+                const set = `cart = '${JSON.stringify(carro.carrito)}',
                             subtotal = '${subtotalToPay}', 
-                            shipping = '${carro[0].envio}', 
+                            shipping = '${carro.envio}', 
                             total = '${totalToPay}'`;
 
                 await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
@@ -1162,7 +1131,7 @@ app.post('/producto/', async (req, res) => {
         if(length === undefined || length === null) {
             cart = [];
         } else {
-            cart = JSON.parse(length);
+            cart = JSON.parse(length).carrito;
         }
 
         for(let x = 0; x <= cart.length; x++){
@@ -1183,19 +1152,23 @@ app.post('/producto/', async (req, res) => {
 
         var cartItems = await getProductDetail(prodnumber);
 
-        let datosVenta = {
+        let datosVenta =  {
             imagen: variables(prodnumber).product_image,
             nombre: variables(prodnumber).product_name,
             precio: parseInt(variables(prodnumber).product_price),
             cantidad: prodquantity,
             stock: parseInt(cartItems.product_quantity),
-            envio: 0,
             id: variables(prodnumber).product_id
         };
         
         cart.push(datosVenta);
 
-        var stringfiedCart = JSON.stringify(cart);
+        let carro = {
+            envio: 0,
+            carrito: cart
+        }
+
+        var stringfiedCart = JSON.stringify(carro);
 
         await redisClient.set(username, stringfiedCart);
 

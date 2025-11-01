@@ -2,7 +2,7 @@ function cartNumeration(cartLength, user){
 
     if(cartLength !== null && user !== '' && cartLength !== '[]' ) {
         try {
-            var jsonCart = JSON.parse(cartLength);
+            var jsonCart = JSON.parse(cartLength).carrito;
 
             return jsonCart.length;
         } catch (error) {
