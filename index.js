@@ -862,7 +862,7 @@ app.post('/pagar', async (req, res) => {
 
         const amount = totalToPay;
         const apiKey =  process.env.API_KEY;
-        const commerceOrder = order;
+        const commerceOrder = Randomstring.generate(9);
         const currency = "CLP";
         const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
         const paymentMethod = "9";
