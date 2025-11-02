@@ -627,6 +627,8 @@ app.post('/delete', async (req, res) => {
 //Ruta carrito - Mostrar items en carrito
 app.get('/cart', async (req, res) => {
 
+    // res.setHeader('Cache-Control', 'no-cache');
+
     try {
         const token = req.session.token;
         const user = verifyJWT(token);
@@ -634,6 +636,7 @@ app.get('/cart', async (req, res) => {
         // var length = await getFromTable('cart', 'user_cart', 'username', user);
 
         var length = await redisClient.get(user);
+
         const selecterRadio = await redisClient.get(user+'radiobutton');
 
         const items = cartNumeration(length, user);
@@ -657,6 +660,10 @@ app.get('/cart', async (req, res) => {
 
         var subtotal = 0;
 
+        if(jsonCart === undefined || jsonCart === null){
+            return res.status(401).redirect('/');
+        }
+
         for(let i = 0; i < jsonCart.carrito.length; i++){
 
             var object = jsonCart.carrito[i];
@@ -671,6 +678,8 @@ app.get('/cart', async (req, res) => {
 
         var envio = jsonCart.envio;
 
+        var newTotal = (subtotal + parseInt(envio));
+
         const data = {
             username: user,
             clientname: clientName,
@@ -683,7 +692,7 @@ app.get('/cart', async (req, res) => {
             array: array,
             count: items,
             subtotal: subtotal,
-            total: (subtotal + parseInt(envio)),
+            total: newTotal,
             radiobtn: selecterRadio
         };
       
@@ -1129,10 +1138,13 @@ app.post('/producto/', async (req, res) => {
 
         var cart = [];
 
+        var shippment = 0;
+
         if(length === undefined || length === null) {
             cart = [];
         } else {
             cart = JSON.parse(length).carrito;
+            shippment = JSON.parse(length).envio;
         }
 
         for(let x = 0; x <= cart.length; x++){
@@ -1165,7 +1177,7 @@ app.post('/producto/', async (req, res) => {
         cart.push(datosVenta);
 
         let carro = {
-            envio: 0,
+            envio: shippment,
             carrito: cart
         }
 
