@@ -1,54 +1,34 @@
 import compression from 'compression';
-import { Resend } from 'resend';
 import cors from 'cors';
 import express from 'express';
 import session from 'express-session';
 import { RedisStore } from 'connect-redis';
-import { createClient } from 'redis';
-import jwt from 'jsonwebtoken';
 import path from 'path';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
-import { comparePassword, hashPassword } from './hash/hashing.js';
-import { toZonedTime } from 'date-fns-tz';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import verifyJWT from "./middleware/verifyJWT.js";
-import getProductDetail from './middleware/queries/productsDetails.js'
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-import deleteFromTable from './middleware/queries/delete.js'
-import getFromTableOrder from './middleware/queries/selectOrder.js';
-import getSaleOrder from './middleware/queries/selectSaleOrder.js';
 import variables from './public/js/config.js';
+import contact from './contactRoutes.js';
+import login from './loginRoutes.js';
+import info from './infoRoutes.js';
+import producto from './productRoutes.js'
+import redisClientInstance from './middleware/redisClient.js';
 
 const app = express();
 
 app.use(compression());
 
-const redisClient = createClient({
-    url: process.env.REDIS_URL,
-    socket: {
-        reconnectStrategy: (retries) => {
-            if(retries >= 10) {
-                return new Error('Se completó la cantidad límite de reconexiones');
-            }
-
-            return Math.min(retries * 100, 5000);
-        }
-    }
-});
-
-redisClient.on('error', (err) => console.log('Error Cliente Redis', err));
-redisClient.connect().catch(console.error);
+const redisClient = redisClientInstance;
 
 const redisStore = new RedisStore( { client: redisClient });
-
-const resend = new Resend(process.env.RESEND_KEY);
 
 app.use(session({
     store: redisStore,
@@ -77,6 +57,10 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.set('views', path.join(__dirname + '/views/'));
 app.set('view engine', 'ejs');
+app.use('/user', info);
+app.use('/auth', login);
+app.use('/page', contact);
+app.use('/', producto);
 
 // //Para que pesque imagenes y estilos
 app.use(express.static(__dirname + '/public'));
@@ -88,8 +72,6 @@ app.get('/', async (req, res) => {
         const token = req.session.token;
         
         const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
-
-        // var length = await getFromTable('cart', 'user_cart', 'username', username);
 
         var length = await redisClient.get(username);
 
@@ -132,508 +114,12 @@ app.get('/', async (req, res) => {
     }
 });
 
-//Carga pagina LOGIN
-app.get('/login', (req, res) => {
-    const data = {no: 'no'};
-    res.render('login', data);
-});
-
-//Ruta login - Acceso de usuario
-app.post("/login", async (request, response) => {
-    const credential = request.body.user;
-    const password = request.body.pass;
-
-    try {
-        const credentialType = credential.includes('@') ? 'mail' : 'username';
-
-        const user = await getFromTable('username, password, mail', 'user_info', credentialType, credential);
-
-        if(!comparePassword(password, user[0].password)){
-            const data = {no: 'yes'};
-            return response.render('login', data);
-        }
-
-        //Generar Token JWT
-        const token = jwt.sign(
-            { id: user[0].mail, username: user[0].username },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: '6h'
-            }
-        );
-
-        request.session.token = token;
-
-        response.redirect('/personal');
-
-    } catch (error) {
-        console.log(error)
-        response.status(500).redirect('/login');    
-    }
-});
-
-const newRut = (rut) => {
-    const numRut = rut.indexOf('-');
-    const numbers = rut.substring(0, numRut - 3);
-    const numbers3 = rut.substring(numRut - 3, numRut);
-    const verifNum = rut.substring(numRut + 1, numRut + 2);
-
-    var newNumbers = '';
-
-    for(const char of numbers) {
-        newNumbers = newNumbers + '*';
-    }
-
-    const newRut = newNumbers + numbers3 + '-' + verifNum;
-
-    return newRut;
-}
-
-const newMail = (mail) => {
-    const arrobaMail = mail.indexOf('@');
-    const mailInit = mail.substring(0, arrobaMail - 3);
-    const mail3 = mail.substring(arrobaMail - 3, arrobaMail);
-    const afterArroba = mail.substring(arrobaMail + 1, mail.length);
-
-    var newMailInit = '';
-
-    for(const char of mailInit) {
-        newMailInit = newMailInit + '*';
-    }
-
-    const newmail = newMailInit + mail3 + '@' + afterArroba;
-
-    return newmail;
-}
-
-//Ruta Signup - Info de Usuario(s)
-app.get("/user/info", async (req, res) => {
-
-    const token = req.session.token;
-    
-    try {
-        const data = verifyJWT(token);
-
-        // var length = await getFromTable('cart', 'user_cart', 'username', data);
-
-        var length = await redisClient.get(data);
-
-        const items = cartNumeration(length, data);
-
-        if(data == ''){
-            return res.status(401).redirect("/auth/logout");
-        }
-
-        const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
-
-        const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
-
-        const dataUser = {
-            fullname: datos[0].fullname,
-            birthdate: datos[0].birthdate.toLocaleDateString('es-CL', dateOptions).replace(/\//g, '-'),
-            address: datos[0].address,
-            comune: datos[0].comune,
-            region: datos[0].region,
-            country: datos[0].country,
-            phone: datos[0].phone,
-            mail: newMail(datos[0].mail),
-            rut: newRut(datos[0].rut),
-            count: items,
-            problem: 'no'
-        }
-        
-        res.render('userinfo', dataUser);
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).redirect('/');
-    }
-
-});
-
-//Actualizar datos usuario LOGGED
-app.post("/user/info", async (req, res) => {
-
-    const onlyLettersSpaces = /^[a-zA-Z ]+$/;
-    const onlyLettersNumbersSpaces = /^[a-zA-Z0-9 ]+$/;
-    const plusNumbers = /^\+?\d+$/;
-
-    const token = req.session.token;
-
-    const fullnameRB = req.body.fullname;
-    const addressRB = req.body.address;
-    const comuneRB = req.body.comune;
-    const regionRB = req.body.region;
-    const countryRB = req.body.country;
-    const phoneRB = req.body.phone;
-
-    try {
-
-        const data = verifyJWT(token);
-
-        var length = await redisClient.get(data);
-
-        const items = cartNumeration(length, data);
-        
-        if(data == ''){
-            return res.status(401).redirect("/auth/logout");
-        }
-
-        var erroresValidar = 0;
-
-        if(!onlyLettersSpaces.test(fullnameRB)){
-            erroresValidar++;
-        }
-
-        if(!onlyLettersNumbersSpaces.test(addressRB)){
-            erroresValidar++;
-        }
-
-        if(!onlyLettersSpaces.test(comuneRB)){
-            erroresValidar++;
-        }
-        
-        if(!onlyLettersSpaces.test(countryRB)){
-            erroresValidar++;
-        }
-
-        if(!plusNumbers.test(phoneRB)){
-            erroresValidar++;
-        }
-
-        async function actualizar(code){
-            const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
-
-            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
-
-            const userData = {
-                fullname: datos[0].fullname,
-                birthdate: datos[0].birthdate.toLocaleDateString('es-CL', dateOptions).replace(/\//g, '-'),
-                address: datos[0].address,
-                comune: datos[0].comune,
-                region: datos[0].region,
-                country: datos[0].country,
-                phone: datos[0].phone,
-                mail: newMail(datos[0].mail),
-                rut: newRut(datos[0].rut),
-                count: items,
-                problem: code
-            }
-            
-            return res.render('userinfo', userData);
-        }   
-
-        if(erroresValidar === 0) {
-            const set = `fullname = '${fullnameRB}', 
-                address = '${addressRB}', 
-                comune = '${comuneRB}', 
-                region = '${regionRB}',
-                country = '${countryRB}', 
-                phone = '${phoneRB}'`;
-
-            await updateTable('user_info', set, 'username', data);
-
-            actualizar('ok');
-        } else {
-            actualizar('yes');
-            
-        }
-        
-    } catch (error) {
-        res.status(500).redirect('/');
-    }
-
-});
-
-//Nuevo password
-app.post("/user/newpass", async (req, res) => {
-
-    const oldpass = req.body.oldpass;
-    const newpass = req.body.newpass;
-    const token = req.session.token;
-
-    try {
-        const data = verifyJWT(token);
-
-        if(data == ''){
-            return res.status(401).redirect("/auth/logout");
-        }
-
-        const user = await getFromTable('password', 'user_info', 'username', data);
-
-        var password = '';
-
-        if(comparePassword(oldpass, user[0].password)){
-            password = hashPassword(newpass);
-        }
-
-        const set = `password = '${password}'`;
-
-        await updateTable('user_info', set, 'username', data);
-
-        return res.status(201).redirect("/auth/logout");
-
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).redirect('/');
-    }
-});
-
-//Acceso recuperación password
-app.get('/forgot', (req, res) => {
-
-    const data = {no: 'no'};
-    res.render('forgot', data);
-});
-
-//Recuperación password
-app.post("/auth/forgot", async (req, res) => {
-    try {
-        const username = req.body.user;
-        const email = req.body.mail;
-
-        const user = await getFromTable('mail', 'user_info', 'username', username);
-
-        var random = '';
-
-        if(user[0].mail == email){
-            random = Randomstring.generate(7);
-        } else {
-            const data = {no: 'yes'};
-            return res.render('forgot', data);
-        }
-
-        const password = hashPassword(random);
-
-        const set = `password = '${password}'`;
-
-        await updateTable('user_info', set, 'username', username);
-
-        resend.emails.send({
-            from: 'contacto@meipulseras.cl',
-            to: email,
-            subject: 'Recuperación de contraseña',
-            html: '<br>'+
-                '<br>'+      
-                '<div style="text-align: center;">'+
-                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                '</div>'+
-                '<br>'+
-                '<br>'+
-                '<div style="text-align: center;">'+
-                '<p style="font-family: Quicksand;">Su contraseña provisoria es: ' + random + '</p>'+
-                    '<p style="font-family: Quicksand;">Por favor, inicie sesión y cambie la contraseña provisoria por una nueva.</p>'+
-                '</div>'+
-                '<br>'+
-                '<br>'
-        });
-        
-        return res.status(201).redirect('/');
-        
-    } catch (error) {
-        res.status(500).redirect('/');
-    }
-});
-
-//LOG OUT usuario LOGGED
-app.get('/auth/logout', async (req, res) => {
-
-    res.status(200).clearCookie('token', "", {
-        path: "/"
-    });
-    
-    req.session.destroy(function (err) {
-        res.redirect('/');
-    });
-});
-
-//Informacion personal de usuario LOGGED
-app.get('/personal', async (req, res) => {
-
-    try {
-        const token = req.session.token;
-        const user = verifyJWT(token);
-        
-        // var length = await getFromTable('cart', 'user_cart', 'username', user);
-
-        var length = await redisClient.get(user);
-
-        const items = cartNumeration(length, user);
-
-        if(user == ''){
-            return res.status(401).redirect('/');
-        }
-
-        const compras = await getFromTableOrder('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user, 'sale_date', 'DESC');
-
-        const data = {
-            username: user,
-            array: JSON.stringify(compras),
-            count: items
-        };
-
-        res.render('personal', data);
-        
-
-    } catch (error) {
-        res.status(500).redirect('/');
-    }
-});
-
-//Ruta Signup - Formulario registro usuario
-app.get('/signup', async (req, res) => {
-
-    try {
-
-        const region = await getFromTable('region_name', 'regions', null, null);
-
-        const data = {
-            registrado: 'no',
-            region: JSON.stringify(region)
-        }
-
-        res.render('register', data);
-    } catch (error) {
-        res.status(500).redirect('/');
-    }
-});
-
-//Ruta Signup - Registro de Usuario(s)
-app.post("/signup", async (req, res) => {
-    try {
-
-        const onlyLettersSpaces = /^[a-zA-Z ]+$/;
-        const onlyLettersNumbers = /^[a-zA-Z0-9]+$/;
-        const onlyLettersNumbersSpaces = /^[a-zA-Z0-9 ]+$/;
-        const plusNumbers = /^\+?\d+$/;
-
-        const regiones = await getFromTable('region_name', 'regions', null, null);
-
-        const username = req.body.user;
-        const mail = req.body.mail;
-        const rut = req.body.rut;
-        const password = hashPassword(req.body.pass);
-        const fullname = req.body.fullname;
-        const birthdate = req.body.birthdate;
-        const address = req.body.address;
-        const comune = req.body.comune;
-        const region = req.body.region;
-        const country = req.body.country;
-        const phone = req.body.phone;
-
-        function errorValidarDatos(code) {
-            const data = {
-                registrado: code,
-                region: JSON.stringify(regiones)
-            }
-
-            res.render('register', data);
-        }
-
-        const userExists = await getFromTable('username', 'user_info', 'username', username);
-        const mailExists = await getFromTable('mail', 'user_info', 'mail', mail);
-
-        var erroresValidar = 0;
-
-        if(!onlyLettersNumbers.test(username)){
-            erroresValidar++;
-        }
-
-        if(!onlyLettersSpaces.test(fullname)){
-            erroresValidar++;
-        }
-
-        if(!onlyLettersNumbersSpaces.test(address)){
-            erroresValidar++;
-        }
-
-        if(!onlyLettersSpaces.test(comune)){
-            erroresValidar++;
-        }
-        
-        if(!onlyLettersSpaces.test(country)){
-            erroresValidar++;
-        }
-
-        if(!plusNumbers.test(phone)){
-            erroresValidar++;
-        }
-
-        if(userExists.toString().trim() !== '' 
-            && userExists[0].username.toString().toUpperCase() === username.toString().toUpperCase() ||
-            mailExists.toString().trim() !== '' && mailExists[0].mail.toString().toUpperCase() === mail.toString().toUpperCase()) {
-
-            erroresValidar = erroresValidar + 10;
-        }
-
-        if(erroresValidar == 0) {
-            const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
-
-            const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}', '${rut}'`;
-
-            await intoTable("user_info", columns, values);
-
-            resend.emails.send({
-                from: 'contacto@meipulseras.cl',
-                to: mail,
-                subject: 'Registro exitoso, ' + username,
-                html: '<br>'+
-                    '<br>'+      
-                    '<div style="text-align: center;">'+
-                        '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                    '</div>'+
-                    '<br>'+
-                    '<br>'+
-                    '<div style="text-align: center;">'+
-                    '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
-                        '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
-                        '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>'+
-                    '</div>'+
-                    '<br>'+
-                    '<br>'
-            });
-        
-            return res.status(201).redirect('/');
-        } else if(erroresValidar == 10){
-            errorValidarDatos('yes');
-        } else if(erroresValidar >= 10){ 
-            errorValidarDatos('yes+invalidregister');
-        } else {
-            errorValidarDatos('invalidregister');
-        }
-         
-    } catch (error) {
-        console.log(error)
-        res.status(500).redirect('/');
-    }
-});
-
-//Delete - elimina registro de usuario
-app.post('/delete', async (req, res) => {
-
-    const token = req.session.token;
-    const user = verifyJWT(token);
-
-    try {
-        const deleteUser = await deleteFromTable('user_info', 'username', user);
-
-        return res.status(200).redirect('/auth/logout');
-    } catch (error) {
-        res.status(500).redirect('/');
-    }
-});
-
 //Ruta carrito - Mostrar items en carrito
 app.get('/cart', async (req, res) => {
 
-    // res.setHeader('Cache-Control', 'no-cache');
-
     try {
         const token = req.session.token;
         const user = verifyJWT(token);
-
-        // var length = await getFromTable('cart', 'user_cart', 'username', user);
 
         var length = await redisClient.get(user);
 
@@ -719,7 +205,6 @@ app.post('/cart', async (req, res) => {
     const user = verifyJWT(token);
        
     try {
-        // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
         var cart = await redisClient.get(user);
 
@@ -757,7 +242,6 @@ app.post('/envio', async (req, res) => {
     const user = verifyJWT(token);
        
     try {
-        // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
         var cart = await redisClient.get(user);
 
@@ -801,8 +285,6 @@ app.post('/pagar', async (req, res) => {
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
-
-    // var cart = await getFromTable('cart', 'user_cart', 'username', user);
 
     try {
 
@@ -904,10 +386,6 @@ app.post('/pagar', async (req, res) => {
 
         await redisClient.del(user+'radiobutton');
 
-        // const insertedCartError = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
-
-        // await redisClient.set(user, insertedCartError[0].cart);
-
         res.status(500).render('notconfirmed', dataError);
     }
 });
@@ -983,9 +461,6 @@ app.post('/result', async (req, res) => {
 
             await updateTable('sales', set, comp1, user);
 
-            // const set1 = `commerce_order = '${response.output.commerceOrder}'`;
-            // await updateTable('user_cart', set1, 'username', user);
-
             await redisClient.set(user+'Order', response.output.commerceOrder);
             
             res.status(200).redirect('/confirmedpayment');
@@ -1032,9 +507,9 @@ app.get('/confirmedpayment', async (req, res) => {
         const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
 
         if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
-            // await deleteFromTable('user_cart', 'username', user);
 
             await redisClient.del(user);
+            
             await redisClient.del(user+'Order');
 
             var jsonCart = JSON.parse(insertedCart[0].cart);
@@ -1068,215 +543,6 @@ app.get('/confirmedpayment', async (req, res) => {
 
         res.status(500).render('notconfirmed', dataError);
     }
-});
-
-//Ruta PRODUCTO - Requiere LOGGED
-app.get('/producto/:productnumber', async (req, res) => {
-
-    const numproduct = req.params['productnumber'];
-    const token = req.session.token;
-
-    try {
-
-        const data = verifyJWT(token) == '' ? '' : verifyJWT(token);
-
-        // var length = await getFromTable('cart', 'user_cart', 'username', data);
-
-        var length = await redisClient.get(data);
-
-        const items = cartNumeration(length, data);  
-
-        const prodtosell = await getProductDetail(numproduct);
-
-        const image = variables(numproduct).product_image;
-        const id = variables(numproduct).product_id;
-        const name = variables(numproduct).product_name;
-        const description = variables(numproduct).product_description;
-        const price = variables(numproduct).product_price;
-        const stock = prodtosell.product_quantity;
-
-        var prod = {
-            username: data,
-            count: items,
-            prodid: id,
-            prodimage: image,
-            prodname: name,
-            proddescription: description,
-            prodprice: price,
-            prodstock: stock,
-            prodnumber: numproduct
-        }
-
-        res.render('producto', prod);
-        
-    } catch (error) {
-        console.log(error)
-        res.status(500).redirect('/');
-    }    
-
-});
-
-app.post('/producto/', async (req, res) => {
-
-    const token = req.session.token;
-    let prodquantity = parseInt(req.body.prodquantity);
-    const prodnumber = req.body.prodnumber;
-
-    const username = verifyJWT(token);
-
-    // var length = await getFromTable('cart', 'user_cart', 'username', username);
-    
-    try {
-
-        var length = await redisClient.get(username);
-
-        const items = cartNumeration(length, username);
-
-        if(username == ''){
-            return res.status(401).redirect("/login");
-        }
-
-        var cart = [];
-
-        var shippment = 0;
-
-        if(length === undefined || length === null) {
-            cart = [];
-        } else {
-            cart = JSON.parse(length).carrito;
-            shippment = JSON.parse(length).envio;
-        }
-
-        for(let x = 0; x <= cart.length; x++){
-
-            var object = cart[x];
-            
-            for(var producto in object){
-                if(object.id === ('PrMP' + prodnumber)){
-                    prodquantity = (parseInt(prodquantity) + parseInt(cart[x].cantidad));
-                    const index = cart.indexOf(object);
-                    if(index > -1){
-                        cart.splice(index, 1);
-                    }
-                    break;
-                }
-            }
-        }
-
-        var cartItems = await getProductDetail(prodnumber);
-
-        let datosVenta =  {
-            imagen: variables(prodnumber).product_image,
-            nombre: variables(prodnumber).product_name,
-            precio: parseInt(variables(prodnumber).product_price),
-            cantidad: prodquantity,
-            stock: parseInt(cartItems.product_quantity),
-            id: variables(prodnumber).product_id
-        };
-        
-        cart.push(datosVenta);
-
-        let carro = {
-            envio: shippment,
-            carrito: cart
-        }
-
-        var stringfiedCart = JSON.stringify(carro);
-
-        await redisClient.set(username, stringfiedCart);
-
-    res.redirect('/producto/' + prodnumber);
-
-    }catch(error){
-        console.log(error)
-        res.status(500).redirect('/');
-    }
-});
-
-//Contacto
-app.get('/contact', async (req, res) => {
-
-    try {
-        const token = req.session.token;
-        var data = {
-            username: verifyJWT(token)
-        };
-
-        var length = await getFromTable('cart', 'user_cart', 'username', data.username);
-
-        const items = cartNumeration(length[0], data.username);
-        
-        let dataUser;
-
-        if(data.username == ''){
-            dataUser = {
-                fullname: '',
-                phone: '',
-                mail: '',
-                username: '',
-                count: items
-            }
-        } else {
-            const datosContacto = await getFromTable('fullname, phone, mail', 'user_info', 'username', data.username);
-
-            dataUser = {
-                fullname: datosContacto[0].fullname,
-                phone: datosContacto[0].phone,
-                mail: datosContacto[0].mail,
-                username: data.username,
-                count: items
-            }
-        }
-
-        res.render('form', dataUser);
-        
-    } catch (error) {
-        console.log(error);
-        res.status(500).redirect('/');
-    }
-});
-
-//Enviar formulario contacto
-app.post("/contact", (req, res) => {
-
-    const userName = req.body.name;
-    const userMail = req.body.mail;
-    const phone = req.body.phone;
-    const comment = req.body.comment;
-
-    const fecha = new Date().toLocaleDateString('es-CL', { timezone: 'America/Adak' });
-
-    const hora = toZonedTime(new Date(), 'America/Santiago').toLocaleTimeString();
-
-    try {
-        resend.emails.send({
-            from: 'contacto@meipulseras.cl',
-            to: 'meipulseras@gmail.com',
-            subject: 'Contacto ' + fecha + ' ' + hora,
-            html: '<ol>'+
-            '<li><b>Nombre completo:</b> '+userName+'</li>'+
-            '<li><b>Teléfono:</b> '+phone+'</li>'+
-            '<li><b>Email:</b> '+userMail+'</li>'+
-            '</ol>'+
-            '<p><b>Comentario contacto:</b> '+comment+'</p>'
-        });
-
-        res.redirect('/enviado');
-
-    } catch (e) {
-        console.log(e);
-        res.redirect('/noenviado');
-    } 
-});
-
-//Contacto Enviado
-app.get('/enviado', (req, res) => {
-    res.sendFile(path.join(__dirname + '/views/ok.html'));
-});
-
-//Contacto No Enviado
-app.get('/noenviado', (req, res) => {
-    res.sendFile(path.join(__dirname + '/views/error.html'));
 });
 
 //LOG OUT usuario LOGGED

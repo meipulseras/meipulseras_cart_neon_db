@@ -3,6 +3,8 @@
     src: url(Quicksand-VariableFont_wght.ttf);
 }
 
+.regionselect { display: none;}
+
 .prodnamemobile { display: none;}
 
 .foto { width: 280px; height: 280px;}
