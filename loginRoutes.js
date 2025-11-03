@@ -237,6 +237,7 @@ router.post("/forgot", async (req, res) => {
 
         if(user[0].mail == email){
             random = Randomstring.generate(7);
+            
         } else {
             const data = {no: 'yes'};
             return res.render('forgot', data);
@@ -267,7 +268,8 @@ router.post("/forgot", async (req, res) => {
                 '<br>'
         });
         
-        return res.status(201).redirect('/');
+        const data = {no: 'ok'};
+        return res.render('forgot', data);
         
     } catch (error) {
         res.status(500).redirect('/');

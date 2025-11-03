@@ -1,6 +1,6 @@
 https://meipulseras.cl/
-https://meipulseras.cl/login
-https://meipulseras.cl/personal
+https://meipulseras.cl/auth/login
+https://meipulseras.cl/user/personal
 https://meipulseras.cl/user/info
 https://meipulseras.cl/cart
 https://meipulseras.cl/producto/1

@@ -18,6 +18,10 @@
         </ul>
     </div>
     <div class="relleno"></div>
+    <div class="forgotText">
+        <h1>Ingrese sus credenciales de registro para recuperar su contraseña.</h1>
+    </div>
+    <div class="relleno2"></div>
     <div class="formu">
         <form action="/auth/forgot" method="post">
             <div class="inputforms">
@@ -50,7 +54,18 @@
                 confirmButtonText: 'Aceptar',
                 showConfirmButton: true,
             }).then(function() {
-                window.location = "/forgot";
+                window.location = "/auth/forgot";
+            });
+            alerta = 'no';
+        } else if(alerta === 'ok') {
+            Swal.fire({
+                title: 'Credenciales correctas',
+                text: 'Se enviará un email al usuario registrado con ese correo electrónico.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                showConfirmButton: true,
+            }).then(function() {
+                window.location = "/";
             });
             alerta = 'no';
         }
