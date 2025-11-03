@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.2">
+    <link rel="stylesheet" href="/css/style.css?v=3.3">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -17,7 +17,7 @@
     </div>
     <div class="relleno"></div>
     <div class="formu">
-        <form action="/login" method="post">
+        <form action="/auth/login" method="post">
             <div class="inputforms">
                 <div class="lblinput">
                     <div class="inputlbl">
@@ -30,7 +30,7 @@
                         <input class="forminput" type="password" id="pass" name="pass" required><br />
                     </div>
                     <br />
-                    <a class="forgotpass" key="COTIZ" href="/forgot">¿Olvidó su contraseña?</a>
+                    <a class="forgotpass" key="COTIZ" href="/auth/forgot">¿Olvidó su contraseña?</a>
                     <br />
                     <br />
             <input class="cotiza pe" type="submit" value="Enviar" id="aceptar">
@@ -41,7 +41,7 @@
         <h4 class="lblform h4" key="REGISTER">¿No estás registrado?</h4>
         <br>
         <div>
-            <a class="cotiza pe" key="REGISTER" href="/signup">REGISTRAR</a>
+            <a class="cotiza pe" key="REGISTER" href="/auth/signup">REGISTRAR</a>
         </div>
     </div>
     <p id="data" style="display: none;"><%= no %></p>
