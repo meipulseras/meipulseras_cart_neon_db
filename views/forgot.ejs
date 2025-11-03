@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.3">
+    <link rel="stylesheet" href="/css/style.css?v=3.4">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -18,6 +18,10 @@
         </ul>
     </div>
     <div class="relleno"></div>
+    <div class="forgotText">
+        <h1>Ingrese sus credenciales de registro para recuperar su contraseña.</h1>
+    </div>
+    <div class="relleno2"></div>
     <div class="formu">
         <form action="/auth/forgot" method="post">
             <div class="inputforms">
@@ -50,7 +54,18 @@
                 confirmButtonText: 'Aceptar',
                 showConfirmButton: true,
             }).then(function() {
-                window.location = "/forgot";
+                window.location = "/auth/forgot";
+            });
+            alerta = 'no';
+        } else if(alerta === 'ok') {
+            Swal.fire({
+                title: 'Credenciales correctas',
+                text: 'Se enviará un email al usuario registrado con ese correo electrónico.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                showConfirmButton: true,
+            }).then(function() {
+                window.location = "/";
             });
             alerta = 'no';
         }

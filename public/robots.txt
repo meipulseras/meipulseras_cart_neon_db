@@ -1,8 +1,20 @@
 User-agent: *
 Allow: /
-Allow: /cotizacion
-Allow: /english
-Allow: /pricing
+Allow: /auth/login
+Allow: /auth/logout
+Allow: /user/personal
+Allow: /user/info
+Allow: /producto/1
+Allow: /producto/2
+Allow: /producto/3
+Allow: /producto/4
+Allow: /producto/5
+Allow: /producto/6
+Allow: /producto/7
+Allow: /producto/8
+Allow: /cart
+Allow: /page/contact
+Allow: /policy
 Disallow: /enviado
 Disallow: /noenviado
 

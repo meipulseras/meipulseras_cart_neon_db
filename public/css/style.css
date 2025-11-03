@@ -160,6 +160,18 @@
     margin-bottom: 20px;
 }
 
+.forgotText {
+    width: 70%;
+    padding-left: 15%;
+    padding-right: 15%;
+    text-align: center;
+    font-family: Quicksand; 
+    letter-spacing: .1rem; 
+    color: #7b7d7b;
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -599,6 +611,14 @@ h4 {
     }
 
     .totalpagado { width: 80%; padding-left: 10%; padding-right: 10%;}
+
+    .forgotText {
+        width: 90%;
+        padding-left: 5%;
+        padding-right: 5%;
+        font-size: 0.6rem;
+        margin-bottom: 0px;
+    }
     
 }
 
