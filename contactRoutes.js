@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import { fileURLToPath } from 'url';
 import { Resend } from 'resend';
 import { toZonedTime } from 'date-fns-tz';
@@ -11,6 +12,8 @@ import cartNumeration from './middleware/cartCount.js';
 import redisClientInstance from './middleware/redisClient.js';
 
 const router = express.Router();
+
+router.use(compression());
 
 const resend = new Resend(process.env.RESEND_KEY);
 

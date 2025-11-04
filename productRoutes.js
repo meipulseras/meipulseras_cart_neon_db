@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import verifyJWT from './middleware/verifyJWT.js'
 import cartNumeration from './middleware/cartCount.js';
 import getProductDetail from './middleware/queries/productsDetails.js'
@@ -6,6 +7,8 @@ import variables from './public/js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
 
 const router = express.Router();
+
+router.use(compression());
 
 const redisClient = redisClientInstance;
 
