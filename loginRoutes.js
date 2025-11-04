@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import compression from 'compression';
 import { Resend } from 'resend';
 import express from 'express';
 import Randomstring from 'randomstring';
@@ -12,6 +13,8 @@ import deleteFromTable from './middleware/queries/delete.js'
 const app = express();
 
 const router = express.Router();
+
+router.use(compression());
 
 const resend = new Resend(process.env.RESEND_KEY);
 
