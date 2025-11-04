@@ -195,19 +195,19 @@ app.post('/pagar', async (req, res) => {
         const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
         const paymentMethod = "9";
         const subject = concepto.toString();
-        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmedpayment" : process.env.PORT + "/confirmedpayment";
+        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed_payment" : process.env.PORT + "/confirmed_payment";
         const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
         const params = {
-            "amount": amount,
-            "apiKey": apiKey,
-            "commerceOrder": commerceOrder,
-            "currency": currency,
-            "email": emailpayer[0].mail,
-            "paymentMethod": paymentMethod,
-            "subject": subject,
-            "urlConfirmation": urlConfirmation,
-            "urlReturn": urlReturn
+            amount: amount,
+            apiKey: apiKey,
+            commerceOrder: commerceOrder,
+            currency: currency,
+            email: emailpayer[0].mail,
+            paymentMethod: paymentMethod,
+            subject: subject,
+            urlConfirmation: urlConfirmation,
+            urlReturn: urlReturn
         }
 
         const keys = orderParams(params);
@@ -268,6 +268,64 @@ app.post('/pagar', async (req, res) => {
         await redisClient.del(user+'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
+    }
+});
+
+//Supuesto POST que usa FLOW
+app.post('/confirmed_payment', async (req, res) => {
+
+    const apiKey = process.env.API_KEY;
+
+    console.log(apiKey);
+    
+    try {
+
+        const params = {
+            token: req.body.token,
+            apiKey: apiKey
+        }
+
+        const secretKey = process.env.SECRET_KEY;
+
+        const urlFlow = process.env.URI_FLOW;
+        const getPayment = urlFlow + "/payment/getStatus";
+
+        const keys = orderParams(params);
+
+        let data = [];
+
+        keys.map(key => {
+            data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+        });
+
+        data = data.join("&");
+
+        let s = [];
+
+        keys.map(key => {
+            s.push(key + "=" + params[key])
+        });
+
+        s = s.join("&");
+
+        const signed = CryptoJS.HmacSHA256(s, secretKey);
+
+        const urlGet = getPayment + "?" + data + "&s=" + signed;
+
+        let response = await axios.get(urlGet)
+                    .then(response => {
+                        return {
+                            output: response.data,
+                            info: {
+                                http_code: response.status
+                            }
+                        }
+                    });
+
+        res.status(200).json(response);
+
+    } catch (error) {
+        res.json([ error ]);
     }
 });
 
@@ -344,7 +402,7 @@ app.post('/result', async (req, res) => {
 
             await redisClient.set(user+'Order', response.output.commerceOrder);
             
-            res.status(200).redirect('/confirmedpayment');
+            res.status(200).redirect('/confirmed');
         
         } else {
             await redisClient.set(user, insertedCart[0].cart);
@@ -360,7 +418,7 @@ app.post('/result', async (req, res) => {
 });
 
 //Resultado MeiPulseras a clientes
-app.get('/confirmedpayment', async (req, res) => {
+app.get('/confirmed', async (req, res) => {
 
     const token = req.session.token;
     const user = verifyJWT(token);
