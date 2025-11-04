@@ -376,7 +376,13 @@ h4 {
 
 
 .logomei {text-align: center; width: 300px; height: auto; }
-.logo { text-align: center; margin-left: 236px; margin-right: auto; width: 66%;}
+.logo { text-align: center; 
+    /* margin-left: 236px;  */
+    /* margin-right: auto;  */
+    width: 66%;
+    padding-left: 17%;
+    padding-right: 17%;
+}
 
 .divcenter { text-align: center;}
 
@@ -519,7 +525,7 @@ h4 {
     .lblprod, .lblprec { font-size: .8em;}
     .commentbox {width: 90%; height: 200px; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b;}
     .logomei { width: 200px; height: auto; padding-top: 30px;}
-    .logo { display: block; margin-left: 95px; margin-right: auto; width:40%;}
+    .logo { display: block; width:60%; padding-left: 20%; padding-right: 20%;}
     .texto {font-family: Quicksand; text-align: center; letter-spacing: .1rem; color: #303030; font-size: .5rem;}
     /* .wsp { position: -webkit-sticky; position: sticky; bottom: 90px; float: right;} */
     .wsplogo { width: 15px; height: auto; } 
@@ -623,7 +629,7 @@ h4 {
 }
 
 @media screen and (max-device-width: 412px) AND (max-device-width: 375px) {
-    .logo { margin-left: 84px; width: 50%;}
+    .logo { width: 60%; padding-left: 20%; padding-right: 20%;}
     .table-container {
         overflow-x: auto;
     }
