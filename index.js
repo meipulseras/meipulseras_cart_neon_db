@@ -22,6 +22,7 @@ import login from './loginRoutes.js';
 import info from './infoRoutes.js';
 import cart from './cartRoutes.js'
 import redisClientInstance from './middleware/redisClient.js';
+import isMobile from './public/js/mobile.js';
 
 const app = express();
 
@@ -77,7 +78,36 @@ app.get('/', async (req, res) => {
 
         var length = await redisClient.get(username);
 
-        const items = cartNumeration(length, username);    
+        const items = cartNumeration(length, username);
+        
+        let im_1;
+        let im_2;
+        let im_3;
+        let im_4;
+        let im_5;
+        let im_6;
+        let im_7;
+        let im_8;
+
+        if(isMobile(req)){
+            im_1 = variables(1).product_image_mob;
+            im_2 = variables(2).product_image_mob;
+            im_3 = variables(3).product_image_mob;
+            im_4 = variables(4).product_image_mob;
+            im_5 = variables(5).product_image_mob;
+            im_6 = variables(6).product_image_mob;
+            im_7 = variables(7).product_image_mob;
+            im_8 = variables(8).product_image_mob;
+        } else {
+            im_1 = variables(1).product_image;
+            im_2 = variables(2).product_image;
+            im_3 = variables(3).product_image;
+            im_4 = variables(4).product_image;
+            im_5 = variables(5).product_image;
+            im_6 = variables(6).product_image;
+            im_7 = variables(7).product_image;
+            im_8 = variables(8).product_image;
+        }
 
         var data = {
             username: username,
@@ -98,14 +128,14 @@ app.get('/', async (req, res) => {
             prec_6: variables(6).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
             prec_7: variables(7).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
             prec_8: variables(8).product_price.replace(/\B(?=(\d{3})+(?!\d))/g, "."),
-            imag_1: variables(1).product_image,
-            imag_2: variables(2).product_image,
-            imag_3: variables(3).product_image,
-            imag_4: variables(4).product_image,
-            imag_5: variables(5).product_image,
-            imag_6: variables(6).product_image,
-            imag_7: variables(7).product_image,
-            imag_8: variables(8).product_image
+            imag_1: im_1,
+            imag_2: im_2,
+            imag_3: im_3,
+            imag_4: im_4,
+            imag_5: im_5,
+            imag_6: im_6,
+            imag_7: im_7,
+            imag_8: im_8
         };
 
         res.render('index', data);

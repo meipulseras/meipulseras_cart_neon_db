@@ -5,6 +5,8 @@ import cartNumeration from './middleware/cartCount.js';
 import getProductDetail from './middleware/queries/productsDetails.js'
 import variables from './public/js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
+import isMobile from './public/js/mobile.js';
+
 
 const router = express.Router();
 
@@ -28,7 +30,7 @@ router.get('/producto/:productnumber', async (req, res) => {
 
         const prodtosell = await getProductDetail(numproduct);
 
-        const image = variables(numproduct).product_image;
+        const image = isMobile(req) ? variables(numproduct).product_image_mob : variables(numproduct).product_image;
         const id = variables(numproduct).product_id;
         const name = variables(numproduct).product_name;
         const description = variables(numproduct).product_description;
