@@ -527,7 +527,7 @@ h4 {
 
 
 @media screen and (max-device-width: 480px) {
-    div { border: 1px dotted green;}
+    /* div { border: 1px dotted green;} */
     .lblprod, .lblprec { font-size: .8em;}
     .commentbox {width: 90%; height: 200px; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b;}
     .logomei { width: 200px; height: auto; padding-top: 30px;}
