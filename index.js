@@ -303,12 +303,13 @@ app.post('/pagar', async (req, res) => {
 
 //Supuesto POST que usa FLOW
 app.post('/confirmed_payment', async (req, res) => {
-
-    const apiKey = process.env.API_KEY;
-
-    console.log(apiKey);
     
     try {
+
+        const apiKey = process.env.API_KEY;
+
+        const token = req.session.token;
+        const user = verifyJWT(token);
 
         const params = {
             token: req.body.token,
@@ -366,6 +367,9 @@ app.post('/result', async (req, res) => {
 
     try {
 
+        const token = req.session.token;
+        const user = verifyJWT(token);
+
         const params = {
             token: req.body.token,
             apiKey: apiKey
@@ -408,9 +412,6 @@ app.post('/result', async (req, res) => {
                         }
                     });
         
-        const token = req.session.token;
-        const user = verifyJWT(token);
-
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
 
@@ -455,6 +456,10 @@ app.get('/confirmed', async (req, res) => {
 
     try {
 
+        var length = await redisClient.get(user);
+
+        const items = cartNumeration(length, user);
+
         var order = await redisClient.get(user+'Order');
 
         if(order === null) {
@@ -467,7 +472,8 @@ app.get('/confirmed', async (req, res) => {
             array: array[0].cart,
             subtotal: array[0].subtotal,
             envio: array[0].shipping,
-            total: array[0].total
+            total: array[0].total,
+            count: items - 1
         }
 
         const saleDate = new Date();
