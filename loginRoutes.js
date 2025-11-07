@@ -8,7 +8,6 @@ import { comparePassword, hashPassword } from './hash/hashing.js';
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-import deleteFromTable from './middleware/queries/delete.js'
 
 const app = express();
 
@@ -32,9 +31,11 @@ router.post("/login", async (request, response) => {
     try {
         const credentialType = credential.includes('@') ? 'mail' : 'username';
 
-        const user = await getFromTable('username, password, mail', 'user_info', credentialType, credential);
+        const credUpper = credential.toUpperCase();
 
-        if(!comparePassword(password, user[0].password)){
+        const user = await getFromTable('username, password, mail', 'user_info', credentialType, credUpper);
+
+        if(JSON.stringify(user) === '[]' || !comparePassword(password, user[0].password)){
             const data = {no: 'yes'};
             return response.render('login', data);
         }
@@ -54,7 +55,7 @@ router.post("/login", async (request, response) => {
 
     } catch (error) {
         console.log(error)
-        response.status(500).redirect('/login');    
+        response.status(500).redirect('/auth/login');    
     }
 });
 
@@ -88,7 +89,9 @@ router.post("/signup", async (req, res) => {
         const regiones = await getFromTable('region_name', 'regions', null, null);
 
         const username = req.body.user;
+        const userUpper = username.toUpperCase();
         const mail = req.body.mail;
+        const mailUpper = mail.toUpperCase();
         const rut = req.body.rut;
         const password = hashPassword(req.body.pass);
         const fullname = req.body.fullname;
@@ -147,7 +150,7 @@ router.post("/signup", async (req, res) => {
         if(erroresValidar == 0) {
             const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
 
-            const values = `'${username}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mail}', '${password}', '${rut}'`;
+            const values = `'${userUpper}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mailUpper}', '${password}', '${rut}'`;
 
             await intoTable("user_info", columns, values);
 
@@ -298,7 +301,18 @@ router.post('/delete', async (req, res) => {
     const user = verifyJWT(token);
 
     try {
-        const deleteUser = await deleteFromTable('user_info', 'username', user);
+
+        const set = `fullname = '',
+                    birthdate = NULL,
+                    address = '',
+                    comune = '',
+                    region = '',
+                    country = '',
+                    phone = '',
+                    password = '', 
+                    rut = ''`;
+
+        await updateTable('user_info', set, 'username', user);
 
         return res.status(200).redirect('/auth/logout');
     } catch (error) {
