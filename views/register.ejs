@@ -85,6 +85,7 @@
                     <br />
             <input class="cotiza pe" type="submit" value="Enviar" id="aceptarForm" disabled="true" onclick="validarRut()">
         </form>
+        <div class="relleno"></div>
     </div>
     <p id="data" style="display: none;"><%= registrado %></p>
     <script src="/js/date.js" type="text/javascript"></script>
@@ -116,7 +117,7 @@
                     confirmButtonText: 'Aceptar',
                     showConfirmButton: true,
                 }).then(function() {
-                    window.location = "/signup";
+                    window.location = "/auth/signup";
                     alerta = 'no';
                 });
             }
@@ -151,7 +152,7 @@
                         confirmButtonText: 'Aceptar',
                         showConfirmButton: true,
                     }).then(function() {
-                        window.location = "/signup";
+                        window.location = "/auth/signup";
                     });
                 } else {
                     form.submit();
