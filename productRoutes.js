@@ -25,8 +25,8 @@ router.get('/producto/:productnumber', async (req, res) => {
         const data = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
         var length = await redisClient.get(data);
-
-        const items = cartNumeration(length, data);  
+ 
+        const items = data === '' ? '' : cartNumeration(length, data);
 
         const prodtosell = await getProductDetail(numproduct);
 
@@ -37,8 +37,23 @@ router.get('/producto/:productnumber', async (req, res) => {
         const price = variables(numproduct).product_price;
         const stock = prodtosell.product_quantity;
 
+        let carrito;
+
+        let prodcantidad = 0;
+
+        if(length !== null) {
+            carrito = JSON.parse(length).carrito;
+
+            for(let i = 0; i < carrito.length; i++) {
+                const item = carrito[i];
+                if(item.id === 'PrMP' + numproduct){
+                    prodcantidad = item.cantidad;
+                }
+            }
+        }
+        
         var prod = {
-            username: data,
+            username: data.charAt(0) + data.slice(1).toLowerCase(),
             count: items,
             prodid: id,
             prodimage: image,
@@ -46,7 +61,8 @@ router.get('/producto/:productnumber', async (req, res) => {
             proddescription: description,
             prodprice: price,
             prodstock: stock,
-            prodnumber: numproduct
+            prodnumber: numproduct,
+            prodquantity: prodcantidad
         }
 
         res.render('producto', prod);

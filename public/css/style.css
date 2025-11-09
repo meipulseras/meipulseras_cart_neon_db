@@ -5,6 +5,9 @@
 
 body { margin: 0; padding: 0;}
 
+.productname, .productprice { text-align: left;}
+.textprod {margin-bottom: 2%;}
+
 .logaut { padding-right: 10px;}
 
 .regionselect { display: none;}
@@ -303,7 +306,7 @@ margin-top: 5px; width: 60%;
 .lblenv, .error { font-size: 1.2em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; }
 .lblform { font-size: .8em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; }
 .lblprod { font-size: 1.0em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none; font-weight: thin;}
-.lblprec { font-size: 1.0em; font-family: Quicksand; letter-spacing: .1rem; color: #7b7d7b; text-decoration: none; font-weight: bolder;}
+.lblprec { font-size: 1.0em; font-family: Quicksand; letter-spacing: .1rem; color: #e4437e;; text-decoration: none; }
 .lblprod:hover { color: #e4437e; }
 .lblinput { width: 30%; margin: auto; }
 .inputlbl { width: 100%; text-align: left;} 
@@ -396,11 +399,12 @@ h4 {
     gap: 10px;
   }
 
-.grid-item { display: inline-block; text-align: center; width: 280px; height: 380px; border: 1px solid #303030; padding: 10px;}
+.grid-item { width: 280px; height: 360px; border: 1px solid #303030; padding: 10px;}
 
 .welcome {font-family: Quicksand; font-weight: 400;  text-align: center; letter-spacing: .1rem; color: #303030; font-size: 2.0rem; }
 .texto {font-family: Quicksand; text-align: center; letter-spacing: .1rem; color: #303030; font-size: 1.1rem;}
-.foot {font-family: Quicksand; text-align: center; letter-spacing: .1rem; color: #7b7d7b; position: absolute; left: 0; right: 0; margin: auto;}
+.foot {background-color: #e4437e; font-family: Quicksand; text-align: center; letter-spacing: .1rem; color: #ffffff; position: absolute; left: 0; right: 0; margin: auto; text-decoration: none;}
+.anchor { color: #ffffff; text-decoration: none; }
 /* .wsp { position: -webkit-sticky; position: sticky; bottom: 0; padding-right: 10px; text-align: right;} */
 .wsplogo { width: 20px; height: auto; } 
 
@@ -408,8 +412,8 @@ h4 {
 .logosredes {width: 35px; height: auto; text-decoration: none; }
 
 .follow { height: 35px; float: center;}
-.instalogo { height: 35px; float: center;}
-.centro {width: 123px; height: 35px; display:inline-block;}
+.instalogo { height: 35px; filter: brightness(0) invert(1);}
+.centro {width: 80%; height: 35px; padding-left: 10%; padding-right: 10%; display:inline-block;}
 
 .relleno {
     width: 100%;
@@ -515,16 +519,12 @@ h4 {
     border: none;
 }
 
-.links:hover, .links2:hover {
+.links:hover, .link:hover {
     color: rgb(15, 13, 13);
     background-color: rgba(69, 68, 68, 0.1);
 }
 
 .select { width: 100%; margin: auto;}
-
-.horario { width: 26%; padding-left: 37%; padding-right: 37%;}
-
-
 
 @media screen and (max-device-width: 480px) {
     /* div { border: 1px dotted green;} */
@@ -573,7 +573,7 @@ h4 {
     .pricestock { text-align: center; width: 100%; padding-top: 30px;}
     .stock { width: 70%; padding-left: 3%; padding-top: 40px; padding-bottom: 10px; margin-left: 0; float: left;}
     .stockCero {width: 70%; padding-left: 15%; padding-right: 15%; }
-    .grid-item { width: 125px; height: 214px;}
+    .grid-item { width: 125px; height: 205px;}
     .cartbutton { text-align: center; width: 100%; padding-top: 20px; padding-left: 0%;}
     .fotiprod { width: 98%; padding-right: 1%; padding-left: 1%;}
     .proddesc { width: 80%; padding-left: 10%; padding-right: 10%;}
@@ -615,8 +615,6 @@ h4 {
     .forminput { width: 96%; margin: auto;}
     .lblinput { padding-left: 5%; padding-right: 5%; width: 92%; margin: auto;}
     .h4 { font-size: .8rem;}
-
-    .horario { width: 80%; padding-left: 10%; padding-right: 10%; padding-bottom: 10%;}
 
     .table-container {
         overflow-x: auto;
