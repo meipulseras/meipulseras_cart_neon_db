@@ -89,7 +89,7 @@ router.post('/producto/', async (req, res) => {
         const items = cartNumeration(length, username);
 
         if(username == ''){
-            return res.status(401).redirect("/login");
+            return res.status(401).redirect("/auth/login");
         }
 
         var cart = [];

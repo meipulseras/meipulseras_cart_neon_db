@@ -5,6 +5,8 @@
 
 body { margin: 0; padding: 0;}
 
+.borrar, .pagar { text-align: right; padding-right: 5%;}
+
 .productname, .productprice { text-align: left;}
 .textprod {margin-bottom: 2%;}
 
@@ -128,10 +130,8 @@ body { margin: 0; padding: 0;}
     background-color: #e4437e;
 }
 
-.pagar {
+.pagar, .borrar {
     font-family: Quicksand;
-    max-width: 80%;
-    margin: auto;
     text-align: end;
 }
 
@@ -239,11 +239,8 @@ tr:nth-child(even) td {
     width: 20px; height: 20px; float: left;
 }
 
-.carro, .agregar {
-    filter: invert(97%) sepia(100%) saturate(13%) hue-rotate(218deg) brightness(104%) contrast(101%);
-}
 
-.carro:hover {
+.carro:hover, .carrito:hover, .agregar:hover {
     filter: invert(51%) sepia(51%) saturate(6987%) hue-rotate(315deg) brightness(95%) contrast(87%);
 }
 
@@ -603,6 +600,7 @@ h4 {
 
     .container { width: 80%; padding-left: 10%; padding-right: 10%;}
 
+    .borrar, .pagar { width: 80%; padding-right: 10%; padding-left: 10%;}
 
     .pagar { text-align: center;}
     .pipe { padding-left: 7px; padding-right: 7px;}

@@ -64,7 +64,7 @@ router.get('/cart', async (req, res) => {
         var newTotal = (subtotal + parseInt(envio));
 
         const data = {
-            username: user,
+            username: user.charAt(0) + user.slice(1).toLowerCase(),
             clientname: clientName,
             clientaddress: clientAddress,
             clientcomune: clientComune,

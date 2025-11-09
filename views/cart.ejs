@@ -3,14 +3,14 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.7">
+    <link rel="stylesheet" href="/css/style.css?v=3.8">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
     <title>Carro</title>
 </head>
 
-<body onload="radioBtn(); checked();">
+<body onload="eliminarCarro(); radioBtn(); checked();">
     <div class="nav" id="nav">
         <ul class="navbar" id="navbar">
             <li class="links"><a class="logosredes" href="/"> 
@@ -35,6 +35,12 @@
             <label for="" class="lblenv lblprice"><b>Subtotal:</b> $<%= subtotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></label>
         </div>
     </div>
+    <br>
+    <form action="/borrarcarro" method="post" id="eliminar">
+        <div class="borrar">
+            <input id="eliminar" class="cotiza pe lang" type="submit" value="VACIAR CARRO" ></input>
+        </div>
+    </form>
     <br>
     <br>
     <div class="container">
@@ -102,6 +108,29 @@
         }
 
     }
-</script>   
+</script>
+<script>
+    function eliminarCarro() {
+
+        document.getElementById('eliminar').addEventListener('submit', function(event){
+            event.preventDefault();
+
+            const form = this;
+
+            Swal.fire({
+            title: 'Borrar Carro',
+            text: '¿Está seguro que desea borrar su carrito?',
+            icon: 'question',
+            confirmButtonText: 'Aceptar',
+            showConfirmButton: true,
+            showCancelButton: true
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    }
+</script>
 </body>
 </html>
