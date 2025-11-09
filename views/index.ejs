@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.6">
+    <link rel="stylesheet" href="/css/style.css?v=3.7">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -17,17 +17,17 @@
         <ul class="navbar" id="navbar">
             <li class="links"><a class="logosredes" href="/"> 
                 <img class="wsplogo" src="/images/webp/home.webp" alt="home"></a></li>
-            <li class="links2" id="logout"><a class="logosredes" href="/auth/logout"> 
+            <li class="links2 link" id="logout"><a class="logosredes" href="/auth/logout"> 
                 <img class="wsplogo logaut" src="/images/webp/logout.webp" alt="logout"></a></li>
-            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
-            <li class="links2" id="cart"><a class="logosredes" href="/cart"> 
+            <li class="links2 link3 links4" id="pipe"><a class="pipe">|</a></li>
+            <li class="links2 link" id="cart"><a class="logosredes" href="/cart"> 
                 <img class="wsplogo" src="/images/webp/cart.webp" alt="cart">
                 <p id="counter" class="counter"><%= count %></p>
             </a></li>
-            <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
+            <li class="links2 link3 links4" id="pipe"><a class="pipe">|</a></li>
             <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/user/personal"><%= username %></a></li>
             
-            <li class="links2" id="login"><a class="logosredes" href="/auth/login"> 
+            <li class="links2 link" id="login"><a class="logosredes" href="/auth/login"> 
                 <img class="wsplogo" src="/images/webp/login.webp" alt="con_logo"></a></li>
         </ul>
     </div>
@@ -53,35 +53,35 @@ Si conectas con mi trabajo, estaré feliz de ayudarte a encontrar tu pulsera ide
     <div class="divcenter">
         <div class="grid-container">
             <a class="lblprod" href="/producto/1"><div class="grid-item"><img class="foto" src="<%= imag_1 %>" alt="Pulseras1" title="01. <%= prod_1 %>.">
-                <div class="productname"><h4><%= prod_1 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_1 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_1 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/2"><div class="grid-item"><img class="foto" src="<%= imag_2 %>" alt="Pulseras2" title="02. <%= prod_2 %>.">
-                <div class="productname"><h4><%= prod_2 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_2 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_2 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/3"><div class="grid-item"><img class="foto" src="<%= imag_3 %>" alt="Pulseras3" title="03. <%= prod_3 %>.">
-                <div class="productname"><h4><%= prod_3 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_3 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_3 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/4"><div class="grid-item"><img class="foto" src="<%= imag_4 %>" alt="Pulseras4" title="04. <%= prod_4 %>.">
-                <div class="productname"><h4><%= prod_4 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_4 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_4 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/5"><div class="grid-item"><img class="foto" src="<%= imag_5 %>" alt="Pulseras5" title="05. <%= prod_5 %>.">
-                <div class="productname"><h4><%= prod_5 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_5 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_5 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/6"><div class="grid-item"><img class="foto" src="<%= imag_6 %>" alt="Pulseras6" title="06. <%= prod_6 %>.">
-                <div class="productname"><h4><%= prod_6 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_6 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_6 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/7"><div class="grid-item"><img class="foto" src="<%= imag_7 %>" alt="Pulseras7" title="07. <%= prod_7 %>.">
-                <div class="productname"><h4><%= prod_7 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_7 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_7 %></span></div>
             </div></a>
             <a class="lblprod" href="/producto/8"><div class="grid-item"><img class="foto" src="<%= imag_8 %>" alt="Pulseras8" title="08. <%= prod_8 %>.">
-                <div class="productname"><h4><%= prod_8 %></h4></div>
+                <div class="productname"><h4 class="textprod"><%= prod_8 %></h4></div>
                 <div class="productprice"><span class="lblprec">$<%= prec_8 %></span></div>
             </div></a>
             <!-- <div class="grid-item"><img class="foto" src="<%//= imag_9 %>" alt="Pulseras9" title="09. <%//= prod_9 %>.">
@@ -102,29 +102,23 @@ Si conectas con mi trabajo, estaré feliz de ayudarte a encontrar tu pulsera ide
           </div>
     </div>
     <div class="relleno"></div>
-    <div class="texto">
-        <div class="centro">
-        <div class="follow">
-            <p class="lang sigue" id="seguir" key="SIGUE">SÍGUENOS</p>
-        </div>
-        <div class="instalogo">
-            <a class="logosredes" href="https://www.instagram.com/meipulseras"> 
-                <img class="wsplogo" src="/images/webp/instagram.webp" alt="ins_logo">
-            </a>
-            <a class="logosredes" href="/page/contact"> 
-                <img class="wsplogo" src="/images/webp/contact.webp" alt="con_logo">
-            </a>
-        </div> 
-    </div>
-    </div>
     <div class="relleno"></div>
-    <div class="relleno horario">
-        <p class="texto" id="seguir" key="SIGUE">Horario de atención: Lunes a viernes de 11:00 a 18:00 hrs.</p>
-    </div>
-    <div class="relleno">
-        <a class="foot" target="_blank" href="/policy">Términos y Condiciones</a>
-    </div>
+    <div class="relleno"></div>
     <footer class="foot">
+        <br>
+        <div class="centro">
+            <div class="instalogo">
+                <a class="logosredes" href="https://www.instagram.com/meipulseras"> 
+                    <img class="wsplogo" src="/images/webp/instagram.webp" alt="ins_logo">
+                </a>
+                <a class="logosredes" href="/page/contact"> 
+                    <img class="wsplogo" src="/images/webp/contact.webp" alt="con_logo">
+                </a>
+                <br>
+            </div>
+        </div>
+        <br>
+        <a class="anchor" target="_blank" href="/policy">Términos y Condiciones</a>
         <p>Mei Pulseras 2019 &#8729; Santo Domingo, Chile.</p>
         <br>
     </footer>

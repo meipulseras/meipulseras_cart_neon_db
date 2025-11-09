@@ -78,7 +78,7 @@ app.get('/', async (req, res) => {
 
         var length = await redisClient.get(username);
 
-        const items = cartNumeration(length, username);
+        const items = username === '' ? '' : cartNumeration(length, username);
         
         let im_1;
         let im_2;
@@ -110,7 +110,7 @@ app.get('/', async (req, res) => {
         }
 
         var data = {
-            username: username,
+            username: username.charAt(0) + username.slice(1).toLowerCase(),
             count: items,
             prod_1: variables(1).product_name,
             prod_2: variables(2).product_name,

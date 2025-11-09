@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/style.css?v=3.6">
+    <link rel="stylesheet" href="/css/style.css?v=3.7">
     <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -21,7 +21,7 @@
                 <p id="counter" class="counter"><%= count %></p>
             </a></li>
             <li class="links2 link3" id="pipe"><a class="pipe link">|</a></li>
-            <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/personal"><%= username %></a></li>
+            <li class="links2 link3" id="username"><a class="translate link" key="USERNAME" href="/user/personal"><%= username %></a></li>
             <li class="links2" id="login"><a class="logosredes" href="/login"> 
                 <img class="wsplogo" src="/images/webp/login.webp" alt="con_logo"></a></li>
         </ul>
@@ -51,7 +51,7 @@
             <div class="prodnum">
                 <div class="botones">
                     <button class="minplus" id="minus" type="button" data-action="decrement" onclick="disablebuttonminus()"><span>-</span></button>
-                    <input class="inputminplus" type="text" id="prodquantity" name="prodquantity" value="0"></input>
+                    <input class="inputminplus" type="text" id="prodquantity" name="prodquantity" value="<%= prodquantity %>"></input>
                     <button class="minplus" id="plus" type="button" data-action="increment" onclick="disablebuttonplus()"><span>+</span></button>
                 </div>
                 <div class="cartbutton">

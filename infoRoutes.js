@@ -75,8 +75,8 @@ router.get("/info", async (req, res) => {
             region: datos[0].region,
             country: datos[0].country,
             phone: datos[0].phone,
-            mail: newMail(datos[0].mail),
-            rut: newRut(datos[0].rut),
+            mail: newMail(datos[0].mail).toLowerCase(),
+            rut: newRut(datos[0].rut).toUpperCase(),
             count: items,
             problem: 'no'
         }
@@ -153,8 +153,8 @@ router.post("/info", async (req, res) => {
                 region: datos[0].region,
                 country: datos[0].country,
                 phone: datos[0].phone,
-                mail: newMail(datos[0].mail),
-                rut: newRut(datos[0].rut),
+                mail: newMail(datos[0].mail).toLowerCase(),
+                rut: newRut(datos[0].rut).toUpperCase(),
                 count: items,
                 problem: code
             }
@@ -202,7 +202,7 @@ router.get('/personal', async (req, res) => {
         const compras = await getFromTableOrder('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user, 'sale_date', 'DESC');
 
         const data = {
-            username: user,
+            username: user.charAt(0) + user.slice(1).toLowerCase(),
             array: JSON.stringify(compras),
             count: items
         };
