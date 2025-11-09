@@ -301,6 +301,24 @@ app.post('/pagar', async (req, res) => {
     }
 });
 
+//Borrar carrito entero
+app.post('/borrarcarro', async (req, res) => {
+
+    const token = req.session.token;
+    const user = verifyJWT(token);
+    
+    try {
+
+        await redisClient.del(user);
+        await redisClient.del(user+'radiobutton');
+        
+        res.redirect('/');
+
+    } catch (error) {
+        res.json([ error ]);
+    }
+});
+
 //Supuesto POST que usa FLOW
 app.post('/confirmed_payment', async (req, res) => {
     
