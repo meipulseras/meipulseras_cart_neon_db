@@ -161,5 +161,16 @@
             });  
         }
     </script>
+    <script>
+        var rutInput = document.getElementById('rut');
+
+        rutInput.oninput = function() {
+            if(rutInput.value.length === 2) {
+                rutInput.value = rutInput.value.slice(0, -1) + '-' + rutInput.value[rutInput.value.length - 1];
+            } else if(rutInput.value.length > 2) {
+                rutInput.value = rutInput.value.replace('-', '').slice(0, -1) + '-' + rutInput.value[rutInput.value.length - 1];
+            }
+        }
+    </script>
 </body>
 </html>

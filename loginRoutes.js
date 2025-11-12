@@ -102,6 +102,10 @@ router.post("/signup", async (req, res) => {
         const country = req.body.country;
         const phone = req.body.phone;
 
+        const datosFecha = birthdate.split('-')
+
+        const newBirthDate = datosFecha[2] + '-' + datosFecha[1] + '-' + datosFecha[0];
+
         function errorValidarDatos(code) {
             const data = {
                 registrado: code,
@@ -111,8 +115,8 @@ router.post("/signup", async (req, res) => {
             res.render('register', data);
         }
 
-        const userExists = await getFromTable('username', 'user_info', 'username', username);
-        const mailExists = await getFromTable('mail', 'user_info', 'mail', mail);
+        const userExists = await getFromTable('username', 'user_info', 'username', userUpper);
+        const mailExists = await getFromTable('mail', 'user_info', 'mail', mailUpper);
 
         var erroresValidar = 0;
 
@@ -141,8 +145,8 @@ router.post("/signup", async (req, res) => {
         }
 
         if(userExists.toString().trim() !== '' 
-            && userExists[0].username.toString().toUpperCase() === username.toString().toUpperCase() ||
-            mailExists.toString().trim() !== '' && mailExists[0].mail.toString().toUpperCase() === mail.toString().toUpperCase()) {
+            && userExists[0].username === userUpper ||
+            mailExists.toString().trim() !== '' && mailExists[0].mail === mailUpper) {
 
             erroresValidar = erroresValidar + 10;
         }
@@ -150,7 +154,7 @@ router.post("/signup", async (req, res) => {
         if(erroresValidar == 0) {
             const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
 
-            const values = `'${userUpper}', '${fullname}', '${birthdate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mailUpper}', '${password}', '${rut}'`;
+            const values = `'${userUpper}', '${fullname}', '${newBirthDate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mailUpper}', '${password}', '${rut}'`;
 
             await intoTable("user_info", columns, values);
 
@@ -235,13 +239,15 @@ router.get('/forgot', (req, res) => {
 router.post("/forgot", async (req, res) => {
     try {
         const username = req.body.user;
+        const userUpper = username.toUpperCase();
         const email = req.body.mail;
+        const mailUpper = email.toUpperCase();
 
-        const user = await getFromTable('mail', 'user_info', 'username', username);
+        const user = await getFromTable('mail', 'user_info', 'username', userUpper);
 
         var random = '';
 
-        if(user[0].mail == email){
+        if(user[0].mail == mailUpper){
             random = Randomstring.generate(7);
             
         } else {
@@ -253,7 +259,7 @@ router.post("/forgot", async (req, res) => {
 
         const set = `password = '${password}'`;
 
-        await updateTable('user_info', set, 'username', username);
+        await updateTable('user_info', set, 'username', userUpper);
 
         resend.emails.send({
             from: 'contacto@meipulseras.cl',
