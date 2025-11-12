@@ -276,7 +276,8 @@ app.post('/pagar', async (req, res) => {
             const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
             if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro.carrito && insertedCart[0].total !== totalToPay){
-                const set = `cart = '${JSON.stringify(carro.carrito)}',
+                const set = `sale_order = '${order}',
+                            cart = '${JSON.stringify(carro.carrito)}',
                             subtotal = '${subtotalToPay}', 
                             shipping = '${carro.envio}', 
                             total = '${totalToPay}'`;
@@ -293,9 +294,6 @@ app.post('/pagar', async (req, res) => {
         const dataError = {
             error: "Hubo un error al iniciar el proceso de pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
         }
-
-        const saleDate = new Date();
-        const formattedDate = saleDate.toISOString().split('T')[0];
 
         await redisClient.del(user+'radiobutton');
 
@@ -431,6 +429,8 @@ app.post('/result', async (req, res) => {
                             }
                         }
                     });
+
+        console.log(response);
         
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
@@ -439,15 +439,16 @@ app.post('/result', async (req, res) => {
 
         if(response.info.http_code = 200) {
 
-            const set = `paid = ${true},
-                    sale_order = '${response.output.commerceOrder}'`;
+            const set = `paid = ${true}`;
+                    
             const comp1 = `cart = '${insertedCart[0].cart}' 
-                            AND subtotal = '${insertedCart[0].subtotal}' 
-                            AND shipping = '${insertedCart[0].shipping}' 
-                            AND total = '${insertedCart[0].total}' 
-                            AND paid = ${false} 
-                            AND sale_date = '${formattedDate}' 
-                            AND username`;
+                        AND sale_order = '${response.output.commerceOrder}' 
+                        AND subtotal = '${insertedCart[0].subtotal}' 
+                        AND shipping = '${insertedCart[0].shipping}' 
+                        AND total = '${insertedCart[0].total}' 
+                        AND paid = ${false} 
+                        AND sale_date = '${formattedDate}' 
+                        AND username`;
 
             await updateTable('sales', set, comp1, user);
 
