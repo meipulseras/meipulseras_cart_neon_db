@@ -218,11 +218,13 @@ app.post('/pagar', async (req, res) => {
 
         var order = Randomstring.generate(9);
 
+         const emailFromDB = await getFromTable('mail', 'user_info', 'username', user);
+
         const amount = totalToPay;
         const apiKey =  process.env.API_KEY;
         const commerceOrder = order;
         const currency = "CLP";
-        const emailpayer = await getFromTable('mail', 'user_info', 'username', user);
+        const emailpayer = emailFromDB[0].mail;
         const paymentMethod = "9";
         const subject = concepto.toString();
         const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed_payment" : process.env.PORT + "/confirmed_payment";
@@ -233,7 +235,7 @@ app.post('/pagar', async (req, res) => {
             apiKey: apiKey,
             commerceOrder: commerceOrder,
             currency: currency,
-            email: emailpayer[0].mail,
+            email: emailpayer.toLowerCase(),
             paymentMethod: paymentMethod,
             subject: subject,
             urlConfirmation: urlConfirmation,
@@ -320,63 +322,63 @@ app.post('/borrarcarro', async (req, res) => {
 });
 
 //Supuesto POST que usa FLOW
-app.post('/confirmed_payment', async (req, res) => {
+// app.post('/confirmed_payment', async (req, res) => {
     
-    try {
+//     try {
 
-        const apiKey = process.env.API_KEY;
+//         const apiKey = process.env.API_KEY;
 
-        const token = req.session.token;
-        const user = verifyJWT(token);
+//         const token = req.session.token;
+//         const user = verifyJWT(token);
 
-        const params = {
-            token: req.body.token,
-            apiKey: apiKey
-        }
+//         const params = {
+//             token: req.body.token,
+//             apiKey: apiKey
+//         }
 
-        const secretKey = process.env.SECRET_KEY;
+//         const secretKey = process.env.SECRET_KEY;
 
-        const urlFlow = process.env.URI_FLOW;
-        const getPayment = urlFlow + "/payment/getStatus";
+//         const urlFlow = process.env.URI_FLOW;
+//         const getPayment = urlFlow + "/payment/getStatus";
 
-        const keys = orderParams(params);
+//         const keys = orderParams(params);
 
-        let data = [];
+//         let data = [];
 
-        keys.map(key => {
-            data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-        });
+//         keys.map(key => {
+//             data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
+//         });
 
-        data = data.join("&");
+//         data = data.join("&");
 
-        let s = [];
+//         let s = [];
 
-        keys.map(key => {
-            s.push(key + "=" + params[key])
-        });
+//         keys.map(key => {
+//             s.push(key + "=" + params[key])
+//         });
 
-        s = s.join("&");
+//         s = s.join("&");
 
-        const signed = CryptoJS.HmacSHA256(s, secretKey);
+//         const signed = CryptoJS.HmacSHA256(s, secretKey);
 
-        const urlGet = getPayment + "?" + data + "&s=" + signed;
+//         const urlGet = getPayment + "?" + data + "&s=" + signed;
 
-        let response = await axios.get(urlGet)
-                    .then(response => {
-                        return {
-                            output: response.data,
-                            info: {
-                                http_code: response.status
-                            }
-                        }
-                    });
+//         let response = await axios.get(urlGet)
+//                     .then(response => {
+//                         return {
+//                             output: response.data,
+//                             info: {
+//                                 http_code: response.status
+//                             }
+//                         }
+//                     });
 
-        res.status(200).json(response);
+//         res.status(200).json(response);
 
-    } catch (error) {
-        res.json([ error ]);
-    }
-});
+//     } catch (error) {
+//         res.json([ error ]);
+//     }
+// });
 
 //Resultado de compra FLOW
 app.post('/result', async (req, res) => {
@@ -491,7 +493,7 @@ app.get('/confirmed', async (req, res) => {
             subtotal: array[0].subtotal,
             envio: array[0].shipping,
             total: array[0].total,
-            count: items - 1
+            count: 0
         }
 
         const saleDate = new Date();
