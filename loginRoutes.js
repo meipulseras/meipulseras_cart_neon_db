@@ -309,7 +309,7 @@ router.post('/delete', async (req, res) => {
     try {
 
         const set = `fullname = '',
-                    birthdate = NULL,
+                    birthdate = '',
                     address = '',
                     comune = '',
                     region = '',
