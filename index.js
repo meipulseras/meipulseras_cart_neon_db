@@ -1,6 +1,7 @@
 import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import { RedisStore } from 'connect-redis';
 import path from 'path';
@@ -27,6 +28,7 @@ import isMobile from './public/js/mobile.js';
 const app = express();
 
 app.use(compression());
+app.use(cookieParser());
 
 const redisClient = redisClientInstance;
 
@@ -41,13 +43,15 @@ app.use(session({
     cookie: {
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
+        secure: process.env.AMBIENTE === "local" ? false : true,
+        sameSite: process.env.AMBIENTE === "local" ? 'lax' : 'none',
         path: "/"
     }
 }));
 
 app.use(
     cors({
-        origin: process.env.PORT || 3000,
+        origin: "https://meipulseras-cart-neon-db.vercel.app/",
         methods: ['POST', 'GET'],
         credentials: true
     })
@@ -319,74 +323,21 @@ app.post('/borrarcarro', async (req, res) => {
     }
 });
 
-//Supuesto POST que usa FLOW
-// app.post('/confirmed_payment', async (req, res) => {
-    
-//     try {
-
-//         const apiKey = process.env.API_KEY;
-
-//         const token = req.session.token;
-//         const user = verifyJWT(token);
-
-//         const params = {
-//             token: req.body.token,
-//             apiKey: apiKey
-//         }
-
-//         const secretKey = process.env.SECRET_KEY;
-
-//         const urlFlow = process.env.URI_FLOW;
-//         const getPayment = urlFlow + "/payment/getStatus";
-
-//         const keys = orderParams(params);
-
-//         let data = [];
-
-//         keys.map(key => {
-//             data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-//         });
-
-//         data = data.join("&");
-
-//         let s = [];
-
-//         keys.map(key => {
-//             s.push(key + "=" + params[key])
-//         });
-
-//         s = s.join("&");
-
-//         const signed = CryptoJS.HmacSHA256(s, secretKey);
-
-//         const urlGet = getPayment + "?" + data + "&s=" + signed;
-
-//         let response = await axios.get(urlGet)
-//                     .then(response => {
-//                         return {
-//                             output: response.data,
-//                             info: {
-//                                 http_code: response.status
-//                             }
-//                         }
-//                     });
-
-//         res.status(200).json(response);
-
-//     } catch (error) {
-//         res.json([ error ]);
-//     }
-// });
-
 //Resultado de compra FLOW
 app.post('/result', async (req, res) => {
 
     const apiKey = process.env.API_KEY;
 
+    console.log(apiKey);
+
     try {
 
         const token = req.session.token;
+
         const user = verifyJWT(token);
+
+        console.log(token);
+        console.log(user);
 
         const params = {
             token: req.body.token,
@@ -394,7 +345,6 @@ app.post('/result', async (req, res) => {
         }
 
         const secretKey = process.env.SECRET_KEY;
-
         const urlFlow = process.env.URI_FLOW;
         const getPayment = urlFlow + "/payment/getStatus";
 
@@ -429,10 +379,9 @@ app.post('/result', async (req, res) => {
                             }
                         }
                     });
-
-        console.log(response);
         
         const saleDate = new Date();
+
         const formattedDate = saleDate.toISOString().split('T')[0];
 
         const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
@@ -461,6 +410,9 @@ app.post('/result', async (req, res) => {
         }
         
     } catch (error) {
+
+        console.log(error);
+
         const dataError = {
             error: "Hubo un error al procesar su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
         }

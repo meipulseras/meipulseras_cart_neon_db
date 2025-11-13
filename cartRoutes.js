@@ -70,7 +70,7 @@ router.get('/cart', async (req, res) => {
             clientcomune: clientComune,
             clientregion: clientRegion,
             clientphone: clientPhone,
-            clientmail: clientMail,
+            clientmail: clientMail.toLowerCase(),
             clientshipmentprice: regionPrice[0].blue_price,
             array: array,
             count: items,
