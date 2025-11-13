@@ -44,7 +44,7 @@ app.use(session({
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
         // secure: process.env.AMBIENTE === "local" ? false : true,
-        sameSite: process.env.AMBIENTE === "local" ? 'lax' : 'none',
+        // sameSite: process.env.AMBIENTE === "local" ? 'lax' : 'none',
         path: "/"
     }
 }));
