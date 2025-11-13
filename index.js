@@ -43,19 +43,19 @@ app.use(session({
     cookie: {
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
-        // secure: process.env.AMBIENTE === "local" ? false : true,
-        // sameSite: process.env.AMBIENTE === "local" ? 'lax' : 'none',
+        secure: process.env.AMBIENTE === "local" ? false : true,
+        sameSite: 'lax',
         path: "/"
     }
 }));
 
-app.use(
-    cors({
-        origin: "https://meipulseras-cart-neon-db.vercel.app/",
-        methods: ['POST', 'GET'],
-        credentials: true
-    })
-);
+// app.use(
+//     cors({
+//         origin: "https://meipulseras-cart-neon-db.vercel.app/",
+//         methods: ['POST', 'GET'],
+//         credentials: true
+//     })
+// );
 
 // //express.urlencoded y express.json para que pesque datos de form.html
 app.use(express.urlencoded({extended: true}));
