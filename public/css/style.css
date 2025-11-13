@@ -598,7 +598,7 @@ h4 {
         white-space: pre;    
     }
 
-    .container { width: 80%; padding-left: 10%; padding-right: 10%;}
+    .container { width: 90%; padding-left: 5%; padding-right: 5%;}
 
     .borrar, .pagar { width: 80%; padding-right: 10%; padding-left: 10%;}
 

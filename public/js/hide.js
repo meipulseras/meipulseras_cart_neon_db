@@ -1,5 +1,4 @@
 var username = document.getElementById("username");
-var counter = document.getElementById("counter").innerText;
 
 if(username !== null && username.innerText == ''){
     document.getElementById("counter").style.display= "none";
