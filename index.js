@@ -43,8 +43,8 @@ app.use(session({
     cookie: {
         maxAge: (60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.AMBIENTE === "local" ? false : true,
-        sameSite: 'lax',
+        // secure: process.env.AMBIENTE === "local" ? false : true,
+        // sameSite: 'lax',
         path: "/"
     }
 }));
