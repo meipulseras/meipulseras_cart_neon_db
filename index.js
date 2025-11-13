@@ -49,13 +49,13 @@ app.use(session({
     }
 }));
 
-// app.use(
-//     cors({
-//         origin: "https://meipulseras-cart-neon-db.vercel.app/",
-//         methods: ['POST', 'GET'],
-//         credentials: true
-//     })
-// );
+app.use(
+    cors({
+        origin: "https://meipulseras-cart-neon-db.vercel.app/",
+        methods: ['POST', 'GET', 'HEAD'],
+        credentials: true
+    })
+);
 
 // //express.urlencoded y express.json para que pesque datos de form.html
 app.use(express.urlencoded({extended: true}));
