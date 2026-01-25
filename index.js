@@ -237,7 +237,7 @@ app.post('/pagar', async (req, res) => {
         const emailpayer = emailFromDB[0].mail;
         const paymentMethod = "9";
         const subject = concepto.toString();
-        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed" : process.env.PORT + "/confirmed";
+        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/api/confirmed" : process.env.PORT + "/api/confirmed";
         const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
         const params = {
@@ -494,44 +494,6 @@ app.get('/confirmado', async (req, res) => {
         await redisClient.del(user+'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
-    }
-});
-
-//Confirmed POST para FLOW
-app.post('/confirmed', async (req, res) => {
-
-    try {
-
-        // const apiKey = process.env.API_KEY;
-        // const secretKey = process.env.SECRET_KEY;
-        // const token = req.body.token;
-
-        // console.log(apiKey)
-        // console.log(secretKey)
-        // console.log(token)
-
-        // if (!token) {
-        //     return res.sendStatus(400);
-        // }
-
-        // consultar estado del pago
-        // const params = { token, apiKey };
-        // const keys = orderParams(params);
-
-        // let data = keys.map(k => `${k}=${params[k]}`).join("&");
-        // let signed = CryptoJS.HmacSHA256(data, secretKey);
-
-        // const urlFlow = process.env.URI_FLOW + "/payment/getStatus";
-        // const response = await axios.get(`${urlFlow}?${data}&s=${signed}`);
-
-        // console.log(response)
-
-        // if (response.data.status === 2) {
-        return res.sendStatus(200);
-        // }        
-
-    } catch (error) {
-        console.error(error);
     }
 });
 
