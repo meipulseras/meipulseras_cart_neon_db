@@ -52,13 +52,13 @@ const redisClient = redisClientInstance;
 //     }
 // }));
 
-app.use(
-    cors({
-        origin: true,
-        //methods: ['POST', 'GET', 'HEAD'],
-        credentials: true
-    })
-);
+// app.use(
+//     cors({
+//         origin: true,
+//         //methods: ['POST', 'GET', 'HEAD'],
+//         credentials: true
+//     })
+// );
 
 // //express.urlencoded y express.json para que pesque datos de form.html
 app.use(express.urlencoded({extended: true}));
@@ -206,6 +206,7 @@ app.post('/pagar', async (req, res) => {
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
+    console.log(user);
 
     try {
 
@@ -340,9 +341,9 @@ app.post('/result', async (req, res) => {
     try {
 
         // const token = req.session.token;
-        const token = req.cookies.token;
+        // const token = req.cookies.token;
 
-        const user = verifyJWT(token);
+        // const user = verifyJWT(token);
 
         const params = {
             token: req.body.token,
@@ -385,20 +386,18 @@ app.post('/result', async (req, res) => {
                         }
                     });
         
-        console.log(response);
-        
-        const saleDate = new Date();
-
-        const formattedDate = saleDate.toISOString().split('T')[0];
-
-        const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
-
-        console.log(insertedCart);
-        
         if(response.info.http_code === 200) {
 
+            const saleDate = new Date();
+
+            const formattedDate = saleDate.toISOString().split('T')[0];
+
+            const insertedCart = await getFromTable('cart, subtotal, shipping, total, username', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND sale_order`, response.output.commerceOrder);
+
+            const username = insertedCart[0].username;
+
             const set = `paid = ${true}`;
-                    
+    
             const comp1 = `cart = '${insertedCart[0].cart}' 
                         AND sale_order = '${response.output.commerceOrder}' 
                         AND subtotal = '${insertedCart[0].subtotal}' 
@@ -408,14 +407,12 @@ app.post('/result', async (req, res) => {
                         AND sale_date = '${formattedDate}' 
                         AND username`;
 
-            await updateTable('sales', set, comp1, user);
+            await updateTable('sales', set, comp1, username);
 
-            await redisClient.set(user+'Order', response.output.commerceOrder);
+            await redisClient.set(username+'Order', response.output.commerceOrder);
             
             res.status(200).redirect('/confirmed');
         
-        } else {
-            await redisClient.set(user, insertedCart[0].cart);
         }
         
     } catch (error) {
