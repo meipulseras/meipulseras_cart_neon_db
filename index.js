@@ -527,17 +527,11 @@ app.post('/confirmed', async (req, res) => {
         console.log(response)
 
         // if (response.data.status === 2) {
-            return res.sendStatus(200);
+        return res.sendStatus(200);
         // }        
 
     } catch (error) {
-        const dataError = {
-            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
-        }
-
-        await redisClient.del(user+'radiobutton');
-
-        res.status(500).render('notconfirmed', dataError);
+        console.error(error);
     }
 });
 
