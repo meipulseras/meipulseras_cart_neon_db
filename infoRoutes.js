@@ -50,7 +50,8 @@ const newMail = (mail) => {
 //Ruta Signup - Info de Usuario(s)
 router.get("/info", async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     
     try {
         const data = verifyJWT(token);
@@ -95,7 +96,8 @@ router.post("/info", async (req, res) => {
     const onlyLettersNumbersSpaces = /^[a-zA-Z0-9 ]+$/;
     const plusNumbers = /^\+?\d+$/;
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
 
     const fullnameRB = req.body.fullname;
     const addressRB = req.body.address;
@@ -186,7 +188,8 @@ router.post("/info", async (req, res) => {
 router.get('/personal', async (req, res) => {
 
     try {
-        const token = req.session.token;
+        // const token = req.session.token;
+        const token = req.cookies.token;
         const user = verifyJWT(token);
         
         var length = await redisClient.get(user);

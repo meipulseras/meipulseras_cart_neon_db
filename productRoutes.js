@@ -7,7 +7,6 @@ import variables from './public/js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
 import isMobile from './public/js/mobile.js';
 
-
 const router = express.Router();
 
 router.use(compression());
@@ -18,7 +17,8 @@ const redisClient = redisClientInstance;
 router.get('/producto/:productnumber', async (req, res) => {
 
     const numproduct = req.params['productnumber'];
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
 
     try {
 
@@ -76,7 +76,8 @@ router.get('/producto/:productnumber', async (req, res) => {
 
 router.post('/producto/', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     let prodquantity = parseInt(req.body.prodquantity);
     const prodnumber = req.body.prodnumber;
 
@@ -88,7 +89,7 @@ router.post('/producto/', async (req, res) => {
 
         const items = cartNumeration(length, username);
 
-        if(username == ''){
+        if(username === ''){
             return res.status(401).redirect("/auth/login");
         }
 

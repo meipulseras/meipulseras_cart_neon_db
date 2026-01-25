@@ -15,7 +15,8 @@ router.use(compression());
 router.get('/cart', async (req, res) => {
 
     try {
-        const token = req.session.token;
+        // const token = req.session.token;
+        const token = req.cookies.token;
         const user = verifyJWT(token);
 
         var length = await redisClient.get(user);
@@ -96,7 +97,8 @@ router.get('/cart', async (req, res) => {
 
 router.post('/cart', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const idtochange = req.body.cart;
     const prodqty = parseInt(req.body.prodquantity);
     const user = verifyJWT(token);
@@ -111,7 +113,7 @@ router.post('/cart', async (req, res) => {
 
             var item = jsonCart.carrito[i];
         
-            if(item.id == idtochange) {
+            if(item.id === idtochange) {
                 if(prodqty > 0) {
                     item.cantidad = prodqty;
                     await redisClient.set(user, JSON.stringify(jsonCart));

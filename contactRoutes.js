@@ -23,7 +23,8 @@ const redisClient = redisClientInstance;
 router.get('/contact', async (req, res) => {
 
     try {
-        const token = req.session.token;
+        // const token = req.session.token;
+        const token = req.cookies.token;
         var data = {
             username: verifyJWT(token)
         };
@@ -34,7 +35,7 @@ router.get('/contact', async (req, res) => {
         
         let dataUser;
 
-        if(data.username == ''){
+        if(data.username === ''){
             dataUser = {
                 fullname: '',
                 phone: '',
