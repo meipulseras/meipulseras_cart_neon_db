@@ -206,7 +206,6 @@ app.post('/pagar', async (req, res) => {
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
-    console.log(user);
 
     try {
 
@@ -336,8 +335,6 @@ app.post('/result', async (req, res) => {
 
     const apiKey = process.env.API_KEY;
 
-    console.log(apiKey);
-
     try {
 
         // const token = req.session.token;
@@ -411,7 +408,7 @@ app.post('/result', async (req, res) => {
 
             await redisClient.set(username+'Order', response.output.commerceOrder);
             
-            res.status(200).redirect('/confirmed');
+            res.status(200).redirect('/confirmado');
         
         }
         
@@ -428,7 +425,7 @@ app.post('/result', async (req, res) => {
 });
 
 //Resultado MeiPulseras a clientes
-app.get('/confirmed', async (req, res) => {
+app.get('/confirmado', async (req, res) => {
 
     // const token = req.session.token;
     const token = req.cookies.token;
@@ -489,6 +486,50 @@ app.get('/confirmed', async (req, res) => {
         } else {
             await redisClient.set(user, insertedCart[0].cart);
         }
+    } catch (error) {
+        const dataError = {
+            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
+        }
+
+        await redisClient.del(user+'radiobutton');
+
+        res.status(500).render('notconfirmed', dataError);
+    }
+});
+
+//Confirmed POST para FLOW
+app.post('/confirmed', async (req, res) => {
+
+    try {
+
+        const apiKey = process.env.API_KEY;
+        const secretKey = process.env.SECRET_KEY;
+        const token = req.body.token;
+
+        console.log(apiKey)
+        console.log(secretKey)
+        console.log(token)
+
+        if (!token) {
+            return res.sendStatus(400);
+        }
+
+        // consultar estado del pago
+        const params = { token, apiKey };
+        const keys = orderParams(params);
+
+        let data = keys.map(k => `${k}=${params[k]}`).join("&");
+        let signed = CryptoJS.HmacSHA256(data, secretKey);
+
+        const urlFlow = process.env.URI_FLOW + "/payment/getStatus";
+        const response = await axios.get(`${urlFlow}?${data}&s=${signed}`);
+
+        console.log(response)
+
+        // if (response.data.status === 2) {
+            return res.sendStatus(200);
+        // }        
+
     } catch (error) {
         const dataError = {
             error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
