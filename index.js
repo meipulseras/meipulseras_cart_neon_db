@@ -2,8 +2,8 @@ import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import { RedisStore } from 'connect-redis';
+// import session from 'express-session';
+// import { RedisStore } from 'connect-redis';
 import path from 'path';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
@@ -32,25 +32,30 @@ app.use(cookieParser());
 
 const redisClient = redisClientInstance;
 
-const redisStore = new RedisStore( { client: redisClient });
+// const redisStore = new RedisStore( { client: redisClient });
 
-app.use(session({
-    store: redisStore,
-    name: 'token',
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: (60 * 60 * 1000),
-        httpOnly: true,
-        path: "/"
-    }
-}));
+// app.set('trust proxy', 1);
+
+// app.use(session({
+//     store: redisStore,
+//     name: 'token',
+//     secret: process.env.JWT_SECRET,
+//     resave: false,
+//     saveUninitialized: false,
+//     proxy: true,
+//     cookie: {
+//         maxAge: (60 * 60 * 1000),
+//         httpOnly: true,
+//         sameSite: 'none',
+//         secure: true,
+//         path: "/"
+//     }
+// }));
 
 app.use(
     cors({
-        origin: "https://meipulseras-cart-neon-db.vercel.app/",
-        methods: ['POST', 'GET', 'HEAD'],
+        origin: true,
+        //methods: ['POST', 'GET', 'HEAD'],
         credentials: true
     })
 );
@@ -74,7 +79,8 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', async (req, res) => {
 
     try {
-        const token = req.session.token;
+        // const token = req.session.token;
+        const token = req.cookies.token;
         
         const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
@@ -150,7 +156,8 @@ app.get('/', async (req, res) => {
 
 app.post('/envio', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const selectedOption = req.body.selectedOption;
     const user = verifyJWT(token);
        
@@ -194,7 +201,8 @@ function orderParams(params) {
 //Pagar con Flow
 app.post('/pagar', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
     const user = verifyJWT(token);
@@ -220,7 +228,7 @@ app.post('/pagar', async (req, res) => {
 
         var order = Randomstring.generate(9);
 
-         const emailFromDB = await getFromTable('mail', 'user_info', 'username', user);
+        const emailFromDB = await getFromTable('mail', 'user_info', 'username', user);
 
         const amount = totalToPay;
         const apiKey =  process.env.API_KEY;
@@ -229,7 +237,7 @@ app.post('/pagar', async (req, res) => {
         const emailpayer = emailFromDB[0].mail;
         const paymentMethod = "9";
         const subject = concepto.toString();
-        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed_payment" : process.env.PORT + "/confirmed_payment";
+        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed" : process.env.PORT + "/confirmed";
         const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
         const params = {
@@ -306,7 +314,8 @@ app.post('/pagar', async (req, res) => {
 //Borrar carrito entero
 app.post('/borrarcarro', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const user = verifyJWT(token);
     
     try {
@@ -330,12 +339,10 @@ app.post('/result', async (req, res) => {
 
     try {
 
-        const token = req.session.token;
+        // const token = req.session.token;
+        const token = req.cookies.token;
 
         const user = verifyJWT(token);
-
-        console.log(token);
-        console.log(user);
 
         const params = {
             token: req.body.token,
@@ -378,13 +385,17 @@ app.post('/result', async (req, res) => {
                         }
                     });
         
+        console.log(response);
+        
         const saleDate = new Date();
 
         const formattedDate = saleDate.toISOString().split('T')[0];
 
         const insertedCart = await getFromTable('cart, subtotal, shipping, total', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-        if(response.info.http_code = 200) {
+        console.log(insertedCart);
+        
+        if(response.info.http_code === 200) {
 
             const set = `paid = ${true}`;
                     
@@ -422,7 +433,8 @@ app.post('/result', async (req, res) => {
 //Resultado MeiPulseras a clientes
 app.get('/confirmed', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const user = verifyJWT(token);
 
     try {

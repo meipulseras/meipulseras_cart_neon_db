@@ -49,7 +49,14 @@ router.post("/login", async (request, response) => {
             }
         );
 
-        request.session.token = token;
+        // request.session.token = token;
+
+        response.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 1000
+        });
 
         response.redirect('/user/personal');
 
@@ -198,7 +205,8 @@ router.post("/newpass", async (req, res) => {
 
     const oldpass = req.body.oldpass;
     const newpass = req.body.newpass;
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
 
     try {
         const data = verifyJWT(token);
@@ -292,18 +300,23 @@ router.post("/forgot", async (req, res) => {
 router.get('/logout', async (req, res) => {
 
     res.status(200).clearCookie('token', "", {
-        path: "/"
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax'
     });
+
+    res.redirect('/');
     
-    req.session.destroy(function (err) {
-        res.redirect('/');
-    });
+    // req.session.destroy(function (err) {
+    //     res.redirect('/');
+    // });
 });
 
 //Delete - elimina registro de usuario
 router.post('/delete', async (req, res) => {
 
-    const token = req.session.token;
+    // const token = req.session.token;
+    const token = req.cookies.token;
     const user = verifyJWT(token);
 
     try {
