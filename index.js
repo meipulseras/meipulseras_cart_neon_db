@@ -1,5 +1,5 @@
 import compression from 'compression';
-import cors from 'cors';
+//import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 // import session from 'express-session';
@@ -431,13 +431,22 @@ app.get('/confirmado', async (req, res) => {
     const token = req.cookies.token;
     const user = verifyJWT(token);
 
+    const getRedisSafely = async (key) => {
+        try {
+            return await redisClient.get(key);
+        } catch (error) {
+            console.error("Error en redis al intentar obtener user: ", error);
+                return null;
+        }
+    };
+
     try {
 
         var length = await redisClient.get(user);
 
         const items = cartNumeration(length, user);
 
-        var order = await redisClient.get(user+'Order');
+        var order = await getRedisSafely(user+'Order');
 
         if(order === null) {
             return res.status(401).redirect('/');
@@ -460,10 +469,6 @@ app.get('/confirmado', async (req, res) => {
 
         if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
 
-            await redisClient.del(user);
-            
-            await redisClient.del(user+'Order');
-
             var jsonCart = JSON.parse(insertedCart[0].cart);
 
             for(let x = 0; x < jsonCart.length; x++){
@@ -479,7 +484,16 @@ app.get('/confirmado', async (req, res) => {
                 
             }
 
-            await redisClient.del(user+'radiobutton');
+            try {
+                await redisClient.multi()
+                .del(user)
+                .del(`${user}Order`)
+                .del(`${user}radiobutton`)
+                .exec();
+            } catch (error) {
+                console.error("Error en redis: ", error);
+                return null;
+            }
 
             res.status(200).render('confirmed', data);
             
