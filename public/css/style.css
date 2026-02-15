@@ -322,16 +322,6 @@ h4 {
     font-weight: 80;
 }
 
-.pe {
-    border: 1px solid #e4437e;
-    border-radius: 20px;
-    padding: 9px 80px;
-    margin: 4px 2px;
-    color: white;
-    background-color: #e4437e;
-    
-}
-
 .counter {
     border-radius: 50%;
     width: 18px;
@@ -344,6 +334,16 @@ h4 {
     float: right;
 }
 
+/* .pe {
+    border: 1px solid #e4437e;
+    border-radius: 20px;
+    padding: 9px 80px;
+    margin: 4px 2px;
+    color: white;
+    background-color: #e4437e;
+    
+}
+
 .pe:hover {
     color: #e4437e;
     background-color: white;
@@ -352,6 +352,38 @@ h4 {
     transition-duration: .3s;
     transition-timing-function: ease-out;
     transition-delay: 0s;
+} */
+
+
+.pe {
+    border: 1px solid #e4437e;
+    border-radius: 20px;
+    padding: 9px 80px;
+    margin: 4px 2px;
+    color: white;
+    background-color: #e4437e;
+    transition: all .3s ease-out;
+    cursor: pointer;
+}
+
+.pe:hover {
+    color: #e4437e;
+    background-color: white;
+}
+
+.pe:hover .agregar {
+    color: #e4437e;
+}
+
+.pe:hover .carrito {
+    filter: invert(41%) sepia(58%) saturate(3574%) hue-rotate(321deg) brightness(93%) contrast(92%);
+}
+
+.carro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
 .cotiza {
