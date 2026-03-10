@@ -237,7 +237,7 @@ app.post('/pagar', async (req, res) => {
         const emailpayer = emailFromDB[0].mail;
         const paymentMethod = "9";
         const subject = concepto.toString();
-        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/api/confirmed" : process.env.PORT + "/api/confirmed";
+        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed" : process.env.PORT + "/confirmed";
         const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
 
         const params = {
@@ -309,6 +309,10 @@ app.post('/pagar', async (req, res) => {
 
         res.status(500).render('notconfirmed', dataError);
     }
+});
+
+app.post('/confirmed', async (req, res) => {
+    return res.status(200).send("OK");
 });
 
 //Borrar carrito entero
