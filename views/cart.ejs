@@ -92,6 +92,8 @@
     function radioBtn(){
         var rbtn = document.getElementById('data').innerText;
 
+        document.getElementById(rbtn).checked = true;
+
         document.getElementById('blue').enabled = true;
         document.getElementById('zokko').enabled = true;
 
@@ -102,7 +104,7 @@
         var radio = document.getElementById('radio');
         var btnPagar = document.getElementById("botonpagar");
         
-        if(radio === 'true') {
+        if(radio.innerHTML === 'true') {
             btnPagar.disabled = false;
         }
     }

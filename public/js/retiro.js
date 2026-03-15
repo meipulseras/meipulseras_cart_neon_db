@@ -6,14 +6,18 @@ document.querySelectorAll('input[name="envio"]').forEach(radio => {
         } else {
             document.getElementById("blue").disabled = true;
         }
-        sendDataToNodeJS(selectedValue);
         const pagar = document.getElementById("botonpagar");
+
         pagar.disabled = true;
+
+        sendDataToNodeJS(selectedValue);
+        
+        
         setTimeout(function() {
             history.go(0);
         }, 1200); 
         
-        pagar.disabled = false;
+        //pagar.disabled = false;
     });
 });
 
