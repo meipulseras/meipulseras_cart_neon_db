@@ -163,6 +163,10 @@ app.post('/envio', async (req, res) => {
        
     try {
 
+        setTimeout(() => {
+            console.log('boton pagar');
+        }, 1300);
+
         var cart = await redisClient.get(user);
 
         var jsonCart = JSON.parse(cart);
