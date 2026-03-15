@@ -1,6 +1,11 @@
 document.querySelectorAll('input[name="envio"]').forEach(radio => {
     radio.addEventListener('change', function(){
         const selectedValue = this.value;
+        if(selectedValue === 'blue') {
+            document.getElementById("zokko").disabled = true;
+        } else {
+            document.getElementById("blue").disabled = true;
+        }
         sendDataToNodeJS(selectedValue);
         const pagar = document.getElementById("botonpagar");
         pagar.disabled = true;
