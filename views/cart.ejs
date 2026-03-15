@@ -83,6 +83,7 @@
     <br>
     <br>
     <p id="data" style="display: none;"><%= radiobtn %></p>
+    <p id="radio" style="display: none;"><%= checked %></p>
 <script src="/js/table.js" type="text/javascript"></script>
 <script src="/js/retiro.js" type="text/javascript"></script>
 <script src="/js/cartcount.js" type="text/javascript"></script>
@@ -97,16 +98,12 @@
 </script>
 <script>
     function checked() {
-        var blue = document.getElementById('blue');
-        var zokko = document.getElementById('zokko');
+        var radio = document.getElementById('radio');
         var btnPagar = document.getElementById("botonpagar");
         
-        if(blue.checked) {
-            btnPagar.disabled = false;
-        } else if (zokko.checked) {
+        if(radio === 'true') {
             btnPagar.disabled = false;
         }
-
     }
 </script>
 <script>

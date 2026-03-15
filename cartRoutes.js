@@ -23,6 +23,12 @@ router.get('/cart', async (req, res) => {
 
         const selecterRadio = await redisClient.get(user+'radiobutton');
 
+        var checked = 'false';
+
+        if(selecterRadio !== null) {
+            checked = 'true';
+        }
+
         const items = cartNumeration(length, user);
 
         if(user == ''){
@@ -77,7 +83,8 @@ router.get('/cart', async (req, res) => {
             count: items,
             subtotal: subtotal,
             total: newTotal,
-            radiobtn: selecterRadio
+            radiobtn: selecterRadio,
+            checked: checked
         };
       
         if(array.length === 2 && array === '[]' || data.username === ''){
