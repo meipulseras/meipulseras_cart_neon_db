@@ -387,7 +387,7 @@ app.post('/result', async (req, res) => {
                         }
                     });
         
-        if(response.info.http_code === 200) {
+        if(response.info.http_code === 200 && response.output.status === 2) {
 
             const saleDate = new Date();
 
@@ -414,6 +414,8 @@ app.post('/result', async (req, res) => {
             
             res.status(200).redirect('/confirmado');
         
+        } else {
+            throw new Error(`Fallo en el pago, response.output.status: ${response.output.status}`);
         }
         
     } catch (error) {
