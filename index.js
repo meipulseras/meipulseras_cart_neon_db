@@ -30,7 +30,9 @@ const app = express();
 const whitelist = [
     'https://meipulseras.cl',
     'https://www.meipulseras.cl',
-    'https://meipulseras-cart-neon-db.vercel.app'
+    'https://meipulseras-cart-neon-db.vercel.app',
+    'https://www.flow.cl',
+    'https://sandbox.flow.cl'
 ];
 
 
