@@ -1,5 +1,5 @@
 import compression from 'compression';
-//import cors from 'cors';
+import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 // import session from 'express-session';
@@ -27,14 +27,33 @@ import isMobile from './public/js/mobile.js';
 
 const app = express();
 
+const whitelist = [
+    'https://meipulseras.cl',
+    'https://www.meipulseras.cl',
+    'https://meipulseras-cart-neon-db.vercel.app'
+];
+
+
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            if (!origin || whitelist.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error('No permitido por CORS'));
+            }
+        },
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
+        credentials: true
+    })
+);
+
 app.use(compression());
 app.use(cookieParser());
 
 const redisClient = redisClientInstance;
 
 // const redisStore = new RedisStore( { client: redisClient });
-
-// app.set('trust proxy', 1);
 
 // app.use(session({
 //     store: redisStore,
@@ -52,16 +71,8 @@ const redisClient = redisClientInstance;
 //     }
 // }));
 
-// app.use(
-//     cors({
-//         origin: true,
-//         //methods: ['POST', 'GET', 'HEAD'],
-//         credentials: true
-//     })
-// );
-
 // //express.urlencoded y express.json para que pesque datos de form.html
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.set('views', path.join(__dirname + '/views/'));
@@ -81,13 +92,13 @@ app.get('/', async (req, res) => {
     try {
         // const token = req.session.token;
         const token = req.cookies.token;
-        
+
         const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
         var length = await redisClient.get(username);
 
         const items = username === '' ? '' : cartNumeration(length, username);
-        
+
         let im_1;
         let im_2;
         let im_3;
@@ -97,7 +108,7 @@ app.get('/', async (req, res) => {
         let im_7;
         let im_8;
 
-        if(isMobile(req)){
+        if (isMobile(req)) {
             im_1 = variables(1).product_image_mob;
             im_2 = variables(2).product_image_mob;
             im_3 = variables(3).product_image_mob;
@@ -147,7 +158,7 @@ app.get('/', async (req, res) => {
         };
 
         res.render('index', data);
-        
+
     } catch (error) {
         console.log(error);
         res.status(500).redirect('/');
@@ -160,7 +171,7 @@ app.post('/envio', async (req, res) => {
     const token = req.cookies.token;
     const selectedOption = req.body.selectedOption;
     const user = verifyJWT(token);
-       
+
     try {
 
         var cart = await redisClient.get(user);
@@ -170,18 +181,18 @@ app.post('/envio', async (req, res) => {
         const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
         const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
 
-        if(selectedOption == 'blue'){
+        if (selectedOption == 'blue') {
             jsonCart.envio = parseInt(regionPrice[0].blue_price);
-            await redisClient.set(user+'radiobutton', selectedOption);
+            await redisClient.set(user + 'radiobutton', selectedOption);
             await redisClient.set(user, JSON.stringify(jsonCart));
         } else {
             jsonCart.envio = 0;
-            await redisClient.set(user+'radiobutton', selectedOption);
+            await redisClient.set(user + 'radiobutton', selectedOption);
             await redisClient.set(user, JSON.stringify(jsonCart));
         }
-            
+
         res.redirect('/cart');
-        
+
     } catch (error) {
         console.log(error)
         res.status(500).redirect('/');
@@ -190,12 +201,12 @@ app.post('/envio', async (req, res) => {
 
 function orderParams(params) {
     return Object.keys(params)
-    .map(key => key)
-    .sort((a,b) => {
-        if(a > b) return 1;
-        else if (a < b) return -1;
-        return 0;
-    });
+        .map(key => key)
+        .sort((a, b) => {
+            if (a > b) return 1;
+            else if (a < b) return -1;
+            return 0;
+        });
 }
 
 //Pagar con Flow
@@ -214,13 +225,13 @@ app.post('/pagar', async (req, res) => {
 
         var concepto = [];
 
-        for(let x = 0; x < carro.carrito.length; x++){
+        for (let x = 0; x < carro.carrito.length; x++) {
 
             var item = carro.carrito[x];
 
             concepto.push(item.nombre + ' x ' + item.cantidad)
-            
-        }  
+
+        }
 
         const secretKey = process.env.SECRET_KEY;
         const urlFlow = process.env.URI_FLOW;
@@ -231,7 +242,7 @@ app.post('/pagar', async (req, res) => {
         const emailFromDB = await getFromTable('mail', 'user_info', 'username', user);
 
         const amount = totalToPay;
-        const apiKey =  process.env.API_KEY;
+        const apiKey = process.env.API_KEY;
         const commerceOrder = order;
         const currency = "CLP";
         const emailpayer = emailFromDB[0].mail;
@@ -265,27 +276,27 @@ app.post('/pagar', async (req, res) => {
         const signed = CryptoJS.HmacSHA256(data, secretKey);
 
         let response = await axios.post(createPayment, `${data}&s=${signed}`)
-                    .then(response => {
-                        return {
-                            output: response.data,
-                            info: {
-                                http_code: response.status
-                            }
-                        }
-                    });
-        
+            .then(response => {
+                return {
+                    output: response.data,
+                    info: {
+                        http_code: response.status
+                    }
+                }
+            });
+
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
         const values = `'${order}', '${JSON.stringify(carro.carrito)}', ${subtotalToPay}, ${carro.envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
         const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
-        if(JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === ''){
+        if (JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === '') {
             await intoTable('sales', columns, values);
         } else {
             const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
-            if(!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro.carrito && insertedCart[0].total !== totalToPay){
+            if (!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro.carrito && insertedCart[0].total !== totalToPay) {
                 const set = `sale_order = '${order}',
                             cart = '${JSON.stringify(carro.carrito)}',
                             subtotal = '${subtotalToPay}', 
@@ -297,15 +308,15 @@ app.post('/pagar', async (req, res) => {
         }
 
         const redirectTo = response.output.url + "?token=" + response.output.token;
-        
+
         res.redirect(redirectTo);
-        
+
     } catch (error) {
         const dataError = {
             error: "Hubo un error al iniciar el proceso de pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
         }
 
-        await redisClient.del(user+'radiobutton');
+        await redisClient.del(user + 'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
     }
@@ -321,16 +332,16 @@ app.post('/borrarcarro', async (req, res) => {
     // const token = req.session.token;
     const token = req.cookies.token;
     const user = verifyJWT(token);
-    
+
     try {
 
         await redisClient.del(user);
-        await redisClient.del(user+'radiobutton');
-        
+        await redisClient.del(user + 'radiobutton');
+
         res.redirect('/');
 
     } catch (error) {
-        res.json([ error ]);
+        res.json([error]);
     }
 });
 
@@ -378,16 +389,16 @@ app.post('/result', async (req, res) => {
         const urlGet = getPayment + "?" + data + "&s=" + signed;
 
         let response = await axios.get(urlGet)
-                    .then(response => {
-                        return {
-                            output: response.data,
-                            info: {
-                                http_code: response.status
-                            }
-                        }
-                    });
-        
-        if(response.info.http_code === 200 && response.output.status === 2) {
+            .then(response => {
+                return {
+                    output: response.data,
+                    info: {
+                        http_code: response.status
+                    }
+                }
+            });
+
+        if (response.info.http_code === 200 && response.output.status === 2) {
 
             const saleDate = new Date();
 
@@ -398,7 +409,7 @@ app.post('/result', async (req, res) => {
             const username = insertedCart[0].username;
 
             const set = `paid = ${true}`;
-    
+
             const comp1 = `cart = '${insertedCart[0].cart}' 
                         AND sale_order = '${response.output.commerceOrder}' 
                         AND subtotal = '${insertedCart[0].subtotal}' 
@@ -410,14 +421,14 @@ app.post('/result', async (req, res) => {
 
             await updateTable('sales', set, comp1, username);
 
-            await redisClient.set(username+'Order', response.output.commerceOrder);
-            
+            await redisClient.set(username + 'Order', response.output.commerceOrder);
+
             res.status(200).redirect('/confirmado');
-        
+
         } else {
             throw new Error(`Fallo en el pago, response.output.status: ${response.output.status}`);
         }
-        
+
     } catch (error) {
 
         console.log(error);
@@ -442,7 +453,7 @@ app.get('/confirmado', async (req, res) => {
             return await redisClient.get(key);
         } catch (error) {
             console.error("Error en redis al intentar obtener user: ", error);
-                return null;
+            return null;
         }
     };
 
@@ -452,9 +463,9 @@ app.get('/confirmado', async (req, res) => {
 
         const items = cartNumeration(length, user);
 
-        var order = await getRedisSafely(user+'Order');
+        var order = await getRedisSafely(user + 'Order');
 
-        if(order === null) {
+        if (order === null) {
             return res.status(401).redirect('/');
         }
 
@@ -473,11 +484,11 @@ app.get('/confirmado', async (req, res) => {
 
         const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
 
-        if(insertedCart[0].paid && insertedCart[0].sale_order !== 0){
+        if (insertedCart[0].paid && insertedCart[0].sale_order !== 0) {
 
             var jsonCart = JSON.parse(insertedCart[0].cart);
 
-            for(let x = 0; x < jsonCart.length; x++){
+            for (let x = 0; x < jsonCart.length; x++) {
 
                 var item = jsonCart[x];
 
@@ -487,22 +498,22 @@ app.get('/confirmado', async (req, res) => {
 
                 const set = `product_quantity = ${newStock}`;
                 await updateTable('price_quantity_products', set, 'product_id', item.id);
-                
+
             }
 
             try {
                 await redisClient.multi()
-                .del(user)
-                .del(`${user}Order`)
-                .del(`${user}radiobutton`)
-                .exec();
+                    .del(user)
+                    .del(`${user}Order`)
+                    .del(`${user}radiobutton`)
+                    .exec();
             } catch (error) {
                 console.error("Error en redis: ", error);
                 return null;
             }
 
             res.status(200).render('confirmed', data);
-            
+
         } else {
             await redisClient.set(user, insertedCart[0].cart);
         }
@@ -511,7 +522,7 @@ app.get('/confirmado', async (req, res) => {
             error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
         }
 
-        await redisClient.del(user+'radiobutton');
+        await redisClient.del(user + 'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
     }
