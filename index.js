@@ -32,7 +32,8 @@ const whitelist = [
     'https://www.meipulseras.cl',
     'https://meipulseras-cart-neon-db.vercel.app',
     'https://www.flow.cl',
-    'https://sandbox.flow.cl'
+    'https://sandbox.flow.cl',
+    'http://localhost:3000'
 ];
 
 
