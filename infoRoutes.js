@@ -143,11 +143,10 @@ router.post("/info", async (req, res) => {
         async function actualizar(code){
             const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
 
-            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Santiago' };
 
             const userData = {
                 fullname: datos[0].fullname,
-                birthdate: datos[0].birthdate.toLocaleDateString('es-CL', dateOptions).replace(/\//g, '-'),
+                birthdate: datos[0].birthdate,
                 address: datos[0].address,
                 comune: datos[0].comune,
                 region: datos[0].region,
