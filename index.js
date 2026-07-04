@@ -2,8 +2,7 @@ import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-// import session from 'express-session';
-// import { RedisStore } from 'connect-redis';
+import { Resend } from 'resend';
 import path from 'path';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
@@ -24,15 +23,19 @@ import info from './infoRoutes.js';
 import cart from './cartRoutes.js'
 import redisClientInstance from './middleware/redisClient.js';
 import isMobile from './public/js/mobile.js';
-
+import deleteShoppingCart from './public/js/deletecart.js'
+import checkPayment from './public/js/checkpayment.js'
 const app = express();
+
+const resend = new Resend(process.env.RESEND_KEY);
 
 const whitelist = [
     'https://meipulseras.cl',
     'https://www.meipulseras.cl',
     'https://meipulseras-cart-neon-db.vercel.app',
     'https://www.flow.cl',
-    'https://sandbox.flow.cl'
+    'https://sandbox.flow.cl',
+    'http://localhost:3000'
 ];
 
 
@@ -55,24 +58,6 @@ app.use(cookieParser());
 
 const redisClient = redisClientInstance;
 
-// const redisStore = new RedisStore( { client: redisClient });
-
-// app.use(session({
-//     store: redisStore,
-//     name: 'token',
-//     secret: process.env.JWT_SECRET,
-//     resave: false,
-//     saveUninitialized: false,
-//     proxy: true,
-//     cookie: {
-//         maxAge: (60 * 60 * 1000),
-//         httpOnly: true,
-//         sameSite: 'none',
-//         secure: true,
-//         path: "/"
-//     }
-// }));
-
 // //express.urlencoded y express.json para que pesque datos de form.html
 app.use(express.urlencoded({ extended: true }));
 
@@ -92,10 +77,11 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', async (req, res) => {
 
     try {
-        // const token = req.session.token;
         const token = req.cookies.token;
 
         const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
+
+        await checkPayment(username)
 
         var length = await redisClient.get(username);
 
@@ -169,7 +155,6 @@ app.get('/', async (req, res) => {
 
 app.post('/envio', async (req, res) => {
 
-    // const token = req.session.token;
     const token = req.cookies.token;
     const selectedOption = req.body.selectedOption;
     const user = verifyJWT(token);
@@ -201,20 +186,9 @@ app.post('/envio', async (req, res) => {
     }
 });
 
-function orderParams(params) {
-    return Object.keys(params)
-        .map(key => key)
-        .sort((a, b) => {
-            if (a > b) return 1;
-            else if (a < b) return -1;
-            return 0;
-        });
-}
-
-//Pagar con Flow
+//Pagar usando flujo transferencia electronica
 app.post('/pagar', async (req, res) => {
 
-    // const token = req.session.token;
     const token = req.cookies.token;
     const subtotalToPay = req.body.subtotal;
     const totalToPay = req.body.total;
@@ -235,57 +209,54 @@ app.post('/pagar', async (req, res) => {
 
         }
 
-        const secretKey = process.env.SECRET_KEY;
-        const urlFlow = process.env.URI_FLOW;
-        const createPayment = urlFlow + "/payment/create";
-
         var order = Randomstring.generate(9);
+
+        carro.orden = order;
+
+        await redisClient.set(user, JSON.stringify(carro));
 
         const emailFromDB = await getFromTable('mail', 'user_info', 'username', user);
 
         const amount = totalToPay;
-        const apiKey = process.env.API_KEY;
         const commerceOrder = order;
-        const currency = "CLP";
         const emailpayer = emailFromDB[0].mail;
-        const paymentMethod = "9";
-        const subject = concepto.toString();
-        const urlConfirmation = process.env.AMBIENTE == "local" ? "http://localhost:3000/confirmed" : process.env.PORT + "/confirmed";
-        const urlReturn = process.env.AMBIENTE == "local" ? "http://localhost:3000/result" : process.env.PORT + "/result";
+        const concept = concepto.toString();
 
-        const params = {
-            amount: amount,
-            apiKey: apiKey,
-            commerceOrder: commerceOrder,
-            currency: currency,
-            email: emailpayer.toLowerCase(),
-            paymentMethod: paymentMethod,
-            subject: subject,
-            urlConfirmation: urlConfirmation,
-            urlReturn: urlReturn
-        }
-
-        const keys = orderParams(params);
-
-        let data = [];
-
-        keys.map(key => {
-            data.push(key + "=" + params[key])
+        resend.emails.send({
+            from: process.env.MAIL_CONTACTO_MEI,
+            to: emailpayer,
+            subject: 'Compra Nº Orden ' + commerceOrder,
+            html: '<br>'+
+                '<br>'+      
+                '<div style="text-align: center;">'+
+                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
+                '</div>'+
+                '<br>'+
+                '<br>'+
+                '<div style="text-align: center;">'+
+                    '<p style="font-family: Quicksand;">Número Orden: ' + commerceOrder + '</p>'+
+                    '<p style="font-family: Quicksand;">Monto tranferencia electrónica: $' + amount + '</p>'+
+                    '<br>'+
+                    '<p style="font-family: Quicksand;">Productos:</p>'+
+                    '<p style="font-family: Quicksand;">' + concept + '</p>'+
+                    '<br>'+
+                    '<p style="font-family: Quicksand;">Datos tranferencia electrónica:</p>'+
+                    '<p style="font-family: Quicksand;">Giro: '+ process.env.GIRO_MEI +'</p>'+
+                    '<p style="font-family: Quicksand;">RUT: '+ process.env.RUT_MEI +'</p>'+
+                    '<p style="font-family: Quicksand;">Email: '+ process.env.MAIL_MEI +'</p>'+
+                    '<p style="font-family: Quicksand;">Tipo Cuenta: '+ process.env.TIPO_CUENTA_MEI +'</p>'+
+                    '<p style="font-family: Quicksand;">Número Cuenta: '+ process.env.NRO_CUENTA_MEI +'</p>'+
+                    '<p style="font-family: Quicksand;">Banco: '+ process.env.BANCO_CUENTA_MEI +'</p>'+
+                    '<br>'+
+                    '<p style="font-family: Quicksand;">Cuenta con una hora para realizar la tranferencia electrónica,</p>'+
+                    '<p style="font-family: Quicksand;">de otra forma su reserva será anulada.</p>'+
+                    '<p style="font-family: Quicksand;">Una vez pagado, envíe el comprobante de pago a '+ process.env.MAIL_CONTACTO_MEI +' junto al número de orden de compra: ' + commerceOrder + '.</p>'+
+                    '<br>'+
+                    '<p style="font-family: Quicksand;">Atentamente, Mei Pulseras.</p>'+
+                '</div>'+
+                '<br>'+
+                '<br>'
         });
-
-        data = data.join("&");
-
-        const signed = CryptoJS.HmacSHA256(data, secretKey);
-
-        let response = await axios.post(createPayment, `${data}&s=${signed}`)
-            .then(response => {
-                return {
-                    output: response.data,
-                    info: {
-                        http_code: response.status
-                    }
-                }
-            });
 
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
@@ -309,225 +280,33 @@ app.post('/pagar', async (req, res) => {
             }
         }
 
-        const redirectTo = response.output.url + "?token=" + response.output.token;
-
-        res.redirect(redirectTo);
+        res.redirect('/orden');
 
     } catch (error) {
         const dataError = {
-            error: "Hubo un error al iniciar el proceso de pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
+            error: "Hubo un error al iniciar el proceso de pago."
         }
 
         await redisClient.del(user + 'radiobutton');
 
         res.status(500).render('notconfirmed', dataError);
     }
-});
-
-app.post('/confirmed', async (req, res) => {
-    return res.status(200).send("OK");
 });
 
 //Borrar carrito entero
 app.post('/borrarcarro', async (req, res) => {
-
-    // const token = req.session.token;
     const token = req.cookies.token;
     const user = verifyJWT(token);
+    var deleted = await deleteShoppingCart(user);
 
-    try {
-
-        await redisClient.del(user);
-        await redisClient.del(user + 'radiobutton');
-
-        res.redirect('/');
-
-    } catch (error) {
-        res.json([error]);
+    if(deleted){
+        res.status(200).redirect('/');
     }
 });
 
-//Resultado de compra FLOW
-app.post('/result', async (req, res) => {
-
-    const apiKey = process.env.API_KEY;
-
-    try {
-
-        // const token = req.session.token;
-        // const token = req.cookies.token;
-
-        // const user = verifyJWT(token);
-
-        const params = {
-            token: req.body.token,
-            apiKey: apiKey
-        }
-
-        const secretKey = process.env.SECRET_KEY;
-        const urlFlow = process.env.URI_FLOW;
-        const getPayment = urlFlow + "/payment/getStatus";
-
-        const keys = orderParams(params);
-
-        let data = [];
-
-        keys.map(key => {
-            data.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
-        });
-
-        data = data.join("&");
-
-        let s = [];
-
-        keys.map(key => {
-            s.push(key + "=" + params[key])
-        });
-
-        s = s.join("&");
-
-        const signed = CryptoJS.HmacSHA256(s, secretKey);
-
-        const urlGet = getPayment + "?" + data + "&s=" + signed;
-
-        let response = await axios.get(urlGet)
-            .then(response => {
-                return {
-                    output: response.data,
-                    info: {
-                        http_code: response.status
-                    }
-                }
-            });
-
-        if (response.info.http_code === 200 && response.output.status === 2) {
-
-            const saleDate = new Date();
-
-            const formattedDate = saleDate.toISOString().split('T')[0];
-
-            const insertedCart = await getFromTable('cart, subtotal, shipping, total, username', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND sale_order`, response.output.commerceOrder);
-
-            const username = insertedCart[0].username;
-
-            const set = `paid = ${true}`;
-
-            const comp1 = `cart = '${insertedCart[0].cart}' 
-                        AND sale_order = '${response.output.commerceOrder}' 
-                        AND subtotal = '${insertedCart[0].subtotal}' 
-                        AND shipping = '${insertedCart[0].shipping}' 
-                        AND total = '${insertedCart[0].total}' 
-                        AND paid = ${false} 
-                        AND sale_date = '${formattedDate}' 
-                        AND username`;
-
-            await updateTable('sales', set, comp1, username);
-
-            await redisClient.set(username + 'Order', response.output.commerceOrder);
-
-            res.status(200).redirect('/confirmado');
-
-        } else {
-            throw new Error(`Fallo en el pago, response.output.status: ${response.output.status}`);
-        }
-
-    } catch (error) {
-
-        console.log(error);
-
-        const dataError = {
-            error: "Hubo un error al procesar su pago. Revise las transacciones de su banco para verificar si se cursó el pago. Si no se cursó el pago, intente nuevamente la compra."
-        }
-
-        res.status(500).render('notconfirmed', dataError);
-    }
-});
-
-//Resultado MeiPulseras a clientes
-app.get('/confirmado', async (req, res) => {
-
-    // const token = req.session.token;
-    const token = req.cookies.token;
-    const user = verifyJWT(token);
-
-    const getRedisSafely = async (key) => {
-        try {
-            return await redisClient.get(key);
-        } catch (error) {
-            console.error("Error en redis al intentar obtener user: ", error);
-            return null;
-        }
-    };
-
-    try {
-
-        var length = await redisClient.get(user);
-
-        const items = cartNumeration(length, user);
-
-        var order = await getRedisSafely(user + 'Order');
-
-        if (order === null) {
-            return res.status(401).redirect('/');
-        }
-
-        var array = await getFromTable('cart, subtotal, shipping, total', 'sales', `sale_order = '${order}' AND username`, user);
-
-        const data = {
-            array: array[0].cart,
-            subtotal: array[0].subtotal,
-            envio: array[0].shipping,
-            total: array[0].total,
-            count: 0
-        }
-
-        const saleDate = new Date();
-        const formattedDate = saleDate.toISOString().split('T')[0];
-
-        const insertedCart = await getFromTable('cart, paid, sale_order', 'sales', `sale_order = '${order}' AND paid = ${true} AND sale_date = '${formattedDate}' AND username`, user);
-
-        if (insertedCart[0].paid && insertedCart[0].sale_order !== 0) {
-
-            var jsonCart = JSON.parse(insertedCart[0].cart);
-
-            for (let x = 0; x < jsonCart.length; x++) {
-
-                var item = jsonCart[x];
-
-                var stockDB = await getFromTable('product_quantity', 'price_quantity_products', 'product_id', item.id);
-
-                var newStock = parseInt(stockDB[0].product_quantity) - parseInt(item.cantidad);
-
-                const set = `product_quantity = ${newStock}`;
-                await updateTable('price_quantity_products', set, 'product_id', item.id);
-
-            }
-
-            try {
-                await redisClient.multi()
-                    .del(user)
-                    .del(`${user}Order`)
-                    .del(`${user}radiobutton`)
-                    .exec();
-            } catch (error) {
-                console.error("Error en redis: ", error);
-                return null;
-            }
-
-            res.status(200).render('confirmed', data);
-
-        } else {
-            await redisClient.set(user, insertedCart[0].cart);
-        }
-    } catch (error) {
-        const dataError = {
-            error: "Hubo un error al confirmar su pago. Revise las transacciones de su banco para verificar el pago y el correo electrónico de Flow y envíe un contacto con su Número de orden de comercio para que confirmemos el pago."
-        }
-
-        await redisClient.del(user + 'radiobutton');
-
-        res.status(500).render('notconfirmed', dataError);
-    }
+//Contacto Enviado
+app.get('/orden', (req, res) => {
+    res.sendFile(path.join(__dirname + '/views/waitingpayment.html'));
 });
 
 //LOG OUT usuario LOGGED

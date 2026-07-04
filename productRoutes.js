@@ -6,6 +6,7 @@ import getProductDetail from './middleware/queries/productsDetails.js'
 import variables from './public/js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
 import isMobile from './public/js/mobile.js';
+import checkPayment from './public/js/checkpayment.js'
 
 const router = express.Router();
 
@@ -17,12 +18,13 @@ const redisClient = redisClientInstance;
 router.get('/producto/:productnumber', async (req, res) => {
 
     const numproduct = req.params['productnumber'];
-    // const token = req.session.token;
     const token = req.cookies.token;
 
     try {
 
         const data = verifyJWT(token) == '' ? '' : verifyJWT(token);
+
+        await checkPayment(data);
 
         var length = await redisClient.get(data);
  
@@ -76,7 +78,6 @@ router.get('/producto/:productnumber', async (req, res) => {
 
 router.post('/producto/', async (req, res) => {
 
-    // const token = req.session.token;
     const token = req.cookies.token;
     let prodquantity = parseInt(req.body.prodquantity);
     const prodnumber = req.body.prodnumber;
@@ -135,6 +136,7 @@ router.post('/producto/', async (req, res) => {
 
         let carro = {
             envio: shippment,
+            orden: 'orden',
             carrito: cart
         }
 
