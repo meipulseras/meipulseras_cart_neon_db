@@ -49,8 +49,6 @@ router.post("/login", async (request, response) => {
             }
         );
 
-        // request.session.token = token;
-
         response.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -166,7 +164,7 @@ router.post("/signup", async (req, res) => {
             await intoTable("user_info", columns, values);
 
             resend.emails.send({
-                from: 'contacto@meipulseras.cl',
+                from: process.env.MAIL_CONTACTO_MEI,
                 to: mail,
                 subject: 'Registro exitoso, ' + username,
                 html: '<br>'+
@@ -205,7 +203,6 @@ router.post("/newpass", async (req, res) => {
 
     const oldpass = req.body.oldpass;
     const newpass = req.body.newpass;
-    // const token = req.session.token;
     const token = req.cookies.token;
 
     try {
@@ -270,7 +267,7 @@ router.post("/forgot", async (req, res) => {
         await updateTable('user_info', set, 'username', userUpper);
 
         resend.emails.send({
-            from: 'contacto@meipulseras.cl',
+            from: process.env.MAIL_CONTACTO_MEI,
             to: email,
             subject: 'Recuperación de contraseña',
             html: '<br>'+
@@ -307,15 +304,11 @@ router.get('/logout', async (req, res) => {
 
     res.redirect('/');
     
-    // req.session.destroy(function (err) {
-    //     res.redirect('/');
-    // });
 });
 
 //Delete - elimina registro de usuario
 router.post('/delete', async (req, res) => {
 
-    // const token = req.session.token;
     const token = req.cookies.token;
     const user = verifyJWT(token);
 

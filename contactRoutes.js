@@ -10,6 +10,7 @@ import verifyJWT from "./middleware/verifyJWT.js";
 import getFromTable from './middleware/queries/select.js';
 import cartNumeration from './middleware/cartCount.js';
 import redisClientInstance from './middleware/redisClient.js';
+import checkPayment from './public/js/checkpayment.js'
 
 const router = express.Router();
 
@@ -23,19 +24,18 @@ const redisClient = redisClientInstance;
 router.get('/contact', async (req, res) => {
 
     try {
-        // const token = req.session.token;
         const token = req.cookies.token;
-        var data = {
-            username: verifyJWT(token)
-        };
+        const user = verifyJWT(token)
 
-        var length = await redisClient.get(data.username);
+        await checkPayment(user);
 
-        const items = cartNumeration(length, data.username);
+        var length = await redisClient.get(user);
+
+        const items = cartNumeration(length, user);
         
         let dataUser;
 
-        if(data.username === ''){
+        if(user === ''){
             dataUser = {
                 fullname: '',
                 phone: '',
@@ -44,13 +44,13 @@ router.get('/contact', async (req, res) => {
                 count: items
             }
         } else {
-            const datosContacto = await getFromTable('fullname, phone, mail', 'user_info', 'username', data.username);
+            const datosContacto = await getFromTable('fullname, phone, mail', 'user_info', 'username', user);
 
             dataUser = {
                 fullname: datosContacto[0].fullname,
                 phone: datosContacto[0].phone,
                 mail: datosContacto[0].mail,
-                username: data.username,
+                username: user.charAt(0) + user.slice(1).toLowerCase(),
                 count: items
             }
         }
@@ -77,8 +77,8 @@ router.post("/contact", (req, res) => {
 
     try {
         resend.emails.send({
-            from: 'contacto@meipulseras.cl',
-            to: 'meipulseras@gmail.com',
+            from: process.env.MAIL_CONTACTO_MEI,
+            to: process.env.MAIL_MEI,
             subject: 'Contacto ' + fecha + ' ' + hora,
             html: '<ol>'+
             '<li><b>Nombre completo:</b> '+userName+'</li>'+

@@ -15,7 +15,6 @@ router.use(compression());
 router.get('/cart', async (req, res) => {
 
     try {
-        // const token = req.session.token;
         const token = req.cookies.token;
         const user = verifyJWT(token);
 
@@ -91,8 +90,10 @@ router.get('/cart', async (req, res) => {
             await redisClient.del(user+'radiobutton');
             await redisClient.del(user);
             return res.status(401).redirect('/');
-        } else {
+        } else if(jsonCart.orden === 'orden'){ 
             res.render('cart', data);
+        } else {
+            return res.status(200).redirect('/');
         }
 
     } catch (error) {
@@ -104,7 +105,6 @@ router.get('/cart', async (req, res) => {
 
 router.post('/cart', async (req, res) => {
 
-    // const token = req.session.token;
     const token = req.cookies.token;
     const idtochange = req.body.cart;
     const prodqty = parseInt(req.body.prodquantity);
