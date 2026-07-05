@@ -45,7 +45,7 @@ router.post("/login", async (request, response) => {
             { id: user[0].mail, username: user[0].username },
             process.env.JWT_SECRET,
             {
-                expiresIn: '1h'
+                expiresIn: '2h'
             }
         );
 
@@ -53,7 +53,7 @@ router.post("/login", async (request, response) => {
             httpOnly: true,
             secure: true,
             sameSite: 'lax',
-            maxAge: 60 * 60 * 1000
+            maxAge: 2 * 60 * 60 * 1000
         });
 
         response.redirect('/user/personal');

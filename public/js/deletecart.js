@@ -11,6 +11,7 @@ async function deleteShoppingCart(user){
 
     } catch (error) {
         console.log(error);
+        return false;
     }
 }
 
