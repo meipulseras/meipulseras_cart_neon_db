@@ -10,7 +10,8 @@ import verifyJWT from "./middleware/verifyJWT.js";
 import getFromTable from './middleware/queries/select.js';
 import cartNumeration from './middleware/cartCount.js';
 import redisClientInstance from './middleware/redisClient.js';
-import checkPayment from './public/js/checkpayment.js'
+import checkPayment from './public/js/checkpayment.js';
+import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
 
 const router = express.Router();
 
@@ -28,6 +29,7 @@ router.get('/contact', async (req, res) => {
         const user = verifyJWT(token)
 
         await checkPayment(user);
+        await deleteShoppingCartByTime(token, user);
 
         var length = await redisClient.get(user);
 

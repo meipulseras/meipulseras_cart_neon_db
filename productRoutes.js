@@ -1,12 +1,13 @@
 import express from 'express';
 import compression from 'compression';
-import verifyJWT from './middleware/verifyJWT.js'
+import verifyJWT from './middleware/verifyJWT.js';
 import cartNumeration from './middleware/cartCount.js';
-import getProductDetail from './middleware/queries/productsDetails.js'
+import getProductDetail from './middleware/queries/productsDetails.js';
 import variables from './public/js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
 import isMobile from './public/js/mobile.js';
-import checkPayment from './public/js/checkpayment.js'
+import checkPayment from './public/js/checkpayment.js';
+import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.get('/producto/:productnumber', async (req, res) => {
         const data = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
         await checkPayment(data);
+        await deleteShoppingCartByTime(token, data);
 
         var length = await redisClient.get(data);
  

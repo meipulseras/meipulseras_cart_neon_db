@@ -20,11 +20,12 @@ import producto from './productRoutes.js';
 import contact from './contactRoutes.js';
 import login from './loginRoutes.js';
 import info from './infoRoutes.js';
-import cart from './cartRoutes.js'
+import cart from './cartRoutes.js';
 import redisClientInstance from './middleware/redisClient.js';
 import isMobile from './public/js/mobile.js';
-import deleteShoppingCart from './public/js/deletecart.js'
-import checkPayment from './public/js/checkpayment.js'
+import deleteShoppingCart from './public/js/deletecart.js';
+import checkPayment from './public/js/checkpayment.js';
+import deleteShoppingCartByTime from './public/js/deletecartbytime.js'
 const app = express();
 
 const resend = new Resend(process.env.RESEND_KEY);
@@ -81,7 +82,8 @@ app.get('/', async (req, res) => {
 
         const username = verifyJWT(token) == '' ? '' : verifyJWT(token);
 
-        await checkPayment(username)
+        await checkPayment(username);
+        await deleteShoppingCartByTime(token, username);
 
         var length = await redisClient.get(username);
 

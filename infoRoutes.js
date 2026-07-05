@@ -6,7 +6,8 @@ import getFromTable from './middleware/queries/select.js';
 import updateTable from './middleware/queries/update.js';
 import getFromTableOrder from './middleware/queries/selectOrder.js';
 import redisClientInstance from './middleware/redisClient.js';
-import checkPayment from './public/js/checkpayment.js'
+import checkPayment from './public/js/checkpayment.js';
+import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
 
 const router = express.Router();
 
@@ -57,6 +58,7 @@ router.get("/info", async (req, res) => {
         const data = verifyJWT(token);
 
         await checkPayment(data);
+        await deleteShoppingCartByTime(token, data);
 
         var length = await redisClient.get(data);
 
@@ -192,6 +194,7 @@ router.get('/personal', async (req, res) => {
         const user = verifyJWT(token);
 
         await checkPayment(user);
+        await deleteShoppingCartByTime(token, user);
         
         var length = await redisClient.get(user);
 
