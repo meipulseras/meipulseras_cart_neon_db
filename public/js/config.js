@@ -3,72 +3,72 @@ const arrarVariables = {
         product_image: "/images/webp/1image.webp",
         product_image_mob: "/images/webp/1image_mob.webp",
         product_id: "PrMP1",
-        product_name: "Pulseras para compartir",
-        product_description: "Pulseras tejidas a mano con hilo chino, letras acrílicas y terminaciones metálicas. * Las pulseras personalizadas no cuentan con opción de cambio ni devolución. (Leer términos y condiciones)",
-        product_price: "6500"
+        product_name: "Pulsera para compartir 2",
+        product_description: "Pulseras macramé, elaborada con hilo tripolino, letras acrílicas y terminaciones metálicas. * Las pulseras personalizadas no cuentan con opción de cambio ni devolución. (Leer términos y condiciones).",
+        product_price: "8000"
 
     },
     2: {
         product_image: "/images/webp/2image.webp",
         product_image_mob: "/images/webp/2image_mob.webp",
         product_id: "PrMP2",
-        product_name: "Amuleto protector",
-        product_description: "Hecha a mano con hilo chino, cristales rojos, ojo turco de vidrio y terminaciones en acero.",
-        product_price: "3500"
+        product_name: "Pulseras BFF",
+        product_description: "Pulseras elaboradas con hilo rosado y terminaciones metálicas.",
+        product_price: "6500"
 
     },
     3: {
         product_image: "/images/webp/3image.webp",
         product_image_mob: "/images/webp/3image_mob.webp",
         product_id: "PrMP3",
-        product_name: "Pulseras para compartir",
-        product_description: "Hechas a mano con hilo chino, letras acrílicas personalizadas, separador en forma de corazón y aplicaciones metálicas. Opciones de color: negro, rojo, lila, morado o rosado.",
-        product_price: "6500"
+        product_name: "Pulseras para compartir 1",
+        product_description: "Pulseras macramé, elaborada con hilo tripolino, letras acrílicas y terminaciones metálicas. * Las pulseras personalizadas no cuentan con opción de cambio ni devolución. (Leer términos y condiciones).",
+        product_price: "8000"
 
     },
     4: {
         product_image: "/images/webp/4image.webp",
         product_image_mob: "/images/webp/4image_mob.webp",
         product_id: "PrMP4",
-        product_name: "Pulsera macramé",
-        product_description: "Elaborada a mano con la técnica de macramé, utilizando hilo chino, dije y aplicaciones metálicas.",
-        product_price: "3500"
+        product_name: "Pulseras estrellas",
+        product_description: "Pulseras elaboradas con hilo tripolino, cristal y aplicaciones en acero quirúrgico.",
+        product_price: "8500"
 
     },
     5: {
         product_image: "/images/webp/5image.webp",
         product_image_mob: "/images/webp/5image_mob.webp",
         product_id: "PrMP5",
-        product_name: "Pulseras para compartir",
-        product_description: "Hechas a mano con hilo chino, corazón rojo central y aplicaciones metálicas. Opciones de color: negro, rojo, lila, morado o rosado.",
-        product_price: "5500"
+        product_name: "Pulseras girasol",
+        product_description: "Pulseras elaboradas con hilo tripolino negro, dijes esmaltados y aplicaciones en dorado.",
+        product_price: "6500"
 
     },
     6: {
         product_image: "/images/webp/6image.webp",
         product_image_mob: "/images/webp/6image_mob.webp",
         product_id: "PrMP6",
-        product_name: "Pulseras para compartir",
-        product_description: "Hechas a mano con doble hilo chino, dije en forma de corazón y aplicaciones metálicas. Opciones de color: negro, rojo, lila, morado o rosado.",
-        product_price: "5500"
+        product_name: "Pulsera macramé",
+        product_description: "Pulseras tejidas a mano con hilo tripolino, aplicaciones y dijes metálicos.",
+        product_price: "4000"
 
     },
     7: {
         product_image: "/images/webp/7image.webp",
         product_image_mob: "/images/webp/7image_mob.webp",
         product_id: "PrMP7",
-        product_name: "Pulsera cuarzo rosa",
-        product_description: "Hecha a mano con hilo chino, cuarzo rosa, dije y aplicaciones metálicas.",
-        product_price: "5500"
+        product_name: "Pulsera hilo rojo",
+        product_description: "Pulseras elaboradas con hilo rojo y terminaciones metálicas.",
+        product_price: "6500"
 
     },
     8: {
         product_image: "/images/webp/8image.webp",
         product_image_mob: "/images/webp/8image_mob.webp",
         product_id: "PrMP8",
-        product_name: "Pulsera macramé",
-        product_description: "Hecha a mano con técnica de macramé espiral, utilizando hilo chino, figura de cerámica y aplicaciones de acero.",
-        product_price: "5500"
+        product_name: "Set 5 pulseras",
+        product_description: "Pulseras elasticadas, elaboradas con mostacillas y acrílico.",
+        product_price: "7000"
 
     }
 }
