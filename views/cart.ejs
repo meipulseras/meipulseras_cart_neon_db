@@ -56,8 +56,8 @@
     <br>
     <div class="container">
         <h1 class="h1">Precio envío</h1>
-            <input type="radio" class="radio" name="envio" id="blue" value="blue">
-            <label for="blue" class="lblenv"><b>Blue Express: </b> $<%= clientshipmentprice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") %></label><br>
+            <input type="radio" class="radio" name="envio" id="starken" value="starken">
+            <label for="starken" class="lblenv"><b>Starken: </b>Envío por pagar.</label><br>
             <br>
             <input type="radio" class="radio" name="envio" id="zokko" value="zokko">
             <label for="zokko" class="lblenv"><b>Retiro en Zokko Showroom: </b>$0</label>
@@ -92,10 +92,12 @@
     function radioBtn(){
         var rbtn = document.getElementById('data').innerText;
 
-        document.getElementById(rbtn).checked = true;
+        if(rbtn !== '') {
+            document.getElementById(rbtn).checked = true;
 
-        document.getElementById('blue').enabled = true;
-        document.getElementById('zokko').enabled = true;
+            document.getElementById('starken').enabled = true;
+            document.getElementById('zokko').enabled = true;
+        }
 
     }
 </script>

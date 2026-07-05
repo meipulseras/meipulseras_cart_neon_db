@@ -1,17 +1,16 @@
 document.querySelectorAll('input[name="envio"]').forEach(radio => {
     radio.addEventListener('change', function(){
         const selectedValue = this.value;
-        if(selectedValue === 'blue') {
+        if(selectedValue === 'starken') {
             document.getElementById("zokko").disabled = true;
         } else {
-            document.getElementById("blue").disabled = true;
+            document.getElementById("starken").disabled = true;
         }
         const pagar = document.getElementById("botonpagar");
 
         pagar.disabled = true;
 
         sendDataToNodeJS(selectedValue);
-        
         
         setTimeout(function() {
             history.go(0);
