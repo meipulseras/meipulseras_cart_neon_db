@@ -33,7 +33,8 @@ const resend = new Resend(process.env.RESEND_KEY);
 const whitelist = [
     'https://meipulseras.cl',
     'https://www.meipulseras.cl',
-    'https://meipulseras-cart-neon-db.vercel.app'
+    'https://meipulseras-cart-neon-db.vercel.app',
+    'http://localhost:3000'
 ];
 
 
@@ -94,26 +95,16 @@ app.get('/', async (req, res) => {
         let im_6;
         let im_7;
         let im_8;
-
-        if (isMobile(req)) {
-            im_1 = variables(1).product_image_mob;
-            im_2 = variables(2).product_image_mob;
-            im_3 = variables(3).product_image_mob;
-            im_4 = variables(4).product_image_mob;
-            im_5 = variables(5).product_image_mob;
-            im_6 = variables(6).product_image_mob;
-            im_7 = variables(7).product_image_mob;
-            im_8 = variables(8).product_image_mob;
-        } else {
-            im_1 = variables(1).product_image;
-            im_2 = variables(2).product_image;
-            im_3 = variables(3).product_image;
-            im_4 = variables(4).product_image;
-            im_5 = variables(5).product_image;
-            im_6 = variables(6).product_image;
-            im_7 = variables(7).product_image;
-            im_8 = variables(8).product_image;
-        }
+      
+        im_1 = variables(1).product_image;
+        im_2 = variables(2).product_image;
+        im_3 = variables(3).product_image;
+        im_4 = variables(4).product_image;
+        im_5 = variables(5).product_image;
+        im_6 = variables(6).product_image;
+        im_7 = variables(7).product_image;
+        im_8 = variables(8).product_image;
+        
 
         var data = {
             username: username.charAt(0) + username.slice(1).toLowerCase(),
@@ -164,19 +155,10 @@ app.post('/envio', async (req, res) => {
 
         var jsonCart = JSON.parse(cart);
 
-        const clientRegion = await getFromTable('fullname, address, comune, region, phone, mail', 'user_info', 'username', user);
-        const regionPrice = await getFromTable('blue_price', 'regions', 'region_name', clientRegion[0].region);
-
-        if (selectedOption == 'blue') {
-            jsonCart.envio = parseInt(regionPrice[0].blue_price);
-            await redisClient.set(user + 'radiobutton', selectedOption);
-            await redisClient.set(user, JSON.stringify(jsonCart));
-        } else {
-            jsonCart.envio = 0;
-            await redisClient.set(user + 'radiobutton', selectedOption);
-            await redisClient.set(user, JSON.stringify(jsonCart));
-        }
-
+        jsonCart.envio = selectedOption;
+        await redisClient.set(user + 'radiobutton', selectedOption);
+        await redisClient.set(user, JSON.stringify(jsonCart));
+        
         res.redirect('/cart');
 
     } catch (error) {
@@ -260,7 +242,7 @@ app.post('/pagar', async (req, res) => {
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
-        const values = `'${order}', '${JSON.stringify(carro.carrito)}', ${subtotalToPay}, ${carro.envio}, ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
+        const values = `'${order}', '${JSON.stringify(carro.carrito)}', ${subtotalToPay}, '${carro.envio}', ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
         const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
 
         if (JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === '') {

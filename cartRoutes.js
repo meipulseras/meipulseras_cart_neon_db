@@ -65,9 +65,7 @@ router.get('/cart', async (req, res) => {
 
         var array = JSON.stringify(jsonCart.carrito);
 
-        var envio = jsonCart.envio;
-
-        var newTotal = (subtotal + parseInt(envio));
+        var newTotal = (subtotal);
 
         const data = {
             username: user.charAt(0) + user.slice(1).toLowerCase(),
