@@ -23,7 +23,7 @@ const newRut = (rut) => {
 
     var newNumbers = '';
 
-    for(const char of numbers) {
+    for (const char of numbers) {
         newNumbers = newNumbers + '*';
     }
 
@@ -40,7 +40,7 @@ const newMail = (mail) => {
 
     var newMailInit = '';
 
-    for(const char of mailInit) {
+    for (const char of mailInit) {
         newMailInit = newMailInit + '*';
     }
 
@@ -53,7 +53,7 @@ const newMail = (mail) => {
 router.get("/info", async (req, res) => {
 
     const token = req.cookies.token;
-    
+
     try {
         const data = verifyJWT(token);
 
@@ -64,7 +64,7 @@ router.get("/info", async (req, res) => {
 
         const items = cartNumeration(length, data);
 
-        if(data == ''){
+        if (data == '') {
             return res.status(401).redirect("/auth/logout");
         }
 
@@ -83,7 +83,7 @@ router.get("/info", async (req, res) => {
             count: items,
             problem: 'no'
         }
-        
+
         res.render('userinfo', dataUser);
 
     } catch (error) {
@@ -116,34 +116,34 @@ router.post("/info", async (req, res) => {
         var length = await redisClient.get(data);
 
         const items = cartNumeration(length, data);
-        
-        if(data == ''){
+
+        if (data == '') {
             return res.status(401).redirect("/auth/logout");
         }
 
         var erroresValidar = 0;
 
-        if(!onlyLettersSpaces.test(fullnameRB)){
+        if (!onlyLettersSpaces.test(fullnameRB)) {
             erroresValidar++;
         }
 
-        if(!onlyLettersNumbersSpaces.test(addressRB)){
+        if (!onlyLettersNumbersSpaces.test(addressRB)) {
             erroresValidar++;
         }
 
-        if(!onlyLettersSpaces.test(comuneRB)){
-            erroresValidar++;
-        }
-        
-        if(!onlyLettersSpaces.test(countryRB)){
+        if (!onlyLettersSpaces.test(comuneRB)) {
             erroresValidar++;
         }
 
-        if(!plusNumbers.test(phoneRB)){
+        if (!onlyLettersSpaces.test(countryRB)) {
             erroresValidar++;
         }
 
-        async function actualizar(code){
+        if (!plusNumbers.test(phoneRB)) {
+            erroresValidar++;
+        }
+
+        async function actualizar(code) {
             const datos = await getFromTable('fullname, birthdate, address, comune, region, country, phone, mail, rut', 'user_info', 'username', data);
 
 
@@ -160,26 +160,27 @@ router.post("/info", async (req, res) => {
                 count: items,
                 problem: code
             }
-            
+
             return res.render('userinfo', userData);
-        }   
+        }
 
-        if(erroresValidar === 0) {
-            const set = `fullname = '${fullnameRB}', 
-                address = '${addressRB}', 
-                comune = '${comuneRB}', 
-                region = '${regionRB}',
-                country = '${countryRB}', 
-                phone = '${phoneRB}'`;
+        if (erroresValidar === 0) {
+            const set = `fullname = $1, 
+                        address = $2, 
+                        comune = $3, 
+                        region = $4,
+                        country = $5, 
+                        phone = $6`;
 
-            await updateTable('user_info', set, 'username', data);
+            const params = [fullnameRB, addressRB, comuneRB, regionRB, countryRB, phoneRB, data];
+            await updateTable('user_info', set, 'username', params);
 
             actualizar('ok');
         } else {
             actualizar('yes');
-            
+
         }
-        
+
     } catch (error) {
         res.status(500).redirect('/');
     }
@@ -195,17 +196,16 @@ router.get('/personal', async (req, res) => {
 
         await checkPayment(user);
         await deleteShoppingCartByTime(token, user);
-        
+
         var length = await redisClient.get(user);
 
         const items = cartNumeration(length, user);
 
-        if(user == ''){
+        if (user == '') {
             return res.status(401).redirect('/');
         }
 
-        const compras = await getFromTableOrder('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', `paid = ${true} AND username`, user, 'sale_date', 'DESC');
-
+        const compras = await getFromTableOrder('sale_order, cart, subtotal, shipping, total, sale_date', 'sales', 'paid = $1 AND username = $2', [true, user], 'sale_date', 'DESC');
         const data = {
             username: user.charAt(0) + user.slice(1).toLowerCase(),
             array: JSON.stringify(compras),
@@ -213,7 +213,7 @@ router.get('/personal', async (req, res) => {
         };
 
         res.render('personal', data);
-        
+
 
     } catch (error) {
         res.status(500).redirect('/');

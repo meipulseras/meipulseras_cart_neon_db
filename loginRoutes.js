@@ -19,7 +19,7 @@ const resend = new Resend(process.env.RESEND_KEY);
 
 //Carga pagina LOGIN
 router.get('/login', (req, res) => {
-    const data = {no: 'no'};
+    const data = { no: 'no' };
     res.render('login', data);
 });
 
@@ -35,8 +35,8 @@ router.post("/login", async (request, response) => {
 
         const user = await getFromTable('username, password, mail', 'user_info', credentialType, credUpper);
 
-        if(JSON.stringify(user) === '[]' || !comparePassword(password, user[0].password)){
-            const data = {no: 'yes'};
+        if (JSON.stringify(user) === '[]' || !comparePassword(password, user[0].password)) {
+            const data = { no: 'yes' };
             return response.render('login', data);
         }
 
@@ -60,7 +60,7 @@ router.post("/login", async (request, response) => {
 
     } catch (error) {
         console.log(error)
-        response.status(500).redirect('/auth/login');    
+        response.status(500).redirect('/auth/login');
     }
 });
 
@@ -125,41 +125,41 @@ router.post("/signup", async (req, res) => {
 
         var erroresValidar = 0;
 
-        if(!onlyLettersNumbers.test(username)){
+        if (!onlyLettersNumbers.test(username)) {
             erroresValidar++;
         }
 
-        if(!onlyLettersSpaces.test(fullname)){
+        if (!onlyLettersSpaces.test(fullname)) {
             erroresValidar++;
         }
 
-        if(!onlyLettersNumbersSpaces.test(address)){
+        if (!onlyLettersNumbersSpaces.test(address)) {
             erroresValidar++;
         }
 
-        if(!onlyLettersSpaces.test(comune)){
-            erroresValidar++;
-        }
-        
-        if(!onlyLettersSpaces.test(country)){
+        if (!onlyLettersSpaces.test(comune)) {
             erroresValidar++;
         }
 
-        if(!plusNumbers.test(phone)){
+        if (!onlyLettersSpaces.test(country)) {
             erroresValidar++;
         }
 
-        if(userExists.toString().trim() !== '' 
+        if (!plusNumbers.test(phone)) {
+            erroresValidar++;
+        }
+
+        if (userExists.toString().trim() !== ''
             && userExists[0].username === userUpper ||
             mailExists.toString().trim() !== '' && mailExists[0].mail === mailUpper) {
 
             erroresValidar = erroresValidar + 10;
         }
 
-        if(erroresValidar == 0) {
+        if (erroresValidar == 0) {
             const columns = 'username, fullname, birthdate, address, comune, region, country, phone, mail, password, rut';
 
-            const values = `'${userUpper}', '${fullname}', '${newBirthDate}', '${address}', '${comune}', '${region}', '${country}', '${phone}', '${mailUpper}', '${password}', '${rut}'`;
+            const values = [userUpper, fullname, newBirthDate, address, comune, region, country, phone, mailUpper, password, rut];
 
             await intoTable("user_info", columns, values);
 
@@ -167,31 +167,31 @@ router.post("/signup", async (req, res) => {
                 from: process.env.MAIL_CONTACTO_MEI,
                 to: mail,
                 subject: 'Registro exitoso, ' + username,
-                html: '<br>'+
-                    '<br>'+      
-                    '<div style="text-align: center;">'+
-                        '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                    '</div>'+
-                    '<br>'+
-                    '<br>'+
-                    '<div style="text-align: center;">'+
-                    '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>'+
-                        '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>'+
-                        '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>'+
-                    '</div>'+
-                    '<br>'+
+                html: '<br>' +
+                    '<br>' +
+                    '<div style="text-align: center;">' +
+                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">' +
+                    '</div>' +
+                    '<br>' +
+                    '<br>' +
+                    '<div style="text-align: center;">' +
+                    '<p style="font-family: Quicksand;">Su usuario ' + username + ' fue creado exitosamente.</p>' +
+                    '<p style="font-family: Quicksand;">Ahora puede revisar sus datos personales y generar compras online.</p>' +
+                    '<p style="font-family: Quicksand;">¡Recuerde seguirnos en Instagram!</p>' +
+                    '</div>' +
+                    '<br>' +
                     '<br>'
             });
-        
+
             return res.status(201).redirect('/');
-        } else if(erroresValidar == 10){
+        } else if (erroresValidar == 10) {
             errorValidarDatos('yes');
-        } else if(erroresValidar >= 10){ 
+        } else if (erroresValidar >= 10) {
             errorValidarDatos('yes+invalidregister');
         } else {
             errorValidarDatos('invalidregister');
         }
-         
+
     } catch (error) {
         console.log(error)
         res.status(500).redirect('/');
@@ -208,7 +208,7 @@ router.post("/newpass", async (req, res) => {
     try {
         const data = verifyJWT(token);
 
-        if(data == ''){
+        if (data == '') {
             return res.status(401).redirect("/auth/logout");
         }
 
@@ -216,13 +216,13 @@ router.post("/newpass", async (req, res) => {
 
         var password = '';
 
-        if(comparePassword(oldpass, user[0].password)){
+        if (comparePassword(oldpass, user[0].password)) {
             password = hashPassword(newpass);
         }
 
-        const set = `password = '${password}'`;
+        const set = 'password = $1';
 
-        await updateTable('user_info', set, 'username', data);
+        await updateTable('user_info', set, 'username', [password, data]);
 
         return res.status(201).redirect("/auth/logout");
 
@@ -236,7 +236,7 @@ router.post("/newpass", async (req, res) => {
 //Acceso recuperación password
 router.get('/forgot', (req, res) => {
 
-    const data = {no: 'no'};
+    const data = { no: 'no' };
     res.render('forgot', data);
 });
 
@@ -252,42 +252,42 @@ router.post("/forgot", async (req, res) => {
 
         var random = '';
 
-        if(user[0].mail == mailUpper){
+        if (user[0].mail == mailUpper) {
             random = Randomstring.generate(7);
-            
+
         } else {
-            const data = {no: 'yes'};
+            const data = { no: 'yes' };
             return res.render('forgot', data);
         }
 
         const password = hashPassword(random);
 
-        const set = `password = '${password}'`;
+        const set = 'password = $1';
 
-        await updateTable('user_info', set, 'username', userUpper);
+        await updateTable('user_info', set, 'username', [password, userUpper]);
 
         resend.emails.send({
             from: process.env.MAIL_CONTACTO_MEI,
             to: email,
             subject: 'Recuperación de contraseña',
-            html: '<br>'+
-                '<br>'+      
-                '<div style="text-align: center;">'+
-                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                '</div>'+
-                '<br>'+
-                '<br>'+
-                '<div style="text-align: center;">'+
-                '<p style="font-family: Quicksand;">Su contraseña provisoria es: ' + random + '</p>'+
-                    '<p style="font-family: Quicksand;">Por favor, inicie sesión y cambie la contraseña provisoria por una nueva.</p>'+
-                '</div>'+
-                '<br>'+
+            html: '<br>' +
+                '<br>' +
+                '<div style="text-align: center;">' +
+                '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">' +
+                '</div>' +
+                '<br>' +
+                '<br>' +
+                '<div style="text-align: center;">' +
+                '<p style="font-family: Quicksand;">Su contraseña provisoria es: ' + random + '</p>' +
+                '<p style="font-family: Quicksand;">Por favor, inicie sesión y cambie la contraseña provisoria por una nueva.</p>' +
+                '</div>' +
+                '<br>' +
                 '<br>'
         });
-        
-        const data = {no: 'ok'};
+
+        const data = { no: 'ok' };
         return res.render('forgot', data);
-        
+
     } catch (error) {
         res.status(500).redirect('/');
     }
@@ -303,7 +303,7 @@ router.get('/logout', async (req, res) => {
     });
 
     res.redirect('/');
-    
+
 });
 
 //Delete - elimina registro de usuario
