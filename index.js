@@ -4,8 +4,6 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { Resend } from 'resend';
 import path from 'path';
-import CryptoJS from 'crypto-js';
-import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
 import { fileURLToPath } from 'url';
@@ -22,7 +20,6 @@ import login from './loginRoutes.js';
 import info from './infoRoutes.js';
 import cart from './cartRoutes.js';
 import redisClientInstance from './middleware/redisClient.js';
-import isMobile from './public/js/mobile.js';
 import deleteShoppingCart from './public/js/deletecart.js';
 import checkPayment from './public/js/checkpayment.js';
 import deleteShoppingCartByTime from './public/js/deletecartbytime.js'
