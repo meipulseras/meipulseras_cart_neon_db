@@ -100,12 +100,8 @@
     <br>
     <br>
     <br>
-    <p id="data" style="display: none;">
-        <%= radiobtn %>
-    </p>
-    <p id="radio" style="display: none;">
-        <%= checked %>
-    </p>
+    <p id="data" style="display: none;"><%= radiobtn %></p>
+    <p id="radio" style="display: none;"><%= checked %></p>
     <script src="/js/table.js" type="text/javascript"></script>
     <script src="/js/retiro.js" type="text/javascript"></script>
     <script src="/js/cartcount.js" type="text/javascript"></script>
@@ -114,7 +110,7 @@
         function radioBtn() {
             var rbtn = document.getElementById('data').innerText;
 
-            if (rbtn !== '') {
+            if (rbtn.trim() === 'zokko' || rbtn.trim() === 'starken') {
                 document.getElementById(rbtn).checked = true;
 
                 document.getElementById('starken').enabled = true;
@@ -128,7 +124,7 @@
             var radio = document.getElementById('radio');
             var btnPagar = document.getElementById("botonpagar");
 
-            if (radio.innerHTML === 'true') {
+            if (radio.innerHTML.trim() === 'true') {
                 btnPagar.disabled = false;
             }
         }
