@@ -1,6 +1,6 @@
 @font-face {
     font-family: Quicksand;
-    src: url(Quicksand-Light.ttf);
+    src: url('/public/fonts/Quicksand-Light.ttf') format('truetype');
 }
 
 .welcome {
