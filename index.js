@@ -4,8 +4,6 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { Resend } from 'resend';
 import path from 'path';
-import CryptoJS from 'crypto-js';
-import axios from 'axios';
 import Randomstring from 'randomstring';
 import cartNumeration from './middleware/cartCount.js';
 import { fileURLToPath } from 'url';
@@ -22,7 +20,6 @@ import login from './loginRoutes.js';
 import info from './infoRoutes.js';
 import cart from './cartRoutes.js';
 import redisClientInstance from './middleware/redisClient.js';
-import isMobile from './public/js/mobile.js';
 import deleteShoppingCart from './public/js/deletecart.js';
 import checkPayment from './public/js/checkpayment.js';
 import deleteShoppingCartByTime from './public/js/deletecartbytime.js'
@@ -95,7 +92,7 @@ app.get('/', async (req, res) => {
         let im_6;
         let im_7;
         let im_8;
-      
+
         im_1 = variables(1).product_image;
         im_2 = variables(2).product_image;
         im_3 = variables(3).product_image;
@@ -104,7 +101,7 @@ app.get('/', async (req, res) => {
         im_6 = variables(6).product_image;
         im_7 = variables(7).product_image;
         im_8 = variables(8).product_image;
-        
+
 
         var data = {
             username: username.charAt(0) + username.slice(1).toLowerCase(),
@@ -158,7 +155,7 @@ app.post('/envio', async (req, res) => {
         jsonCart.envio = selectedOption;
         await redisClient.set(user + 'radiobutton', selectedOption);
         await redisClient.set(user, JSON.stringify(jsonCart));
-        
+
         res.redirect('/cart');
 
     } catch (error) {
@@ -171,8 +168,6 @@ app.post('/envio', async (req, res) => {
 app.post('/pagar', async (req, res) => {
 
     const token = req.cookies.token;
-    const subtotalToPay = req.body.subtotal;
-    const totalToPay = req.body.total;
     const user = verifyJWT(token);
 
     try {
@@ -181,14 +176,18 @@ app.post('/pagar', async (req, res) => {
         const carro = JSON.parse(cart);
 
         var concepto = [];
+        var totalToPay = 0;
 
         for (let x = 0; x < carro.carrito.length; x++) {
 
             var item = carro.carrito[x];
 
             concepto.push(item.nombre + ' x ' + item.cantidad)
+            totalToPay = totalToPay + (parseInt(item.precio) * parseInt(item.cantidad))
 
         }
+
+        const subtotalToPay = totalToPay;
 
         var order = Randomstring.generate(9);
 
@@ -207,43 +206,43 @@ app.post('/pagar', async (req, res) => {
             from: process.env.MAIL_CONTACTO_MEI,
             to: emailpayer,
             subject: 'Compra Nº Orden ' + commerceOrder,
-            html: '<br>'+
-                '<br>'+      
-                '<div style="text-align: center;">'+
-                    '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">'+
-                '</div>'+
-                '<br>'+
-                '<br>'+
-                '<div style="text-align: center;">'+
-                    '<p style="font-family: Quicksand;">Número Orden: ' + commerceOrder + '</p>'+
-                    '<p style="font-family: Quicksand;">Monto tranferencia electrónica: $' + amount + '</p>'+
-                    '<br>'+
-                    '<p style="font-family: Quicksand;">Productos:</p>'+
-                    '<p style="font-family: Quicksand;">' + concept + '</p>'+
-                    '<br>'+
-                    '<p style="font-family: Quicksand;">Datos tranferencia electrónica:</p>'+
-                    '<p style="font-family: Quicksand;">Giro: '+ process.env.GIRO_MEI +'</p>'+
-                    '<p style="font-family: Quicksand;">RUT: '+ process.env.RUT_MEI +'</p>'+
-                    '<p style="font-family: Quicksand;">Email: '+ process.env.MAIL_MEI +'</p>'+
-                    '<p style="font-family: Quicksand;">Tipo Cuenta: '+ process.env.TIPO_CUENTA_MEI +'</p>'+
-                    '<p style="font-family: Quicksand;">Número Cuenta: '+ process.env.NRO_CUENTA_MEI +'</p>'+
-                    '<p style="font-family: Quicksand;">Banco: '+ process.env.BANCO_CUENTA_MEI +'</p>'+
-                    '<br>'+
-                    '<p style="font-family: Quicksand;">Cuenta con una hora para realizar la tranferencia electrónica,</p>'+
-                    '<p style="font-family: Quicksand;">de otra forma su reserva será anulada.</p>'+
-                    '<p style="font-family: Quicksand;">Una vez pagado, envíe el comprobante de pago a '+ process.env.MAIL_CONTACTO_MEI +' junto al número de orden de compra: ' + commerceOrder + '.</p>'+
-                    '<br>'+
-                    '<p style="font-family: Quicksand;">Atentamente, Mei Pulseras.</p>'+
-                '</div>'+
-                '<br>'+
+            html: '<br>' +
+                '<br>' +
+                '<div style="text-align: center;">' +
+                '<img width="300px" src="https://meipulseras.cl/images/webp/logo.webp" alt="logo">' +
+                '</div>' +
+                '<br>' +
+                '<br>' +
+                '<div style="text-align: center;">' +
+                '<p style="font-family: Quicksand;">Número Orden: ' + commerceOrder + '</p>' +
+                '<p style="font-family: Quicksand;">Monto tranferencia electrónica: $' + amount + '</p>' +
+                '<br>' +
+                '<p style="font-family: Quicksand;">Productos:</p>' +
+                '<p style="font-family: Quicksand;">' + concept + '</p>' +
+                '<br>' +
+                '<p style="font-family: Quicksand;">Datos tranferencia electrónica:</p>' +
+                '<p style="font-family: Quicksand;">Giro: ' + process.env.GIRO_MEI + '</p>' +
+                '<p style="font-family: Quicksand;">RUT: ' + process.env.RUT_MEI + '</p>' +
+                '<p style="font-family: Quicksand;">Email: ' + process.env.MAIL_MEI + '</p>' +
+                '<p style="font-family: Quicksand;">Tipo Cuenta: ' + process.env.TIPO_CUENTA_MEI + '</p>' +
+                '<p style="font-family: Quicksand;">Número Cuenta: ' + process.env.NRO_CUENTA_MEI + '</p>' +
+                '<p style="font-family: Quicksand;">Banco: ' + process.env.BANCO_CUENTA_MEI + '</p>' +
+                '<br>' +
+                '<p style="font-family: Quicksand;">Cuenta con una hora para realizar la tranferencia electrónica,</p>' +
+                '<p style="font-family: Quicksand;">de otra forma su reserva será anulada.</p>' +
+                '<p style="font-family: Quicksand;">Una vez pagado, envíe el comprobante de pago a ' + process.env.MAIL_CONTACTO_MEI + ' junto al número de orden de compra: ' + commerceOrder + '.</p>' +
+                '<br>' +
+                '<p style="font-family: Quicksand;">Atentamente, Mei Pulseras.</p>' +
+                '</div>' +
+                '<br>' +
                 '<br>'
         });
 
         const saleDate = new Date();
         const formattedDate = saleDate.toISOString().split('T')[0];
         const columns = 'sale_order, cart, subtotal, shipping, total, username, sale_date, paid, ready_to_dispatch';
-        const values = `'${order}', '${JSON.stringify(carro.carrito)}', ${subtotalToPay}, '${carro.envio}', ${totalToPay}, '${user}', '${formattedDate}', ${false}, ${false}`;
-        const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+        const values = [order, JSON.stringify(carro.carrito), subtotalToPay, carro.envio, totalToPay, user, formattedDate, false, false];
+        const insertedCart = await getFromTable('username, cart, shipping, sale_date, paid', 'sales', 'paid = $1 AND sale_date = $2 AND username = $3', [false, formattedDate, user]);
 
         if (JSON.stringify(insertedCart) === '[]' || JSON.stringify(insertedCart).trim() === '') {
             await intoTable('sales', columns, values);
@@ -251,13 +250,13 @@ app.post('/pagar', async (req, res) => {
             const formattedDateDB = insertedCart[0].sale_date.toISOString().split('T')[0];
 
             if (!insertedCart[0].paid && formattedDateDB == formattedDate && insertedCart[0].cart !== carro.carrito && insertedCart[0].total !== totalToPay) {
-                const set = `sale_order = '${order}',
-                            cart = '${JSON.stringify(carro.carrito)}',
-                            subtotal = '${subtotalToPay}', 
-                            shipping = '${carro.envio}', 
-                            total = '${totalToPay}'`;
-
-                await updateTable('sales', set, `paid = ${false} AND sale_date = '${formattedDate}' AND username`, user);
+                const set = `sale_order = $1,
+                            cart = $2,
+                            subtotal = $3, 
+                            shipping = $4, 
+                            total = $5`;
+                const params = [order, JSON.stringify(carro.carrito), subtotalToPay, carro.envio, totalToPay, false, formattedDate, user];
+                await updateTable('sales', set, 'paid = $6 AND sale_date = $7 AND username = $8', params);
             }
         }
 
@@ -280,7 +279,7 @@ app.post('/borrarcarro', async (req, res) => {
     const user = verifyJWT(token);
     var deleted = await deleteShoppingCart(user);
 
-    if(deleted){
+    if (deleted) {
         res.status(200).redirect('/');
     }
 });

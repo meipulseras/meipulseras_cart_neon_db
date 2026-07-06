@@ -4,22 +4,22 @@ import updateTable from '../../middleware/queries/update.js';
 import deleteShoppingCart from './deletecart.js'
 const redisClient = redisClientInstance;
 
-async function checkPayment(user){
+async function checkPayment(user) {
     try {
 
         var cart = await redisClient.get(user);
 
-        if(cart !== null) {
+        if (cart !== null) {
             const carro = JSON.parse(cart);
             const order = carro.orden;
             const saleDate = new Date();
             const formattedDate = saleDate.toISOString().split('T')[0];
 
             if (order !== 'orden') {
-                
-                const insertedCart = await getFromTable('sale_order, cart, username, paid', 'sales', `sale_order = '${order}' AND sale_date`, formattedDate);
 
-                if(insertedCart[0].username === user && insertedCart[0].paid === true){
+                const insertedCart = await getFromTable('sale_order, cart, username, paid', 'sales', 'sale_order = $1 AND sale_date = $2', [order, formattedDate]);
+
+                if (insertedCart[0].username === user && insertedCart[0].paid === true) {
                     await deleteShoppingCart(user);
 
                     var jsonCart = JSON.parse(insertedCart[0].cart);
@@ -32,8 +32,9 @@ async function checkPayment(user){
 
                         var newStock = parseInt(stockDB[0].product_quantity) - parseInt(item.cantidad);
 
-                        const set = `product_quantity = ${newStock}`;
-                        await updateTable('price_quantity_products', set, 'product_id', item.id);
+                        const set = 'product_quantity = $1';
+
+                        await updateTable('price_quantity_products', set, 'product_id', [newStock, item.id]);
 
                     }
 
@@ -41,11 +42,11 @@ async function checkPayment(user){
                     console.log('Esperando a pago...');
                 }
 
-            } 
+            }
         }
-        
 
-    } catch(error){
+
+    } catch (error) {
         console.log(error);
     }
 
