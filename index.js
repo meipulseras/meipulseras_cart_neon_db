@@ -321,7 +321,7 @@ app.post('/borrarcarro', async (req, res) => {
     }
 });
 
-//Contacto Enviado
+//Correo compra Enviado
 app.get('/orden', async (req, res) => {
     res.render('waitingpayment');
 });
