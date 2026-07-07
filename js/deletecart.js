@@ -1,4 +1,4 @@
-import redisClientInstance from '../../middleware/redisClient.js';
+import redisClientInstance from '../middleware/redisClient.js';
 const redisClient = redisClientInstance;
 
 async function deleteShoppingCart(user){

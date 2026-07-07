@@ -3,11 +3,10 @@ import compression from 'compression';
 import verifyJWT from './middleware/verifyJWT.js';
 import cartNumeration from './middleware/cartCount.js';
 import getProductDetail from './middleware/queries/productsDetails.js';
-import variables from './public/js/config.js';
+import variables from './js/config.js';
 import redisClientInstance from './middleware/redisClient.js';
-import isMobile from './public/js/mobile.js';
-import checkPayment from './public/js/checkpayment.js';
-import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
+import checkPayment from './js/checkpayment.js';
+import deleteShoppingCartByTime from './js/deletecartbytime.js';
 
 const router = express.Router();
 

@@ -10,8 +10,8 @@ import verifyJWT from "./middleware/verifyJWT.js";
 import getFromTable from './middleware/queries/select.js';
 import cartNumeration from './middleware/cartCount.js';
 import redisClientInstance from './middleware/redisClient.js';
-import checkPayment from './public/js/checkpayment.js';
-import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
+import checkPayment from './js/checkpayment.js';
+import deleteShoppingCartByTime from './js/deletecartbytime.js';
 
 const router = express.Router();
 

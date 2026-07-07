@@ -1,6 +1,6 @@
-import redisClientInstance from '../../middleware/redisClient.js';
-import getFromTable from '../../middleware/queries/select.js';
-import updateTable from '../../middleware/queries/update.js';
+import redisClientInstance from '../middleware/redisClient.js';
+import getFromTable from '../middleware/queries/select.js';
+import updateTable from '../middleware/queries/update.js';
 import deleteShoppingCart from './deletecart.js'
 const redisClient = redisClientInstance;
 

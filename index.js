@@ -13,16 +13,16 @@ import verifyJWT from "./middleware/verifyJWT.js";
 import getFromTable from './middleware/queries/select.js';
 import intoTable from './middleware/queries/insert.js';
 import updateTable from './middleware/queries/update.js';
-import variables from './public/js/config.js';
+import variables from './js/config.js';
 import producto from './productRoutes.js';
 import contact from './contactRoutes.js';
 import login from './loginRoutes.js';
 import info from './infoRoutes.js';
 import cart from './cartRoutes.js';
 import redisClientInstance from './middleware/redisClient.js';
-import deleteShoppingCart from './public/js/deletecart.js';
-import checkPayment from './public/js/checkpayment.js';
-import deleteShoppingCartByTime from './public/js/deletecartbytime.js'
+import deleteShoppingCart from './js/deletecart.js';
+import checkPayment from './js/checkpayment.js';
+import deleteShoppingCartByTime from './js/deletecartbytime.js'
 const app = express();
 
 const resend = new Resend(process.env.RESEND_KEY);
