@@ -22,8 +22,27 @@ import cart from './cartRoutes.js';
 import redisClientInstance from './middleware/redisClient.js';
 import deleteShoppingCart from './js/deletecart.js';
 import checkPayment from './js/checkpayment.js';
-import deleteShoppingCartByTime from './js/deletecartbytime.js'
+import deleteShoppingCartByTime from './js/deletecartbytime.js';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+
 const app = express();
+
+app.set('trust proxy', 2);
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Demasiadas peticiones. Intenta de nuevo más tarde.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req, res) => {
+        if (req.headers['cf-connecting-ip']) {
+            return req.headers['cf-connecting-ip'];
+        }
+        return ipKeyGenerator(req, res);
+    }
+});
 
 const resend = new Resend(process.env.RESEND_KEY);
 
@@ -65,6 +84,8 @@ app.use('/auth', login);
 app.use('/page', contact);
 app.use('/', producto);
 app.use('/', cart);
+app.use('/api/', apiLimiter);
+app.use(helmet());
 
 // //Para que pesque imagenes y estilos
 app.use(express.static(__dirname + '/public'));

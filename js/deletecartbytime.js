@@ -4,10 +4,10 @@ import { jwtDecode } from 'jwt-decode';
 import redisClientInstance from '../middleware/redisClient.js';
 const redisClient = redisClientInstance;
 
-async function deleteShoppingCartByTime(token, user){
+async function deleteShoppingCartByTime(token, user) {
     try {
 
-        if(!token) {
+        if (!token) {
             return false;
         }
 
@@ -17,7 +17,7 @@ async function deleteShoppingCartByTime(token, user){
 
         const currentTime = Math.floor(Date.now() / 1000);
 
-        if(oneHourExpiration <= currentTime) {
+        if (oneHourExpiration <= currentTime) {
 
             var cart = await redisClient.get(user);
 
@@ -29,7 +29,7 @@ async function deleteShoppingCartByTime(token, user){
         }
 
         return true;
-        
+
     } catch (error) {
         console.log(error);
         return false;

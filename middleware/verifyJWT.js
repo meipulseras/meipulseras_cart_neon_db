@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 
 function verifyJWT(token) {
 
+    if (!token || typeof token !== 'string') return '';
+
     try {
         var data = '';
 
@@ -18,7 +20,7 @@ function verifyJWT(token) {
         console.log(error);
         return '';
     }
-    
+
 }
 
 export default verifyJWT;

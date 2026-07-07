@@ -5,7 +5,7 @@ const arrarVariables = {
         product_id: "PrMP1",
         product_name: "Pulsera para compartir 2",
         product_description: "Pulseras macramé, elaborada con hilo tripolino, letras acrílicas y terminaciones metálicas. * Las pulseras personalizadas no cuentan con opción de cambio ni devolución. (Leer términos y condiciones).",
-        product_price: "8000"
+        product_price: "7500"
 
     },
     2: {
@@ -14,7 +14,7 @@ const arrarVariables = {
         product_id: "PrMP2",
         product_name: "Pulseras BFF",
         product_description: "Pulseras elaboradas con hilo rosado y terminaciones metálicas.",
-        product_price: "6500"
+        product_price: "5500"
 
     },
     3: {
@@ -23,7 +23,7 @@ const arrarVariables = {
         product_id: "PrMP3",
         product_name: "Pulseras para compartir 1",
         product_description: "Pulseras macramé, elaborada con hilo tripolino, letras acrílicas y terminaciones metálicas. * Las pulseras personalizadas no cuentan con opción de cambio ni devolución. (Leer términos y condiciones).",
-        product_price: "8000"
+        product_price: "7500"
 
     },
     4: {
@@ -32,7 +32,7 @@ const arrarVariables = {
         product_id: "PrMP4",
         product_name: "Pulseras estrellas",
         product_description: "Pulseras elaboradas con hilo tripolino, cristal y aplicaciones en acero quirúrgico.",
-        product_price: "8500"
+        product_price: "7500"
 
     },
     5: {
@@ -41,7 +41,7 @@ const arrarVariables = {
         product_id: "PrMP5",
         product_name: "Pulseras girasol",
         product_description: "Pulseras elaboradas con hilo tripolino negro, dijes esmaltados y aplicaciones en dorado.",
-        product_price: "6500"
+        product_price: "5500"
 
     },
     6: {
@@ -50,7 +50,7 @@ const arrarVariables = {
         product_id: "PrMP6",
         product_name: "Pulsera macramé",
         product_description: "Pulseras tejidas a mano con hilo tripolino, aplicaciones y dijes metálicos.",
-        product_price: "4000"
+        product_price: "3500"
 
     },
     7: {
@@ -59,7 +59,7 @@ const arrarVariables = {
         product_id: "PrMP7",
         product_name: "Pulsera hilo rojo",
         product_description: "Pulseras elaboradas con hilo rojo y terminaciones metálicas.",
-        product_price: "6500"
+        product_price: "5500"
 
     },
     8: {
@@ -68,7 +68,7 @@ const arrarVariables = {
         product_id: "PrMP8",
         product_name: "Set 5 pulseras",
         product_description: "Pulseras elasticadas, elaboradas con mostacillas y acrílico.",
-        product_price: "7000"
+        product_price: "7500"
 
     }
 }
