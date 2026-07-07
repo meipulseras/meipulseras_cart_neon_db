@@ -6,8 +6,8 @@ import getFromTable from './middleware/queries/select.js';
 import updateTable from './middleware/queries/update.js';
 import getFromTableOrder from './middleware/queries/selectOrder.js';
 import redisClientInstance from './middleware/redisClient.js';
-import checkPayment from './public/js/checkpayment.js';
-import deleteShoppingCartByTime from './public/js/deletecartbytime.js';
+import checkPayment from './js/checkpayment.js';
+import deleteShoppingCartByTime from './js/deletecartbytime.js';
 
 const router = express.Router();
 

@@ -2,17 +2,23 @@ import jwt from 'jsonwebtoken';
 
 function verifyJWT(token) {
 
-    var data = '';
+    try {
+        var data = '';
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, dataToken) => {
-        if (err) {
-            return data;
-        } else {
-            data = dataToken.username;
-        }
-    });
+        jwt.verify(token, process.env.JWT_SECRET, (err, dataToken) => {
+            if (err) {
+                return data;
+            } else {
+                data = dataToken.username;
+            }
+        });
 
-    return data;
+        return data;
+    } catch (error) {
+        console.log(error);
+        return '';
+    }
+    
 }
 
 export default verifyJWT;
