@@ -1,5 +1,8 @@
 import deleteShoppingCart from './deletecart.js';
+import deleteFromTable from '../middleware/queries/delete.js';
 import { jwtDecode } from 'jwt-decode';
+import redisClientInstance from '../middleware/redisClient.js';
+const redisClient = redisClientInstance;
 
 async function deleteShoppingCartByTime(token, user){
     try {
@@ -12,9 +15,16 @@ async function deleteShoppingCartByTime(token, user){
 
         const oneHourExpiration = decoded.iat + (60 * 60);
 
-        const currentTime = Date.now() / 1000;
+        const currentTime = Math.floor(Date.now() / 1000);
 
-        if(oneHourExpiration < currentTime) {
+        if(oneHourExpiration <= currentTime) {
+
+            var cart = await redisClient.get(user);
+
+            var jsonCart = JSON.parse(cart);
+
+            await deleteFromTable('sales', 'sale_order', jsonCart.orden);
+
             await deleteShoppingCart(user);
         }
 
