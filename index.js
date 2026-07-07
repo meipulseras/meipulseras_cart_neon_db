@@ -85,7 +85,23 @@ app.use('/page', contact);
 app.use('/', producto);
 app.use('/', cart);
 app.use('/api/', apiLimiter);
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: [
+                    "'self'", 
+                    "'unsafe-inline'", 
+                    "https://cdn.jsdelivr.net", 
+                    "https://code.jquery.com"
+                ],
+                styleSrc: ["'self'", "'unsafe-inline'"],
+                imgSrc: ["'self'", "data:", "https://meipulseras.cl"],
+            },
+        },
+    })
+);
 
 // //Para que pesque imagenes y estilos
 app.use(express.static(__dirname + '/public'));
@@ -306,8 +322,8 @@ app.post('/borrarcarro', async (req, res) => {
 });
 
 //Contacto Enviado
-app.get('/orden', (req, res) => {
-    res.sendFile(path.join(__dirname + '/views/waitingpayment.html'));
+app.get('/orden', async (req, res) => {
+    res.render('waitingpayment');
 });
 
 //LOG OUT usuario LOGGED
