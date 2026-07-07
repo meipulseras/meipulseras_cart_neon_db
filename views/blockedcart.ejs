@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/style.css?v=4.5">
+    <link rel="icon" href="/images/webp/meipulseras.webp" type="image/x-icon" />
+    <title>Orden de compra OK</title>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Swal.fire({
+            title: 'Esperando pago',
+            text: 'Estamos esperando su pago.',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            showConfirmButton: true,
+        }).then(function () {
+            window.location = "/";
+        });
+    </script>
+</body>
+
+</html>

@@ -91,14 +91,19 @@ router.get('/cart', async (req, res) => {
         } else if(jsonCart.orden === 'orden'){ 
             res.render('cart', data);
         } else {
-            return res.status(200).redirect('/');
+            return res.status(200).redirect('/blockedcart');
         }
 
     } catch (error) {
         console.log(error)
         res.status(500).redirect('/');
+        
     }
 
+});
+
+router.get('/blockedcart', async (req, res) => {
+    res.render('blockedcart');
 });
 
 router.post('/cart', async (req, res) => {
